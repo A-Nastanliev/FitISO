@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="FitISO.Data/FitISO.Data.csproj" />
+  <Project Path="FitISO.Services/FitISO.Services.csproj" Id="d40245cb-c2e7-4990-8cde-60c6a2840506" />
+  <Project Path="FitISO.Tests/FitISO.Tests.csproj" Id="b70f7629-3b90-4dbb-85d0-92bda9ac6dbf" />
+</Solution>
