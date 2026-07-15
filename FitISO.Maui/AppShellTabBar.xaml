@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Grid xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+      xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+      xmlns:local="clr-namespace:FitISO.Maui"
+      xmlns:nalu="https://nalu-development.github.com/nalu/layouts"
+      SafeAreaEdges="None"
+      x:Class="FitISO.Maui.AppShellTabBar">
+    <Grid SafeAreaEdges="None"
+          Margin="{OnPlatform Default=0, iOS='0,0,0,-12'}">
+        <Grid.Resources>
+            <Style TargetType="ImageButton">
+                <Setter Property="Padding" Value="12"/>
+                <Setter Property="HeightRequest" Value="48"/>
+            </Style>
+            <Style TargetType="FontImageSource">
+                <Setter Property="Size" Value="24"/>
+                <Setter Property="FontFamily" Value="MaterialRound"/>
+                <Setter Property="Color" Value="#BBB"/>
+            </Style>
+        </Grid.Resources>
+        <Border SafeAreaEdges="Container"
+                ZIndex="1"
+                StrokeThickness="0"
+                BackgroundColor="{StaticResource Gray800}">
+            <Border.StrokeShape>
+                <local:FancyTabBarShape x:Name="TabBarShape"
+                                        InsetHeight="40"
+                                        InsetWidth="120" />
+            </Border.StrokeShape>
+
+            <Grid x:Name="Buttons"
+                  SafeAreaEdges="None"
+                  Padding="20,0,20,0">
+            </Grid>
+        </Border>
+
+        <Grid x:Name="SelectedShapeContainer"
+              TranslationY="-24"
+              TranslationX="32"
+              HorizontalOptions="Start"
+              VerticalOptions="Start">
+            <nalu:ViewBox x:Name="SelectedShape" HorizontalOptions="Start" Padding="4">
+                <Border HeightRequest="48"
+                        StrokeThickness="0"
+                        WidthRequest="48"
+                        BackgroundColor="{StaticResource Gray800}"
+                      
+                        StrokeShape="RoundRectangle 24">
+                    <ImageButton x:Name="SelectedButton"
+                                 Padding="10"
+                                 Clicked="SelectedButtonClicked">
+                        <ImageButton.Source>
+                            <FontImageSource Glyph="&#xe88a;"
+                                             Color="White"/>
+                        </ImageButton.Source>
+                    </ImageButton>
+                </Border>
+            </nalu:ViewBox>
+        </Grid>
+    </Grid>
+</Grid>

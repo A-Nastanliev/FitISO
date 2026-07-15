@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Shell
+    x:Class="FitISO.Maui.AppShell"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:local="clr-namespace:FitISO.Maui"
+    xmlns:pages="clr-namespace:FitISO.Maui.Views"
+    xmlns:nalu="https://nalu-development.github.com/nalu/navigation"
+    Title="FitISO.Maui"
+    FlyoutBehavior="Disabled">
+    
+    <TabBar Route="main" nalu:NaluShell.TabBarView="{local:AppShellTabBar}">
+
+        <Tab Title="Workouts" Route="workouts" Icon="{FontImageSource FontFamily=MaterialRound, Glyph='&#xe85d;'}">
+            <ShellContent ContentTemplate="{DataTemplate pages:WorkoutTemplatesPage}"  />
+        </Tab>
+
+        <Tab Title="Active" Route="active" Icon="{FontImageSource FontFamily=MaterialRound, Glyph='&#xe1c4;'}"
+             IsVisible="{Binding Source={x:Static local:ActiveWorkoutState.Instance}, Path=HasActiveWorkout}">
+            <ShellContent ContentTemplate="{DataTemplate pages:ActiveWorkoutPage}" />
+        </Tab>
+
+        <Tab Title="Exercises" Route="exercises" Icon="{FontImageSource FontFamily=MaterialRound, Glyph='&#xEB43;'}">
+            <ShellContent ContentTemplate="{DataTemplate pages:ExercisesPage}" />
+        </Tab>
+        <Tab Title="Settings" Route="settings" Icon="{FontImageSource FontFamily=MaterialRound, Glyph='&#xe8b8;'}">
+            <ShellContent ContentTemplate="{DataTemplate pages:SettingsPage}" />
+        </Tab>
+    </TabBar>
+
+</Shell>
