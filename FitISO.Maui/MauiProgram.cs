@@ -1,6 +1,7 @@
 ﻿using CommunityToolkit.Maui;
 using FitISO.Data;
 using FitISO.Maui.ViewModels;
+using FitISO.Maui.Views;
 using FitISO.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -17,6 +18,7 @@ namespace FitISO.Maui
                 .UseNaluLayouts()
                 .UseMauiCommunityToolkit()
                 .UseNaluTabBar()
+                .UseNaluLayouts()
                 .ConfigureFonts(fonts =>
                 {
                     fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
@@ -35,7 +37,10 @@ namespace FitISO.Maui
             builder.Services.AddSingleton<WorkoutService>();
 
             builder.Services.AddSingleton<ExerciseCollection>();
+            builder.Services.AddSingleton<ExercisePageViewModel>();
 
+            builder.Services.AddTransient<AddExercisePopupPage>();
+            builder.Services.AddTransient<AddExercisePopupViewModel>();
 #if DEBUG
             builder.Logging.AddDebug();
 #endif

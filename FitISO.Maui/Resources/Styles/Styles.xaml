@@ -1,7 +1,32 @@
 ﻿<?xml version="1.0" encoding="UTF-8" ?>
 <ResourceDictionary 
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
-    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml">
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:nalu="https://nalu-development.github.com/nalu/layouts">
+
+    <Style TargetType="nalu:PopupScrim">
+        <Setter Property="BackgroundColor" Value="#20FFFFFF" />
+    </Style>
+
+    <Style TargetType="nalu:PopupContainer">
+        <Setter Property="Background" Value="{StaticResource Gray800}" />
+        <Setter Property="Margin" Value="16" />
+        <Setter Property="StrokeShape" Value="RoundRectangle 24" />
+        <Setter Property="StrokeThickness" Value="0" />
+        <Setter Property="VerticalOptions" Value="Center" />
+        <Setter Property="HorizontalOptions" Value="Center" />
+    </Style>
+
+    <Style x:Key="SectionCard" TargetType="Border">
+        <Setter Property="BackgroundColor" Value="{StaticResource Gray800}" />
+        <Setter Property="StrokeThickness" Value="0" />
+        <Setter Property="StrokeShape">
+            <Setter.Value>
+                <RoundRectangle CornerRadius="20"/>
+            </Setter.Value>
+        </Setter>
+        <Setter Property="Padding" Value="20"/>
+    </Style>
 
     <Style TargetType="ActivityIndicator">
         <Setter Property="Color" Value="{StaticResource White}" />

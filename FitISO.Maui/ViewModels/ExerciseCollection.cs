@@ -57,7 +57,7 @@ namespace FitISO.Maui.ViewModels
                     Exercises.Add(new Exercise(exercise));
 
                 if (exercises.Count > 0)
-                    cursor = exercises[^1].Name;
+                    cursor = Exercises[^1].Name;
 
                 EndLoading(exercises.Count, cursor);
             }
@@ -66,6 +66,17 @@ namespace FitISO.Maui.ViewModels
                 Loading = false;
                 await Shell.Current.DisplayAlertAsync(ex.Message, ex.InnerException.ToString(), "OK");
             }
+        }
+
+        public void Add(Exercise exercise)
+        {
+            var index = 0;
+            while (index < Exercises.Count &&
+                   string.Compare(Exercises[index].Name, exercise.Name, StringComparison.OrdinalIgnoreCase) < 0)
+                index++;
+
+            Exercises.Insert(index, exercise);
+            cursor = Exercises[^1].Name;
         }
     }
 }

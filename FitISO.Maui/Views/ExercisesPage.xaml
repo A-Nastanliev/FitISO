@@ -2,11 +2,34 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="FitISO.Maui.Views.ExercisesPage"
+             xmlns:vm="clr-namespace:FitISO.Maui.ViewModels"
+             x:DataType="vm:ExercisePageViewModel"
+             xmlns:views="clr-namespace:FitISO.Maui.Views"
+             Shell.NavBarIsVisible="False"
              Title="Exercises">
-    <VerticalStackLayout>
-        <Label 
-            Text="Welcome to .NET MAUI!"
-            VerticalOptions="Center" 
-            HorizontalOptions="Center" />
-    </VerticalStackLayout>
+
+    <AbsoluteLayout>
+        <CollectionView VerticalOptions="Fill"  AbsoluteLayout.LayoutBounds="0,0,1,1" AbsoluteLayout.LayoutFlags="All"
+                    ItemsSource="{Binding ExerciseCollection.Exercises}" Margin="6" 
+                    RemainingItemsThreshold="3" VerticalScrollBarVisibility="Never"
+                    RemainingItemsThresholdReachedCommand="{Binding ExerciseCollection.LoadCommand}">
+
+            <CollectionView.EmptyView>
+                <Label  Text="No exercises found"
+                     HorizontalOptions="Center"
+                     VerticalOptions="Center"/>
+            </CollectionView.EmptyView>
+
+            <CollectionView.ItemTemplate>
+                <DataTemplate>
+                    <views:ExerciseView
+                            x:DataType="views:ExerciseView" Margin="0,4" />
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+
+        </CollectionView>
+        <ImageButton AbsoluteLayout.LayoutBounds="0.95,0.97,AutoSize,AutoSize" AbsoluteLayout.LayoutFlags="PositionProportional" HeightRequest="50"
+                Source="{FontImageSource FontFamily=MaterialRound, Glyph='&#xE145;'}" BackgroundColor="{StaticResource Gray800}" CornerRadius="25"
+                Command="{Binding AddExerciseCommand}"/>
+    </AbsoluteLayout>
 </ContentPage>
