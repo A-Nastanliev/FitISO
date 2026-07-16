@@ -16,6 +16,7 @@ namespace FitISO.Tests.Services
         private FitDbContext _context;
         private SetService _service;
         private int _workoutExerciseId;
+        private TestDbContextFactory _contextFactory;
 
         [SetUp]
         public async Task SetUp()
@@ -27,10 +28,11 @@ namespace FitISO.Tests.Services
                 .UseSqlite(_connection)
                 .Options;
 
-            _context = new FitDbContext(options);
+            _contextFactory = new TestDbContextFactory(options);
+            _context = _contextFactory.CreateDbContext();
             _context.Database.EnsureCreated();
 
-            _service = new SetService(_context);
+            _service = new SetService(_contextFactory);
 
             var workout = new Workout { Name = "Test Workout" };
             var exercise = new Exercise { Name = "Bench Press" };

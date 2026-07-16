@@ -6,11 +6,11 @@ namespace FitISO.Services
 {
     public class SetService
     {
-        private readonly FitDbContext _context;
+        readonly IDbContextFactory<FitDbContext> _contextFactory;
 
-        public SetService(FitDbContext context)
+        public SetService(IDbContextFactory<FitDbContext> contextFactory)
         {
-            _context = context;
+            _contextFactory = contextFactory;
         }
 
         public async Task<Set> CreateAsync(int workoutExerciseId, double weight, double reps)
@@ -24,6 +24,7 @@ namespace FitISO.Services
                 Reps = reps
             };
 
+            using var _context = _contextFactory.CreateDbContext();
             _context.Sets.Add(set);
             await _context.SaveChangesAsync();
             return set;
@@ -31,6 +32,7 @@ namespace FitISO.Services
 
         public async Task<Set> UpdateAsync(int id, double? weight = null, double? reps = null)
         {
+            using var _context = _contextFactory.CreateDbContext();
             var set = await _context.Sets.FindAsync(id);
             if (set == null)
                 throw new KeyNotFoundException($"Set {id} was not found.");
@@ -49,6 +51,7 @@ namespace FitISO.Services
 
         public async Task DeleteAsync(int id)
         {
+            using var _context = _contextFactory.CreateDbContext();
             var set = await _context.Sets.FindAsync(id);
             if (set == null)
                 throw new KeyNotFoundException($"Set {id} was not found.");

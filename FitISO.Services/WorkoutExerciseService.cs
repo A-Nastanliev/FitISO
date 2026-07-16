@@ -8,11 +8,11 @@ namespace FitISO.Services
     {
         private const int MaxNoteLength = 100;
 
-        private readonly FitDbContext _context;
+        readonly IDbContextFactory<FitDbContext> _contextFactory;
 
-        public WorkoutExerciseService(FitDbContext context)
+        public WorkoutExerciseService(IDbContextFactory<FitDbContext> contextFactory)
         {
-            _context = context;
+            _contextFactory = contextFactory;
         }
 
         public async Task<WorkoutExercise> CreateAsync(int workoutId, int exerciseId, string? note = null)
@@ -26,6 +26,7 @@ namespace FitISO.Services
                 Note = note
             };
 
+            using var _context = _contextFactory.CreateDbContext();
             _context.WorkoutExercises.Add(workoutExercise);
             await _context.SaveChangesAsync();
             return workoutExercise;
@@ -35,6 +36,7 @@ namespace FitISO.Services
         {
             ValidateNote(note);
 
+            using var _context = _contextFactory.CreateDbContext();
             var workoutExercise = await _context.WorkoutExercises.FindAsync(id);
             if (workoutExercise == null)
                 throw new KeyNotFoundException($"WorkoutExercise {id} was not found.");
@@ -51,6 +53,7 @@ namespace FitISO.Services
 
         public async Task DeleteAsync(int id)
         {
+            using var _context = _contextFactory.CreateDbContext();
             var workoutExercise = await _context.WorkoutExercises.FindAsync(id);
             if (workoutExercise == null)
                 throw new KeyNotFoundException($"WorkoutExercise {id} was not found.");

@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace FitISO.Data.Models
 {
@@ -12,5 +13,14 @@ namespace FitISO.Data.Models
         public string Name { get; set; }
 
         public IEnumerable<WorkoutExercise> WorkoutExercises { get; set; }
+
+        [NotMapped]
+        public Set? BestSet { get; set; }
+
+        [NotMapped]
+        public DateTime? LastSetsDate { get; set; }
+
+        [NotMapped]
+        public List<Set> LastSets { get; set; } = new();
     }
 }

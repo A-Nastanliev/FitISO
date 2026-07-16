@@ -17,6 +17,7 @@ namespace FitISO.Tests.Services
         private SqliteConnection _connection;
         private FitDbContext _context;
         private WorkoutService _service;
+        private TestDbContextFactory _contextFactory;
 
         [SetUp]
         public void SetUp()
@@ -28,10 +29,11 @@ namespace FitISO.Tests.Services
                 .UseSqlite(_connection)
                 .Options;
 
-            _context = new FitDbContext(options);
+            _contextFactory = new TestDbContextFactory(options);
+            _context = _contextFactory.CreateDbContext();
             _context.Database.EnsureCreated();
 
-            _service = new WorkoutService(_context);
+            _service = new WorkoutService(_contextFactory);
         }
 
         [TearDown]

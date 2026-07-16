@@ -6,11 +6,11 @@ namespace FitISO.Services
 {
     public class WorkoutService
     {
-        readonly FitDbContext _context;
+        readonly IDbContextFactory<FitDbContext> _contextFactory;
 
-        public WorkoutService(FitDbContext context)
+        public WorkoutService(IDbContextFactory<FitDbContext> contextFactory)
         {
-            _context = context;
+            _contextFactory = contextFactory;
         }
 
         public async Task<Workout> CreateAsync(string name, bool isTemplate)
@@ -29,6 +29,7 @@ namespace FitISO.Services
                 EndTime = null
             };
 
+            using var _context = _contextFactory.CreateDbContext();
             _context.Workouts.Add(workout);
             await _context.SaveChangesAsync();
             return workout;
@@ -36,6 +37,7 @@ namespace FitISO.Services
 
         public async Task<Workout> GetActiveWorkoutAsync()
         {
+            using var _context = _contextFactory.CreateDbContext();
             return await _context.Workouts
                 .Include(w => w.WorkoutExercises)
                     .ThenInclude(we => we.Sets)
@@ -46,6 +48,7 @@ namespace FitISO.Services
 
         private async Task<List<Workout>> GetNextAsync(bool templatesOnly, int pageSize, int? cursor = null)
         {
+            using var _context = _contextFactory.CreateDbContext();
             IQueryable<Workout> query = _context.Workouts
                 .AsNoTracking()
                 .Include(w => w.WorkoutExercises)
@@ -73,6 +76,7 @@ namespace FitISO.Services
 
         public async Task<Workout> UpdateNameAsync(int id, string name)
         {
+            using var _context = _contextFactory.CreateDbContext();
             var workout = await _context.Workouts.FindAsync(id);
             if (workout == null)
                 throw new KeyNotFoundException($"Workout {id} was not found.");
@@ -85,6 +89,7 @@ namespace FitISO.Services
 
         public async Task<Workout> EndWorkoutAsync(int id)
         {
+            using var _context = _contextFactory.CreateDbContext();
             var workout = await _context.Workouts.FindAsync(id);
             if (workout == null)
                 throw new KeyNotFoundException($"Workout {id} was not found.");
@@ -104,6 +109,7 @@ namespace FitISO.Services
 
         public async Task DeleteAsync(int id)
         {
+            using var _context = _contextFactory.CreateDbContext();
             var workout = await _context.Workouts.FindAsync(id);
             if (workout == null)
                 throw new KeyNotFoundException($"Workout {id} was not found.");

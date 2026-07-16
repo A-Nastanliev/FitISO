@@ -1,4 +1,8 @@
 ﻿using CommunityToolkit.Maui;
+using FitISO.Data;
+using FitISO.Maui.ViewModels;
+using FitISO.Services;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace FitISO.Maui
@@ -20,11 +24,31 @@ namespace FitISO.Maui
                     fonts.AddFont("MaterialIcons-Round.otf", "MaterialRound");
                 });
 
-#if DEBUG
-    		builder.Logging.AddDebug();
-#endif
+            var dbPath = Path.Combine(FileSystem.AppDataDirectory, "fitiso.db3");
 
-            return builder.Build();
+            builder.Services.AddDbContextFactory<FitDbContext>(options =>
+                options.UseSqlite($"Data Source={dbPath}"));
+
+            builder.Services.AddSingleton<ExerciseService>();
+            builder.Services.AddSingleton<SetService>();
+            builder.Services.AddSingleton<WorkoutExerciseService>();
+            builder.Services.AddSingleton<WorkoutService>();
+
+            builder.Services.AddSingleton<ExerciseCollection>();
+
+#if DEBUG
+            builder.Logging.AddDebug();
+#endif
+            var app = builder.Build();
+
+            using (var scope = app.Services.CreateScope())
+            {
+                var factory = scope.ServiceProvider.GetRequiredService<IDbContextFactory<FitDbContext>>();
+                using var db = factory.CreateDbContext();
+                db.Database.Migrate();
+            }
+
+            return app;
         }
     }
 }

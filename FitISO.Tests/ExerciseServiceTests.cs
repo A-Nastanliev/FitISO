@@ -1,13 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using FitISO.Data;
+﻿using FitISO.Data;
 using FitISO.Data.Models;
 using FitISO.Services;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Internal;
 using NUnit.Framework;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace FitISO.Tests.Services
 {
@@ -17,6 +18,7 @@ namespace FitISO.Tests.Services
         private SqliteConnection _connection;
         private FitDbContext _context;
         private ExerciseService _service;
+        private TestDbContextFactory _contextFactory;
 
         [SetUp]
         public void SetUp()
@@ -28,10 +30,11 @@ namespace FitISO.Tests.Services
                 .UseSqlite(_connection)
                 .Options;
 
-            _context = new FitDbContext(options);
+            _contextFactory = new TestDbContextFactory(options);
+            _context = _contextFactory.CreateDbContext();
             _context.Database.EnsureCreated();
 
-            _service = new ExerciseService(_context);
+            _service = new ExerciseService(_contextFactory);
         }
 
         [TearDown]
@@ -179,6 +182,143 @@ namespace FitISO.Tests.Services
         }
 
         [Test]
+        public async Task GetNextAsync_PopulatesBestSet_ForEachExercise()
+        {
+            var exercise = await SeedExerciseAsync("Squat");
+            var workoutExercise = await SeedWorkoutExerciseAsync(exercise.Id, DateTime.UtcNow);
+
+            await SeedSetAsync(workoutExercise.Id, weight: 100, reps: 5);
+            var best = await SeedSetAsync(workoutExercise.Id, weight: 150, reps: 3);
+            await SeedSetAsync(workoutExercise.Id, weight: 120, reps: 8);
+
+            var result = await _service.GetNextAsync(pageSize: 10);
+
+            var returned = result.Single(e => e.Id == exercise.Id);
+            Assert.That(returned.BestSet, Is.Not.Null);
+            Assert.That(returned.BestSet.Id, Is.EqualTo(best.Id));
+        }
+
+        [Test]
+        public async Task GetNextAsync_WithTiedBestWeight_BreaksTieByHighestReps()
+        {
+            var exercise = await SeedExerciseAsync("Squat");
+            var workoutExercise = await SeedWorkoutExerciseAsync(exercise.Id, DateTime.UtcNow);
+
+            await SeedSetAsync(workoutExercise.Id, weight: 100, reps: 5);
+            var best = await SeedSetAsync(workoutExercise.Id, weight: 100, reps: 8);
+
+            var result = await _service.GetNextAsync(pageSize: 10);
+
+            var returned = result.Single(e => e.Id == exercise.Id);
+            Assert.That(returned.BestSet.Id, Is.EqualTo(best.Id));
+        }
+
+        [Test]
+        public async Task GetNextAsync_WithNoSets_BestSetIsNullAndLastSetsIsEmpty()
+        {
+            await SeedExerciseAsync("Squat");
+
+            var result = await _service.GetNextAsync(pageSize: 10);
+
+            var returned = result.Single();
+            Assert.That(returned.BestSet, Is.Null);
+            Assert.That(returned.LastSetsDate, Is.Null);
+            Assert.That(returned.LastSets, Is.Empty);
+        }
+
+        [Test]
+        public async Task GetNextAsync_PopulatesLastSets_FromMostRecentWorkout()
+        {
+            var exercise = await SeedExerciseAsync("Squat");
+
+            var older = await SeedWorkoutExerciseAsync(exercise.Id, DateTime.UtcNow.AddDays(-7));
+            var newer = await SeedWorkoutExerciseAsync(exercise.Id, DateTime.UtcNow.AddDays(-1));
+
+            await SeedSetAsync(older.Id, weight: 90, reps: 10);
+            var expectedSet = await SeedSetAsync(newer.Id, weight: 100, reps: 8);
+
+            var result = await _service.GetNextAsync(pageSize: 10);
+
+            var returned = result.Single(e => e.Id == exercise.Id);
+            Assert.That(returned.LastSetsDate, Is.EqualTo(newer.Workout.StartTime));
+            Assert.That(returned.LastSets.Select(s => s.Id), Is.EqualTo(new[] { expectedSet.Id }));
+        }
+
+        [Test]
+        public async Task GetNextAsync_LastSets_ExcludesWorkoutsWithNullStartTime()
+        {
+            var exercise = await SeedExerciseAsync("Squat");
+
+            var withoutStart = await SeedWorkoutExerciseAsync(exercise.Id, startTime: null);
+            var withStart = await SeedWorkoutExerciseAsync(exercise.Id, DateTime.UtcNow.AddDays(-1));
+
+            await SeedSetAsync(withoutStart.Id, weight: 90, reps: 10);
+            var expectedSet = await SeedSetAsync(withStart.Id, weight: 100, reps: 8);
+
+            var result = await _service.GetNextAsync(pageSize: 10);
+
+            var returned = result.Single(e => e.Id == exercise.Id);
+            Assert.That(returned.LastSets.Select(s => s.Id), Is.EqualTo(new[] { expectedSet.Id }));
+        }
+
+        [Test]
+        public async Task GetNextAsync_WithMultipleExercises_EachGetsItsOwnBestSetAndLastSets()
+        {
+            var squat = await SeedExerciseAsync("Squat");
+            var bench = await SeedExerciseAsync("Bench Press");
+
+            var squatWorkoutExercise = await SeedWorkoutExerciseAsync(squat.Id, DateTime.UtcNow);
+            var benchWorkoutExercise = await SeedWorkoutExerciseAsync(bench.Id, DateTime.UtcNow);
+
+            var squatBest = await SeedSetAsync(squatWorkoutExercise.Id, weight: 100, reps: 5);
+            var benchBest = await SeedSetAsync(benchWorkoutExercise.Id, weight: 200, reps: 5);
+
+            var result = await _service.GetNextAsync(pageSize: 10);
+
+            var returnedSquat = result.Single(e => e.Id == squat.Id);
+            var returnedBench = result.Single(e => e.Id == bench.Id);
+
+            Assert.That(returnedSquat.BestSet.Id, Is.EqualTo(squatBest.Id));
+            Assert.That(returnedBench.BestSet.Id, Is.EqualTo(benchBest.Id));
+        }
+
+        [Test]
+        public async Task GetNextAsync_OnlyPopulatesDataForExercisesInThePage()
+        {
+            var included = await SeedExerciseAsync("Bench Press");
+            var excluded = await SeedExerciseAsync("Squat");
+
+            var includedWorkoutExercise = await SeedWorkoutExerciseAsync(included.Id, DateTime.UtcNow);
+            var excludedWorkoutExercise = await SeedWorkoutExerciseAsync(excluded.Id, DateTime.UtcNow);
+
+            await SeedSetAsync(includedWorkoutExercise.Id, weight: 100, reps: 5);
+            await SeedSetAsync(excludedWorkoutExercise.Id, weight: 999, reps: 5);
+
+            var result = await _service.GetNextAsync(pageSize: 1);
+
+            Assert.That(result.Select(e => e.Name), Is.EqualTo(new[] { "Bench Press" }));
+            Assert.That(result.Single().BestSet, Is.Not.Null);
+        }
+
+        [Test]
+        public async Task GetNextAsync_BestSetIgnoresSetsFromOtherExercises()
+        {
+            var squat = await SeedExerciseAsync("Squat");
+            var bench = await SeedExerciseAsync("Bench Press");
+
+            var squatWorkoutExercise = await SeedWorkoutExerciseAsync(squat.Id, DateTime.UtcNow);
+            var benchWorkoutExercise = await SeedWorkoutExerciseAsync(bench.Id, DateTime.UtcNow);
+
+            var squatBest = await SeedSetAsync(squatWorkoutExercise.Id, weight: 100, reps: 5);
+            await SeedSetAsync(benchWorkoutExercise.Id, weight: 999, reps: 5);
+
+            var result = await _service.GetNextAsync(pageSize: 10);
+
+            var returnedSquat = result.Single(e => e.Id == squat.Id);
+            Assert.That(returnedSquat.BestSet.Id, Is.EqualTo(squatBest.Id));
+        }
+
+        [Test]
         public async Task UpdateNameAsync_WithValidName_UpdatesAndReturnsExercise()
         {
             var exercise = await SeedExerciseAsync("Squat");
@@ -241,7 +381,9 @@ namespace FitISO.Tests.Services
 
             await _service.DeleteAsync(exercise.Id);
 
-            var stored = await _context.Exercises.FindAsync(exercise.Id);
+            var stored = await _context.Exercises
+                .AsNoTracking()
+                .FirstOrDefaultAsync(e => e.Id == exercise.Id);
             Assert.That(stored, Is.Null);
         }
 
@@ -252,105 +394,5 @@ namespace FitISO.Tests.Services
                 () => _service.DeleteAsync(9999));
         }
 
-
-        [Test]
-        public async Task GetBestSetAsync_ReturnsSetWithHighestWeight()
-        {
-            var exercise = await SeedExerciseAsync("Squat");
-            var workoutExercise = await SeedWorkoutExerciseAsync(exercise.Id, DateTime.UtcNow);
-
-            await SeedSetAsync(workoutExercise.Id, weight: 100, reps: 5);
-            var best = await SeedSetAsync(workoutExercise.Id, weight: 150, reps: 3);
-            await SeedSetAsync(workoutExercise.Id, weight: 120, reps: 8);
-
-            var result = await _service.GetBestSetAsync(exercise.Id);
-
-            Assert.That(result.Id, Is.EqualTo(best.Id));
-        }
-
-        [Test]
-        public async Task GetBestSetAsync_WithTiedWeight_BreaksTieByHighestReps()
-        {
-            var exercise = await SeedExerciseAsync("Squat");
-            var workoutExercise = await SeedWorkoutExerciseAsync(exercise.Id, DateTime.UtcNow);
-
-            await SeedSetAsync(workoutExercise.Id, weight: 100, reps: 5);
-            var best = await SeedSetAsync(workoutExercise.Id, weight: 100, reps: 8);
-
-            var result = await _service.GetBestSetAsync(exercise.Id);
-
-            Assert.That(result.Id, Is.EqualTo(best.Id));
-        }
-
-        [Test]
-        public async Task GetBestSetAsync_IgnoresSetsFromOtherExercises()
-        {
-            var squat = await SeedExerciseAsync("Squat");
-            var bench = await SeedExerciseAsync("Bench Press");
-
-            var squatWorkoutExercise = await SeedWorkoutExerciseAsync(squat.Id, DateTime.UtcNow);
-            var benchWorkoutExercise = await SeedWorkoutExerciseAsync(bench.Id, DateTime.UtcNow);
-
-            var squatBest = await SeedSetAsync(squatWorkoutExercise.Id, weight: 100, reps: 5);
-            await SeedSetAsync(benchWorkoutExercise.Id, weight: 200, reps: 5);
-
-            var result = await _service.GetBestSetAsync(squat.Id);
-
-            Assert.That(result.Id, Is.EqualTo(squatBest.Id));
-        }
-
-        [Test]
-        public async Task GetBestSetAsync_WithNoSets_ReturnsNull()
-        {
-            var exercise = await SeedExerciseAsync("Squat");
-
-            var result = await _service.GetBestSetAsync(exercise.Id);
-
-            Assert.That(result, Is.Null);
-        }
-
-
-        [Test]
-        public async Task GetLastSetsAsync_ReturnsSetsFromMostRecentWorkout()
-        {
-            var exercise = await SeedExerciseAsync("Squat");
-
-            var older = await SeedWorkoutExerciseAsync(exercise.Id, DateTime.UtcNow.AddDays(-7));
-            var newer = await SeedWorkoutExerciseAsync(exercise.Id, DateTime.UtcNow.AddDays(-1));
-
-            await SeedSetAsync(older.Id, weight: 90, reps: 10);
-            var expectedSet = await SeedSetAsync(newer.Id, weight: 100, reps: 8);
-
-            var (date, sets) = await _service.GetLastSetsAsync(exercise.Id);
-
-            Assert.That(sets.Select(s => s.Id), Is.EqualTo(new[] { expectedSet.Id }));
-        }
-
-        [Test]
-        public async Task GetLastSetsAsync_ExcludesWorkoutsWithNullStartTime()
-        {
-            var exercise = await SeedExerciseAsync("Squat");
-
-            var withoutStart = await SeedWorkoutExerciseAsync(exercise.Id, startTime: null);
-            var withStart = await SeedWorkoutExerciseAsync(exercise.Id, DateTime.UtcNow.AddDays(-1));
-
-            await SeedSetAsync(withoutStart.Id, weight: 90, reps: 10);
-            var expectedSet = await SeedSetAsync(withStart.Id, weight: 100, reps: 8);
-
-            var (date, sets) = await _service.GetLastSetsAsync(exercise.Id);
-
-            Assert.That(sets.Select(s => s.Id), Is.EqualTo(new[] { expectedSet.Id }));
-        }
-
-        [Test]
-        public async Task GetLastSetsAsync_WithNoMatchingWorkouts_ReturnsNullDateAndEmptyList()
-        {
-            var exercise = await SeedExerciseAsync("Squat");
-
-            var (date, sets) = await _service.GetLastSetsAsync(exercise.Id);
-
-            Assert.That(date, Is.Null);
-            Assert.That(sets, Is.Empty);
-        }
     }
 }
