@@ -26,7 +26,7 @@ namespace FitISO.Maui
                     fonts.AddFont("MaterialIcons-Round.otf", "MaterialRound");
                 });
 
-            var dbPath = Path.Combine(FileSystem.AppDataDirectory, "fitiso.db3");
+            var dbPath = App.DatabasePath;
 
             builder.Services.AddDbContextFactory<FitDbContext>(options =>
                 options.UseSqlite($"Data Source={dbPath}"));
@@ -44,6 +44,8 @@ namespace FitISO.Maui
 
             builder.Services.AddTransient<ExerciseDetailsPopupPage>();
             builder.Services.AddTransient<ExerciseDetailsPopupViewModel>();
+
+            builder.Services.AddSingleton<SettingsPageViewModel>();
 #if DEBUG
             builder.Logging.AddDebug();
 #endif

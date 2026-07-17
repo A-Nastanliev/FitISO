@@ -31,7 +31,7 @@
 
         <ImageButton Grid.Row="0" Grid.Column="1" HeightRequest="48" WidthRequest="48"
                  Source="{FontImageSource FontFamily=MaterialRound, Glyph='&#xE3C9;'}" CornerRadius="24" Padding="8"
-                 IsVisible="{Binding IsNotEditingName}"  BackgroundColor="{StaticResource Gray400}" 
+                 IsVisible="{Binding IsNotEditingName}"  BackgroundColor="{StaticResource Gray500}" 
                  Command="{Binding StartRenameCommand}" />
 
         <ImageButton Grid.Row="0" Grid.Column="1" HeightRequest="48" WidthRequest="48"
@@ -41,14 +41,14 @@
                  Command="{Binding CancelRenameCommand}" IsEnabled="{Binding IsNotBusy}" />
 
         <ImageButton Grid.Row="0" Grid.Column="2" HeightRequest="48" WidthRequest="48"
-                 Source="{FontImageSource FontFamily=MaterialRound, Glyph='&#xE872;'}" BackgroundColor="DarkRed"
+                 Source="{FontImageSource FontFamily=MaterialRound, Glyph='&#xE872;'}" BackgroundColor="IndianRed"
                  CornerRadius="24" Padding="8"
                  IsVisible="{Binding ShowDeleteButton}"
                  Command="{Binding DeleteCommand}" IsEnabled="{Binding IsNotBusy}" />
 
         <ImageButton Grid.Row="0" Grid.Column="2" HeightRequest="48" WidthRequest="48"
                  Source="{FontImageSource FontFamily=MaterialRound, Glyph='&#xE876;'}"
-                 BackgroundColor="{StaticResource Gray400}"  CornerRadius="24" Padding="8"
+                 BackgroundColor="{StaticResource Gray500}"  CornerRadius="24" Padding="8"
                  IsVisible="{Binding IsEditingName}" 
                  Command="{Binding SaveRenameCommand}" IsEnabled="{Binding IsNotBusy}" />
     </Grid>

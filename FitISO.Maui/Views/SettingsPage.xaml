@@ -3,10 +3,34 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="FitISO.Maui.Views.SettingsPage"
              Title="Settings">
-    <VerticalStackLayout>
-        <Label 
-            Text="Welcome to .NET MAUI!"
-            VerticalOptions="Center" 
+    <VerticalStackLayout Padding="24" Spacing="16">
+        <Label
+            Text="Backup &amp; Restore"
+            FontSize="Medium"
+            FontAttributes="Bold" />
+
+        <Label
+            Text="Export a backup of your data or import a previously exported backup. Importing will replace all current data and close the app."
+            FontSize="Small" HorizontalTextAlignment="Justify"
+            TextColor="{StaticResource Gray500}" />
+
+        <ActivityIndicator
+            IsRunning="{Binding IsBusy}"
+            IsVisible="{Binding IsBusy}"
             HorizontalOptions="Center" />
+
+        <Grid ColumnDefinitions="*,*" ColumnSpacing="16">
+            <Button
+                Text="Export Database" CornerRadius="24" BackgroundColor="{StaticResource Gray500}" 
+                Command="{Binding ExportDatabaseCommand}" 
+                IsEnabled="{Binding IsNotBusy}" FontSize="Small" />
+
+            <Button
+                Text="Import Database" CornerRadius="24" Grid.Column="1"
+                Command="{Binding ImportDatabaseCommand}"
+                BackgroundColor="IndianRed" FontSize="Small"
+                IsEnabled="{Binding IsNotBusy}" />
+        </Grid>
+
     </VerticalStackLayout>
 </ContentPage>

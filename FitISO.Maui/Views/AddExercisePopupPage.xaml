@@ -31,7 +31,7 @@
             <Button Text="Cancel" BackgroundColor="{StaticResource Gray600}" TextColor="{StaticResource Gray200}" FontSize="Small"
                     Command="{Binding CancelCommand}" CornerRadius="20" Grid.Column="0"/>
             <Button Text="Add" CornerRadius="20" Grid.Column="1" FontSize="Small"
-                    Command="{Binding AddCommand}" BackgroundColor="{StaticResource Gray400}" TextColor="White"/>
+                    Command="{Binding AddCommand}" BackgroundColor="{StaticResource Gray500}" TextColor="White"/>
         </Grid>
     </Grid>
 </nlayouts:PopupPageBase>

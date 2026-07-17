@@ -4,6 +4,10 @@ namespace FitISO.Maui
 {
     public partial class App : Application
     {
+        public const string DatabaseFileName = "fitiso.db3";
+
+        public static string DatabasePath => Path.Combine(FileSystem.AppDataDirectory, DatabaseFileName);
+
         public App()
         {
             InitializeComponent();
