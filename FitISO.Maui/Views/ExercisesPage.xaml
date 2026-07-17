@@ -10,7 +10,7 @@
 
     <AbsoluteLayout>
         <CollectionView VerticalOptions="Fill"  AbsoluteLayout.LayoutBounds="0,0,1,1" AbsoluteLayout.LayoutFlags="All"
-                    ItemsSource="{Binding ExerciseCollection.Exercises}" Margin="6" 
+                    ItemsSource="{Binding ExerciseCollection.Exercises}" Margin="6" SelectionMode="Single" SelectedItem="{Binding SelectedExercise}"
                     RemainingItemsThreshold="3" VerticalScrollBarVisibility="Never"
                     RemainingItemsThresholdReachedCommand="{Binding ExerciseCollection.LoadCommand}">
 

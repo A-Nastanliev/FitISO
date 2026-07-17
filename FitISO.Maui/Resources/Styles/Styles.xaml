@@ -5,7 +5,7 @@
     xmlns:nalu="https://nalu-development.github.com/nalu/layouts">
 
     <Style TargetType="nalu:PopupScrim">
-        <Setter Property="BackgroundColor" Value="#20FFFFFF" />
+        <Setter Property="BackgroundColor" Value="#70111111" />
     </Style>
 
     <Style TargetType="nalu:PopupContainer">

@@ -41,6 +41,9 @@ namespace FitISO.Maui
 
             builder.Services.AddTransient<AddExercisePopupPage>();
             builder.Services.AddTransient<AddExercisePopupViewModel>();
+
+            builder.Services.AddTransient<ExerciseDetailsPopupPage>();
+            builder.Services.AddTransient<ExerciseDetailsPopupViewModel>();
 #if DEBUG
             builder.Logging.AddDebug();
 #endif

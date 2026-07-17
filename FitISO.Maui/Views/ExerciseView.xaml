@@ -6,7 +6,20 @@
              x:DataType="vm:Exercise"
              x:Name="Root">
 
-    <Border Style="{StaticResource SectionCard}" Padding="20,10">
+    <VisualStateManager.VisualStateGroups>
+        <VisualStateGroupList>
+            <VisualStateGroup x:Name="CommonStates">
+                <VisualState x:Name="Normal" />
+                <VisualState x:Name="Selected">
+                    <VisualState.Setters>
+                        <Setter TargetName="Border" Property="BackgroundColor" Value="{StaticResource Gray500}" />
+                    </VisualState.Setters>
+                </VisualState>
+            </VisualStateGroup>
+        </VisualStateGroupList>
+    </VisualStateManager.VisualStateGroups>
+
+    <Border Style="{StaticResource SectionCard}" Padding="20,10" x:Name="Border">
         <Label HorizontalOptions="Center" VerticalOptions="Center" HorizontalTextAlignment="Start" FontSize="Small" TextColor="White"
             Text="{Binding Name}"/>
     </Border>

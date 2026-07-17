@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using FitISO.Maui.Models;
 using FitISO.Maui.Views;
 using FitISO.Services;
 using System;
@@ -13,6 +14,9 @@ namespace FitISO.Maui.ViewModels
     {
         [ObservableProperty]
         ExerciseCollection exerciseCollection;
+
+        [ObservableProperty]
+        Exercise selectedExercise;
 
         readonly ExerciseService exerciseService;
         readonly IServiceProvider serviceProvider;
@@ -36,6 +40,29 @@ namespace FitISO.Maui.ViewModels
 
             if (exercise is not null)
                 ExerciseCollection.Add(exercise);
+        }
+
+        partial void OnSelectedExerciseChanged(Exercise value)
+        {
+            if (value is not null)
+                _ = ShowExerciseDetails(value);
+        }
+
+        async Task ShowExerciseDetails(Exercise exercise)
+        {
+            var popup = serviceProvider.GetRequiredService<ExerciseDetailsPopupPage>();
+            var viewModel = (ExerciseDetailsPopupViewModel)popup.BindingContext;
+            viewModel.SetExercise(exercise);
+
+            await Shell.Current.Navigation.PushModalAsync(popup);
+            await viewModel.Closed;
+
+            if (viewModel.WasDeleted)
+                ExerciseCollection.Remove(exercise);
+            else if (viewModel.WasRenamed)
+                ExerciseCollection.Reposition(exercise);
+
+            SelectedExercise = null;
         }
     }
 }

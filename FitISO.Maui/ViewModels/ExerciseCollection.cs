@@ -78,5 +78,25 @@ namespace FitISO.Maui.ViewModels
             Exercises.Insert(index, exercise);
             cursor = Exercises[^1].Name;
         }
+
+        public void Reposition(Exercise exercise)
+        {
+            var currentIndex = Exercises.IndexOf(exercise);
+            if (currentIndex < 0) return;
+
+            var index = 0;
+            for (var i = 0; i < Exercises.Count; i++)
+            {
+                if (i == currentIndex) continue;
+
+                if (string.Compare(Exercises[i].Name, exercise.Name, StringComparison.OrdinalIgnoreCase) < 0)
+                    index++;
+            }
+
+            if (index != currentIndex)
+                Exercises.Move(currentIndex, index);
+        }
+
+        public void Remove(Exercise exercise) => Exercises.Remove(exercise);
     }
 }
