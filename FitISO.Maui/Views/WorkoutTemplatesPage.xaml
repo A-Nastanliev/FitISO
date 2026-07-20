@@ -3,17 +3,73 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="FitISO.Maui.Views.WorkoutTemplatesPage"
              xmlns:local="clr-namespace:FitISO.Maui"
+             xmlns:vm="clr-namespace:FitISO.Maui.ViewModels"
+             xmlns:models="clr-namespace:FitISO.Maui.Models"
+             x:DataType="vm:WorkoutTemplatesViewModel"
+             xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+             xmlns:views="clr-namespace:FitISO.Maui.Views"
+             x:Name="Root"
              Title="Workouts">
-    <VerticalStackLayout >
-        <Button Text="Start Workout"
-                Clicked="ToggleActiveWorkoutClicked">
-            <Button.Triggers>
-                <DataTrigger TargetType="Button"
-                             Binding="{Binding Source={x:Static local:ActiveWorkoutState.Instance}, Path=HasActiveWorkout}"
-                             Value="True">
-                    <Setter Property="Text" Value="End Workout" />
-                </DataTrigger>
-            </Button.Triggers>
-        </Button>
-    </VerticalStackLayout>
+
+    <Shell.TitleView>
+        <Grid Padding="10,0" ColumnDefinitions="auto, *,auto" ColumnSpacing="10">
+            <Image Source="{FontImageSource FontFamily=MaterialRound, Glyph='&#xE85D;'}" Grid.Column="0"/>
+            <Label Text="Workouts" FontSize="Medium" Grid.Column="1" FontAttributes="Bold" VerticalTextAlignment="Center" HorizontalTextAlignment="Center"/>
+            <ImageButton   Source="{FontImageSource FontFamily=MaterialRound, Glyph='&#xE145;'}" Grid.Column="2"
+                    Command="{Binding AddWorkoutTemplateCommand}"/>
+        </Grid>
+    </Shell.TitleView>
+
+    <AbsoluteLayout>
+        <CollectionView VerticalOptions="Fill"  AbsoluteLayout.LayoutBounds="0,0,1,1" AbsoluteLayout.LayoutFlags="All"
+                    ItemsSource="{Binding WorkoutTemplates}" Margin="6" SelectionMode="None"
+                    RemainingItemsThreshold="3" VerticalScrollBarVisibility="Never"
+                    RemainingItemsThresholdReachedCommand="{Binding LoadCommand}">
+
+            <CollectionView.EmptyView>
+                <Label  Text="No workout templates found"
+                     HorizontalOptions="Center"
+                     VerticalOptions="Center"/>
+            </CollectionView.EmptyView>
+
+            <CollectionView.ItemTemplate>
+                <DataTemplate>
+                    <Grid x:DataType="models:Workout" RowDefinitions="Auto, Auto, Auto" RowSpacing="10" Margin="0,10">
+                        <Label HorizontalTextAlignment="Center" Text="{Binding Name}" FontSize="Medium"/>
+                        <CollectionView VerticalOptions="Fill" SelectionMode="None" VerticalScrollBarVisibility="Never" Grid.Row="1" ItemsSource="{Binding WorkoutExercises}">
+                            <CollectionView.ItemTemplate>
+                                <DataTemplate >
+                                    <Border x:DataType="models:WorkoutExercise" StrokeThickness="0">
+                                        <Grid Padding="12,4" ColumnDefinitions="*, auto" ColumnSpacing="12">
+                                            <Label HorizontalTextAlignment="Start" Text="{Binding Exercise.Name}" FontSize="Small"/>
+                                            <Label Text="{Binding SetCount}" FontSize="Small" Grid.Column="1"/>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </CollectionView.ItemTemplate>
+                        </CollectionView>
+                        <HorizontalStackLayout Grid.Row="2" HorizontalOptions="Center" Spacing="16">
+                            <ImageButton  Source="{FontImageSource FontFamily=MaterialRound, Glyph='&#xE872;'}" Padding="4"
+                                HeightRequest="46" CornerRadius="23" WidthRequest="46" BackgroundColor="IndianRed"
+                                 Command="{Binding BindingContext.DeleteWorkoutTemplateCommand, Source={x:Reference Root}}"
+                                CommandParameter="{Binding .}"/>
+                            <ImageButton  Source="{FontImageSource FontFamily=MaterialRound, Glyph='&#xE3C9;'}" Padding="7"
+                                HeightRequest="46" CornerRadius="23" WidthRequest="46" BackgroundColor="{StaticResource Gray400}"/>
+                            <Grid HeightRequest="46" WidthRequest="46">
+                                <Button CornerRadius="23" BackgroundColor="{StaticResource Gray100}"/>
+                                <Image Source="{FontImageSource FontFamily=MaterialRound, Glyph='&#xE037;'}"
+                                    HeightRequest="46" WidthRequest="46" BackgroundColor="Transparent">
+                                    <Image.Behaviors>
+                                        <toolkit:IconTintColorBehavior TintColor="{StaticResource Gray600}" />
+                                    </Image.Behaviors>
+                                </Image>
+                            </Grid>
+                        
+                        </HorizontalStackLayout>
+                    </Grid>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+
+        </CollectionView>
+    </AbsoluteLayout>
 </ContentPage>

@@ -1,8 +1,15 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="FitISO.Maui.Views.SettingsPage"
-             Title="Settings">
+             x:Class="FitISO.Maui.Views.SettingsPage">
+
+    <Shell.TitleView>
+        <Grid Padding="10,0" ColumnDefinitions="*, auto, auto,*" ColumnSpacing="10">
+            <Image Source="{FontImageSource FontFamily=MaterialRound, Glyph='&#xE8B8;'}" Grid.Column="1"/>
+            <Label Text="Settings" FontSize="Medium" Grid.Column="2" FontAttributes="Bold" VerticalTextAlignment="Center" HorizontalTextAlignment="Center"/>
+        </Grid>
+    </Shell.TitleView>
+
     <VerticalStackLayout Padding="24" Spacing="16">
         <Label
             Text="Backup &amp; Restore"

@@ -13,7 +13,7 @@ namespace FitISO.Services
             _contextFactory = contextFactory;
         }
 
-        public async Task<Workout> CreateAsync(string name, bool isTemplate)
+        public async Task<Workout> CreateAsync(string name, bool isTemplate, List<WorkoutExercise> workoutExercises)
         {
             if (!isTemplate)
             {
@@ -26,13 +26,23 @@ namespace FitISO.Services
             {
                 Name = name,
                 StartTime = isTemplate ? null : DateTime.UtcNow,
-                EndTime = null
+                EndTime = null,
+                WorkoutExercises = workoutExercises ?? new List<WorkoutExercise>()
             };
 
             using var _context = _contextFactory.CreateDbContext();
             _context.Workouts.Add(workout);
             await _context.SaveChangesAsync();
-            return workout;
+
+            var savedWorkout = await _context.Workouts
+                .Include(w => w.WorkoutExercises)
+                    .ThenInclude(we => we.Exercise)
+                .Include(w => w.WorkoutExercises)
+                    .ThenInclude(we => we.Sets)
+                .AsSplitQuery()
+                .FirstOrDefaultAsync(w => w.Id == workout.Id);
+
+            return savedWorkout!;
         }
 
         public async Task<Workout> GetActiveWorkoutAsync()

@@ -10,6 +10,6 @@ namespace FitISO.Data.Models
         public string Name { get; set; }
         public DateTime? StartTime { get; set; }
         public DateTime? EndTime { get; set; }
-        public IEnumerable<WorkoutExercise> WorkoutExercises { get; set; }
+        public List<WorkoutExercise> WorkoutExercises { get; set; }
     }
 }

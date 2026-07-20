@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="FitISO.Maui.Views.WorkoutFormPage"
+             xmlns:vm="clr-namespace:FitISO.Maui.ViewModels"
+             xmlns:views="clr-namespace:FitISO.Maui.Views"
+             xmlns:models="clr-namespace:FitISO.Maui.Models"
+             x:DataType="vm:WorkoutFormViewModel"
+             x:Name="Root" 
+             Title="{Binding Title}">
+
+    <Shell.BackButtonBehavior>
+        <BackButtonBehavior IsVisible="False" />
+    </Shell.BackButtonBehavior>
+    
+    <Shell.TitleView>
+        <Grid Padding="10,0" ColumnDefinitions="Auto, *, Auto">
+            <ImageButton  Source="{FontImageSource FontFamily=MaterialRound, Glyph='&#xE408;'}" Command="{Binding NavigateBackCommand}"/>
+            <Entry Placeholder="Workout Name" FontSize="Medium" MaxLength="100" Text="{Binding Workout.Name}" Margin="10,0" Grid.Column="1"
+                VerticalTextAlignment="Center" HorizontalTextAlignment="Center"/>
+            <ImageButton  Source="{FontImageSource FontFamily=MaterialRound, Glyph='&#xE161;'}" Grid.Column="2" Command="{Binding SaveCommand}"/>
+        </Grid>
+    </Shell.TitleView>
+
+    <ScrollView VerticalScrollBarVisibility="Never">
+        <VerticalStackLayout Padding="0, 4" Spacing="6">
+            <CollectionView  VerticalOptions="Fill"  RemainingItemsThreshold="3" VerticalScrollBarVisibility="Never" Margin="16,6"
+                       ItemsSource="{Binding Workout.WorkoutExercises}" SelectionMode="None">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="models:WorkoutExercise">
+                        <SwipeView>
+                            <SwipeView.RightItems>
+                                <SwipeItems Mode="Execute">
+                                    <SwipeItem Text="" BackgroundColor="Transparent"
+                                               Command="{Binding BindingContext.DecreaseSetsCommand, Source={x:Reference Root}}"
+                                               CommandParameter="{Binding .}" />
+                                </SwipeItems>
+                            </SwipeView.RightItems>
+                            <SwipeView.LeftItems>
+                                <SwipeItems Mode="Execute">
+                                    <SwipeItem Text="" BackgroundColor="Transparent"
+                                               Command="{Binding BindingContext.IncreaseSetsCommand, Source={x:Reference Root}}"
+                                               CommandParameter="{Binding .}" />
+                                </SwipeItems>
+                            </SwipeView.LeftItems>
+
+                            <Border StrokeShape="RoundRectangle 20" StrokeThickness="0" BackgroundColor="{StaticResource Gray400}" Margin="0,4">
+                                <Grid Padding="12,8" ColumnDefinitions="10*, *" >
+                                    <Label Text="{Binding Exercise.Name}" VerticalOptions="Center"/>
+                                    <Label Grid.Column="1" Text="{Binding SetCount}" VerticalOptions="Center"/>
+                                </Grid>
+                            </Border>
+                        </SwipeView>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+            <BoxView HeightRequest="1" Color="{StaticResource Gray400}"/>
+            <CollectionView VerticalOptions="Fill"  RemainingItemsThreshold="3" VerticalScrollBarVisibility="Never"
+                       ItemsSource="{Binding ExerciseCollection.Exercises}" Margin="16,6" SelectionMode="Single" SelectedItem="{Binding SelectedExercise}"
+                       RemainingItemsThresholdReachedCommand="{Binding ExerciseCollection.LoadCommand}">
+
+                <CollectionView.EmptyView>
+                    <Label  Text="No exercises found"
+                        HorizontalOptions="Center"
+                        VerticalOptions="Center"/>
+                </CollectionView.EmptyView>
+
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <views:ExerciseView
+                               x:DataType="views:ExerciseView" Margin="0,4" />
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+
+            </CollectionView>
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

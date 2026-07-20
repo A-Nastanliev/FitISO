@@ -1,14 +1,21 @@
+using FitISO.Maui.ViewModels;
+
 namespace FitISO.Maui.Views;
 
 public partial class WorkoutTemplatesPage : ContentPage
 {
-	public WorkoutTemplatesPage()
+    readonly WorkoutTemplatesViewModel viewModel;
+
+	public WorkoutTemplatesPage(WorkoutTemplatesViewModel workoutTemplatesViewModel)
 	{
 		InitializeComponent();
+		BindingContext = workoutTemplatesViewModel;
+        viewModel = workoutTemplatesViewModel;
 	}
 
-    private void ToggleActiveWorkoutClicked(object? sender, EventArgs e)
+    protected async override void OnAppearing()
     {
-        ActiveWorkoutState.Instance.HasActiveWorkout = !ActiveWorkoutState.Instance.HasActiveWorkout;
+        base.OnAppearing();
+        await viewModel.LoadCommand.ExecuteAsync(null);
     }
 }

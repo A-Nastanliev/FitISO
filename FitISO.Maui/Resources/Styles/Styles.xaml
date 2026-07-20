@@ -436,7 +436,7 @@
 
     <Style TargetType="Shell" ApplyToDerivedTypes="True">
         <Setter Property="Shell.BackgroundColor" Value="{DynamicResource Gray800}" />
-        <Setter Property="Shell.ForegroundColor" Value="{DynamicResource Gray800}" />
+        <Setter Property="Shell.ForegroundColor" Value="{DynamicResource Gray100}" />
         <Setter Property="Shell.TitleColor" Value="White" />
         <Setter Property="Shell.DisabledColor" Value="{DynamicResource Gray600}" />
         <Setter Property="Shell.UnselectedColor" Value="{DynamicResource Gray400}" />

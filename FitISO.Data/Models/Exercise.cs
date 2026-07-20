@@ -12,7 +12,7 @@ namespace FitISO.Data.Models
         [Length(4,100)]
         public string Name { get; set; }
 
-        public IEnumerable<WorkoutExercise> WorkoutExercises { get; set; }
+        public List<WorkoutExercise> WorkoutExercises { get; set; }
 
         [NotMapped]
         public Set? BestSet { get; set; }

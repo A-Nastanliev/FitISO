@@ -46,6 +46,11 @@ namespace FitISO.Maui
             builder.Services.AddTransient<ExerciseDetailsPopupViewModel>();
 
             builder.Services.AddSingleton<SettingsPageViewModel>();
+
+            builder.Services.AddTransient<WorkoutFormPage>();
+            builder.Services.AddTransient<WorkoutFormViewModel>();
+
+            builder.Services.AddSingleton<WorkoutTemplatesViewModel>();
 #if DEBUG
             builder.Logging.AddDebug();
 #endif
@@ -57,6 +62,22 @@ namespace FitISO.Maui
                 using var db = factory.CreateDbContext();
                 db.Database.Migrate();
             }
+
+#if ANDROID
+            Microsoft.Maui.Handlers.ToolbarHandler.Mapper.AppendToMapping("NoInset", (handler, view) =>
+            {
+                handler.PlatformView.ContentInsetStartWithNavigation = 0;
+                handler.PlatformView.SetContentInsetsAbsolute(0, 0);
+            });
+#endif
+
+#if ANDROID
+            Microsoft.Maui.Handlers.EntryHandler.Mapper.AppendToMapping("NoUnderline", (handler, view) =>
+            {
+                handler.PlatformView.BackgroundTintList =
+                    Android.Content.Res.ColorStateList.ValueOf(Android.Graphics.Color.Transparent);
+            });
+#endif
 
             return app;
         }

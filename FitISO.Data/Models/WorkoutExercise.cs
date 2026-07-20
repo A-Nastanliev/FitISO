@@ -20,6 +20,6 @@ namespace FitISO.Data.Models
         [MaxLength(100)]
         public string Note { get; set; }
 
-        public IEnumerable<Set> Sets { get; set; }
+        public List<Set> Sets { get; set; }
     }
 }

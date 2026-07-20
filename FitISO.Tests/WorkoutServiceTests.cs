@@ -46,7 +46,7 @@ namespace FitISO.Tests.Services
         [Test]
         public async Task CreateAsync_AsWorkout_SetsStartTimeAndPersists()
         {
-            var result = await _service.CreateAsync("Leg Day", isTemplate: false);
+            var result = await _service.CreateAsync("Leg Day", isTemplate: false, workoutExercises: null);
 
             Assert.That(result.Id, Is.GreaterThan(0));
             Assert.That(result.Name, Is.EqualTo("Leg Day"));
@@ -60,7 +60,7 @@ namespace FitISO.Tests.Services
         [Test]
         public async Task CreateAsync_AsTemplate_LeavesStartTimeNull()
         {
-            var result = await _service.CreateAsync("Push Template", isTemplate: true);
+            var result = await _service.CreateAsync("Push Template", isTemplate: true, workoutExercises: null);
 
             Assert.That(result.StartTime, Is.Null);
             Assert.That(result.EndTime, Is.Null);
@@ -69,9 +69,9 @@ namespace FitISO.Tests.Services
         [Test]
         public async Task CreateAsync_AsTemplate_DoesNotConflictWithActiveWorkout()
         {
-            await _service.CreateAsync("Leg Day", isTemplate: false);
+            await _service.CreateAsync("Leg Day", isTemplate: false, workoutExercises: null);
 
-            var template = await _service.CreateAsync("Push Template", isTemplate: true);
+            var template = await _service.CreateAsync("Push Template", isTemplate: true, workoutExercises: null);
 
             Assert.That(template.Id, Is.GreaterThan(0));
         }
@@ -81,18 +81,18 @@ namespace FitISO.Tests.Services
         {
             Assert.ThrowsAsync<InvalidOperationException>(async () =>
             {
-                await _service.CreateAsync("Leg Day", isTemplate: false);
-                await _service.CreateAsync("Push Day", isTemplate: false);
+                await _service.CreateAsync("Leg Day", isTemplate: false, workoutExercises: null);
+                await _service.CreateAsync("Push Day", isTemplate: false, workoutExercises: null);
             });
         }
 
         [Test]
         public async Task CreateAsync_AfterActiveWorkoutEnded_IsAllowed()
         {
-            var first = await _service.CreateAsync("Leg Day", isTemplate: false);
+            var first = await _service.CreateAsync("Leg Day", isTemplate: false, workoutExercises: null);
             await _service.EndWorkoutAsync(first.Id);
 
-            var second = await _service.CreateAsync("Push Day", isTemplate: false);
+            var second = await _service.CreateAsync("Push Day", isTemplate: false, workoutExercises: null);
 
             Assert.That(second.Id, Is.GreaterThan(0));
         }
@@ -100,7 +100,7 @@ namespace FitISO.Tests.Services
         [Test]
         public async Task GetActiveWorkoutAsync_WithActiveWorkout_ReturnsIt()
         {
-            var created = await _service.CreateAsync("Leg Day", isTemplate: false);
+            var created = await _service.CreateAsync("Leg Day", isTemplate: false, workoutExercises: null);
 
             var result = await _service.GetActiveWorkoutAsync();
 
@@ -111,7 +111,7 @@ namespace FitISO.Tests.Services
         [Test]
         public async Task GetActiveWorkoutAsync_WithNoActiveWorkout_ReturnsNull()
         {
-            await _service.CreateAsync("Push Template", isTemplate: true);
+            await _service.CreateAsync("Push Template", isTemplate: true, workoutExercises: null);
 
             var result = await _service.GetActiveWorkoutAsync();
 
@@ -121,7 +121,7 @@ namespace FitISO.Tests.Services
         [Test]
         public async Task GetActiveWorkoutAsync_WithEndedWorkout_ReturnsNull()
         {
-            var created = await _service.CreateAsync("Leg Day", isTemplate: false);
+            var created = await _service.CreateAsync("Leg Day", isTemplate: false, workoutExercises: null);
             await _service.EndWorkoutAsync(created.Id);
 
             var result = await _service.GetActiveWorkoutAsync();
@@ -132,11 +132,11 @@ namespace FitISO.Tests.Services
         [Test]
         public async Task GetWorkoutsAsync_ReturnsOnlyStartedWorkoutsOrderedById()
         {
-            var w1 = await _service.CreateAsync("Leg Day", isTemplate: false);
+            var w1 = await _service.CreateAsync("Leg Day", isTemplate: false, workoutExercises: null);
             await _service.EndWorkoutAsync(w1.Id);
-            var w2 = await _service.CreateAsync("Push Day", isTemplate: false);
+            var w2 = await _service.CreateAsync("Push Day", isTemplate: false, workoutExercises: null);
             await _service.EndWorkoutAsync(w2.Id);
-            await _service.CreateAsync("Template", isTemplate: true);
+            await _service.CreateAsync("Template", isTemplate: true, workoutExercises: null);
 
             var result = await _service.GetWorkoutsAsync(pageSize: 10);
 
@@ -146,9 +146,9 @@ namespace FitISO.Tests.Services
         [Test]
         public async Task GetWorkoutsAsync_RespectsPageSize()
         {
-            var w1 = await _service.CreateAsync("Leg Day", isTemplate: false);
+            var w1 = await _service.CreateAsync("Leg Day", isTemplate: false, workoutExercises: null);
             await _service.EndWorkoutAsync(w1.Id);
-            var w2 = await _service.CreateAsync("Push Day", isTemplate: false);
+            var w2 = await _service.CreateAsync("Push Day", isTemplate: false, workoutExercises: null);
             await _service.EndWorkoutAsync(w2.Id);
 
             var result = await _service.GetWorkoutsAsync(pageSize: 1);
@@ -160,9 +160,9 @@ namespace FitISO.Tests.Services
         [Test]
         public async Task GetWorkoutsAsync_WithCursor_ReturnsItemsAfterCursor()
         {
-            var w1 = await _service.CreateAsync("Leg Day", isTemplate: false);
+            var w1 = await _service.CreateAsync("Leg Day", isTemplate: false, workoutExercises: null);
             await _service.EndWorkoutAsync(w1.Id);
-            var w2 = await _service.CreateAsync("Push Day", isTemplate: false);
+            var w2 = await _service.CreateAsync("Push Day", isTemplate: false, workoutExercises: null);
             await _service.EndWorkoutAsync(w2.Id);
 
             var result = await _service.GetWorkoutsAsync(pageSize: 10, cursor: w1.Id);
@@ -173,7 +173,7 @@ namespace FitISO.Tests.Services
         [Test]
         public async Task GetWorkoutsAsync_WithNoMatchingWorkouts_ReturnsEmptyList()
         {
-            await _service.CreateAsync("Template", isTemplate: true);
+            await _service.CreateAsync("Template", isTemplate: true, workoutExercises: null);
 
             var result = await _service.GetWorkoutsAsync(pageSize: 10);
 
@@ -183,9 +183,9 @@ namespace FitISO.Tests.Services
         [Test]
         public async Task GetTemplatesAsync_ReturnsOnlyTemplatesOrderedById()
         {
-            var t1 = await _service.CreateAsync("Push Template", isTemplate: true);
-            var t2 = await _service.CreateAsync("Pull Template", isTemplate: true);
-            var w = await _service.CreateAsync("Leg Day", isTemplate: false);
+            var t1 = await _service.CreateAsync("Push Template", isTemplate: true, workoutExercises: null);
+            var t2 = await _service.CreateAsync("Pull Template", isTemplate: true, workoutExercises: null);
+            var w = await _service.CreateAsync("Leg Day", isTemplate: false, workoutExercises: null);
 
             var result = await _service.GetTemplatesAsync(pageSize: 10);
 
@@ -195,8 +195,8 @@ namespace FitISO.Tests.Services
         [Test]
         public async Task GetTemplatesAsync_RespectsPageSize()
         {
-            await _service.CreateAsync("Push Template", isTemplate: true);
-            await _service.CreateAsync("Pull Template", isTemplate: true);
+            await _service.CreateAsync("Push Template", isTemplate: true, workoutExercises: null);
+            await _service.CreateAsync("Pull Template", isTemplate: true, workoutExercises: null);
 
             var result = await _service.GetTemplatesAsync(pageSize: 1);
 
@@ -206,7 +206,7 @@ namespace FitISO.Tests.Services
         [Test]
         public async Task GetTemplatesAsync_WithNoMatchingTemplates_ReturnsEmptyList()
         {
-            var w = await _service.CreateAsync("Leg Day", isTemplate: false);
+            var w = await _service.CreateAsync("Leg Day", isTemplate: false, workoutExercises: null);
             await _service.EndWorkoutAsync(w.Id);
 
             var result = await _service.GetTemplatesAsync(pageSize: 10);
@@ -217,7 +217,7 @@ namespace FitISO.Tests.Services
         [Test]
         public async Task UpdateNameAsync_WithValidName_UpdatesAndReturnsWorkout()
         {
-            var created = await _service.CreateAsync("Leg Day", isTemplate: false);
+            var created = await _service.CreateAsync("Leg Day", isTemplate: false, workoutExercises: null);
 
             var updated = await _service.UpdateNameAsync(created.Id, "Leg Day v2");
 
@@ -234,7 +234,7 @@ namespace FitISO.Tests.Services
         [Test]
         public async Task EndWorkoutAsync_WithActiveWorkout_SetsEndTime()
         {
-            var created = await _service.CreateAsync("Leg Day", isTemplate: false);
+            var created = await _service.CreateAsync("Leg Day", isTemplate: false, workoutExercises: null);
 
             var ended = await _service.EndWorkoutAsync(created.Id);
 
@@ -251,7 +251,7 @@ namespace FitISO.Tests.Services
         [Test]
         public async Task EndWorkoutAsync_WithTemplate_ThrowsInvalidOperationException()
         {
-            var template = await _service.CreateAsync("Template", isTemplate: true);
+            var template = await _service.CreateAsync("Template", isTemplate: true, workoutExercises: null);
 
             Assert.ThrowsAsync<InvalidOperationException>(
                 () => _service.EndWorkoutAsync(template.Id));
@@ -260,7 +260,7 @@ namespace FitISO.Tests.Services
         [Test]
         public async Task EndWorkoutAsync_WithAlreadyEndedWorkout_ThrowsInvalidOperationException()
         {
-            var created = await _service.CreateAsync("Leg Day", isTemplate: false);
+            var created = await _service.CreateAsync("Leg Day", isTemplate: false, workoutExercises: null);
             await _service.EndWorkoutAsync(created.Id);
 
             Assert.ThrowsAsync<InvalidOperationException>(
@@ -270,7 +270,7 @@ namespace FitISO.Tests.Services
         [Test]
         public async Task DeleteAsync_WithExistingId_RemovesWorkout()
         {
-            var created = await _service.CreateAsync("Leg Day", isTemplate: false);
+            var created = await _service.CreateAsync("Leg Day", isTemplate: false, workoutExercises: null);
 
             await _service.DeleteAsync(created.Id);
 
