@@ -15,9 +15,6 @@ namespace FitISO.Maui.ViewModels
     public partial class WorkoutFormViewModel : ObservableObject, IQueryAttributable
     {
         [ObservableProperty]
-        string title;
-
-        [ObservableProperty]
         Workout workout = new();
 
         [ObservableProperty]
@@ -65,6 +62,28 @@ namespace FitISO.Maui.ViewModels
                     var workout = await workoutService.CreateAsync(Workout.Name, true, workoutExercises);
                     WeakReferenceMessenger.Default.Send(new WorkoutTemplateCreatedMessage(new Workout(workout)));
                     _ = Toast.Make($"{workout.Name} created").Show();
+                    await NavigateBack();
+                }
+                else
+                {
+                    var workoutExercises = Workout.WorkoutExercises.Select(we => new FitISO.Data.Models.WorkoutExercise
+                    {
+                        Id = we.Id,
+                        ExerciseId = we.Exercise.Id,
+                        Note = we.Note,
+                        Sets = we.Sets.Select(s => new FitISO.Data.Models.Set
+                        {
+                            Id = s.Id,
+                            Weight = s.Weight,
+                            Reps = s.Reps
+                        }).ToList()
+                    }).ToList();
+
+                    var updated = await workoutService.UpdateAsync(Workout.Id, Workout.Name, workoutExercises);
+                    NavigationWorkout.Name = Workout.Name;
+                    Workout updatedWorkout = new Workout(updated);
+                    NavigationWorkout.WorkoutExercises = updatedWorkout.WorkoutExercises;
+                    _ = Toast.Make($"{updated.Name} updated").Show();
                     await NavigateBack();
                 }
             }
@@ -118,27 +137,30 @@ namespace FitISO.Maui.ViewModels
 
         public void ApplyQueryAttributes(IDictionary<string, object> query)
         {
-            if (query.TryGetValue($"{nameof(Workout)}", out var obj) && obj is Workout workout)
+            if (query.TryGetValue($"{nameof(NavigationWorkout)}", out var obj) && obj is Workout workout)
             {
                 NavigationWorkout = workout;
                 isEditMode = true;
-                WorkoutExercise workoutExercise = new WorkoutExercise();
-                foreach(var we in NavigationWorkout.WorkoutExercises)
+                foreach (var we in NavigationWorkout.WorkoutExercises)
                 {
-                    workoutExercise.Id = we.Id;
-                    workoutExercise.Exercise= we.Exercise;
-                    workoutExercise.Note = we.Note;
-                    Workout.WorkoutExercises.Add(workoutExercise);
-                    foreach(var set in we.Sets)
+                    var workoutExercise = new WorkoutExercise
                     {
-                        workoutExercise.Sets.Add(new Set { Id = set.Id});
+                        Id = we.Id,
+                        Exercise = we.Exercise,
+                        Note = we.Note,
+                        Sets = new ObservableCollection<Set>()
+                    };
+
+                    foreach (var set in we.Sets)
+                    {
+                        workoutExercise.Sets.Add(new Set { Id = set.Id });
                     }
+                    workoutExercise.SetCount = workoutExercise.Sets.Count;
+
+                    Workout.WorkoutExercises.Add(workoutExercise);
                 }
-                Title = "Edit Workout";
-            }
-            else
-            {
-                Title = "Create Workout";
+                Workout.Id = workout.Id;
+                Workout.Name = workout.Name;
             }
         }
     }

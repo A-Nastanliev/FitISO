@@ -12,7 +12,7 @@
     <TabBar Route="main" nalu:NaluShell.TabBarView="{local:AppShellTabBar}">
 
         <Tab Title="Workouts" Route="workouts" Icon="{FontImageSource FontFamily=MaterialRound, Glyph='&#xe85d;'}">
-            <ShellContent ContentTemplate="{DataTemplate pages:WorkoutTemplatesPage}"  />
+            <ShellContent ContentTemplate="{DataTemplate pages:WorkoutTemplatesPage}" Title="Templates"  />
         </Tab>
 
         <Tab Title="Active" Route="active" Icon="{FontImageSource FontFamily=MaterialRound, Glyph='&#xe1c4;'}"

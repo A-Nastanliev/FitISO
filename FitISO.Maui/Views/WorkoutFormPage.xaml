@@ -6,8 +6,7 @@
              xmlns:views="clr-namespace:FitISO.Maui.Views"
              xmlns:models="clr-namespace:FitISO.Maui.Models"
              x:DataType="vm:WorkoutFormViewModel"
-             x:Name="Root" 
-             Title="{Binding Title}">
+             x:Name="Root" >
 
     <Shell.BackButtonBehavior>
         <BackButtonBehavior IsVisible="False" />

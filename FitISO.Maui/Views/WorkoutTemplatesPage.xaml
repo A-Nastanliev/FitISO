@@ -54,8 +54,9 @@
                                  Command="{Binding BindingContext.DeleteWorkoutTemplateCommand, Source={x:Reference Root}}"
                                 CommandParameter="{Binding .}"/>
                             <ImageButton  Source="{FontImageSource FontFamily=MaterialRound, Glyph='&#xE3C9;'}" Padding="7"
-                                HeightRequest="46" CornerRadius="23" WidthRequest="46" BackgroundColor="{StaticResource Gray400}"/>
-                            <Grid HeightRequest="46" WidthRequest="46">
+                                HeightRequest="46" CornerRadius="23" WidthRequest="46" BackgroundColor="{StaticResource Gray400}"
+                                Command="{Binding BindingContext.EditWorkoutTemplateCommand, Source={x:Reference Root}}" CommandParameter="{Binding .}"/>
+                            <Grid HeightRequest="46" WidthRequest="46" >
                                 <Button CornerRadius="23" BackgroundColor="{StaticResource Gray100}"/>
                                 <Image Source="{FontImageSource FontFamily=MaterialRound, Glyph='&#xE037;'}"
                                     HeightRequest="46" WidthRequest="46" BackgroundColor="Transparent">

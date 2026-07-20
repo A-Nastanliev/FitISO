@@ -232,6 +232,248 @@ namespace FitISO.Tests.Services
         }
 
         [Test]
+        public async Task UpdateAsync_UpdatesName()
+        {
+            var exercise = new Exercise { Name = "Bench Press" };
+            _context.Exercises.Add(exercise);
+            await _context.SaveChangesAsync();
+
+            var created = await _service.CreateAsync("Push Template", isTemplate: true, workoutExercises: new List<WorkoutExercise>
+            {
+                new WorkoutExercise { ExerciseId = exercise.Id, Sets = new List<Set> { new Set { Weight = 100, Reps = 5 } } }
+            });
+
+            var incoming = created.WorkoutExercises.Select(we => new WorkoutExercise
+            {
+                Id = we.Id,
+                ExerciseId = we.ExerciseId,
+                Note = we.Note,
+                Sets = we.Sets.Select(s => new Set { Id = s.Id, Weight = s.Weight, Reps = s.Reps }).ToList()
+            }).ToList();
+
+            var result = await _service.UpdateAsync(created.Id, "Push Template v2", incoming);
+
+            Assert.That(result.Name, Is.EqualTo("Push Template v2"));
+        }
+
+        [Test]
+        public void UpdateAsync_WithNonExistentId_ThrowsKeyNotFoundException()
+        {
+            Assert.ThrowsAsync<KeyNotFoundException>(
+                () => _service.UpdateAsync(9999, "Name", new List<WorkoutExercise>()));
+        }
+
+        [Test]
+        public async Task UpdateAsync_AddsNewWorkoutExercise()
+        {
+            var exercise = new Exercise { Name = "Bench Press" };
+            var secondExercise = new Exercise { Name = "Squat" };
+            _context.Exercises.AddRange(exercise, secondExercise);
+            await _context.SaveChangesAsync();
+
+            var created = await _service.CreateAsync("Push Template", isTemplate: true, workoutExercises: new List<WorkoutExercise>
+            {
+                new WorkoutExercise { ExerciseId = exercise.Id, Sets = new List<Set> { new Set { Weight = 100, Reps = 5 } } }
+            });
+
+            var incoming = created.WorkoutExercises.Select(we => new WorkoutExercise
+            {
+                Id = we.Id,
+                ExerciseId = we.ExerciseId,
+                Note = we.Note,
+                Sets = we.Sets.Select(s => new Set { Id = s.Id, Weight = s.Weight, Reps = s.Reps }).ToList()
+            }).ToList();
+
+            incoming.Add(new WorkoutExercise
+            {
+                ExerciseId = secondExercise.Id,
+                Sets = new List<Set> { new Set { Weight = 60, Reps = 8 } }
+            });
+
+            var result = await _service.UpdateAsync(created.Id, created.Name, incoming);
+
+            Assert.That(result.WorkoutExercises.Count, Is.EqualTo(2));
+            Assert.That(result.WorkoutExercises.Any(we => we.ExerciseId == secondExercise.Id), Is.True);
+        }
+
+        [Test]
+        public async Task UpdateAsync_RemovesWorkoutExerciseNotInIncomingList()
+        {
+            var exercise = new Exercise { Name = "Bench Press" };
+            _context.Exercises.Add(exercise);
+            await _context.SaveChangesAsync();
+
+            var created = await _service.CreateAsync("Push Template", isTemplate: true, workoutExercises: new List<WorkoutExercise>
+            {
+                new WorkoutExercise { ExerciseId = exercise.Id, Sets = new List<Set> { new Set { Weight = 100, Reps = 5 } } }
+            });
+
+            var result = await _service.UpdateAsync(created.Id, created.Name, new List<WorkoutExercise>());
+
+            Assert.That(result.WorkoutExercises, Is.Empty);
+        }
+
+        [Test]
+        public async Task UpdateAsync_RemovedWorkoutExercise_IsDeletedFromDatabase()
+        {
+            var exercise = new Exercise { Name = "Bench Press" };
+            _context.Exercises.Add(exercise);
+            await _context.SaveChangesAsync();
+
+            var created = await _service.CreateAsync("Push Template", isTemplate: true, workoutExercises: new List<WorkoutExercise>
+            {
+                new WorkoutExercise { ExerciseId = exercise.Id, Sets = new List<Set> { new Set { Weight = 100, Reps = 5 } } }
+            });
+            var removedId = created.WorkoutExercises.Single().Id;
+
+            await _service.UpdateAsync(created.Id, created.Name, new List<WorkoutExercise>());
+
+            var stillThere = await _context.WorkoutExercises.FindAsync(removedId);
+            Assert.That(stillThere, Is.Null);
+        }
+
+        [Test]
+        public async Task UpdateAsync_UpdatesExistingSetValues()
+        {
+            var exercise = new Exercise { Name = "Bench Press" };
+            _context.Exercises.Add(exercise);
+            await _context.SaveChangesAsync();
+
+            var created = await _service.CreateAsync("Push Template", isTemplate: true, workoutExercises: new List<WorkoutExercise>
+            {
+                new WorkoutExercise { ExerciseId = exercise.Id, Sets = new List<Set> { new Set { Weight = 100, Reps = 5 } } }
+            });
+
+            var incoming = created.WorkoutExercises.Select(we => new WorkoutExercise
+            {
+                Id = we.Id,
+                ExerciseId = we.ExerciseId,
+                Note = we.Note,
+                Sets = we.Sets.Select(s => new Set { Id = s.Id, Weight = s.Weight, Reps = s.Reps }).ToList()
+            }).ToList();
+            incoming.Single().Sets.Single().Weight = 120;
+            incoming.Single().Sets.Single().Reps = 3;
+
+            var result = await _service.UpdateAsync(created.Id, created.Name, incoming);
+
+            var set = result.WorkoutExercises.Single().Sets.Single();
+            Assert.That(set.Weight, Is.EqualTo(120));
+            Assert.That(set.Reps, Is.EqualTo(3));
+        }
+
+        [Test]
+        public async Task UpdateAsync_AddsNewSetToExistingExercise()
+        {
+            var exercise = new Exercise { Name = "Bench Press" };
+            _context.Exercises.Add(exercise);
+            await _context.SaveChangesAsync();
+
+            var created = await _service.CreateAsync("Push Template", isTemplate: true, workoutExercises: new List<WorkoutExercise>
+            {
+                new WorkoutExercise { ExerciseId = exercise.Id, Sets = new List<Set> { new Set { Weight = 100, Reps = 5 } } }
+            });
+
+            var incoming = created.WorkoutExercises.Select(we => new WorkoutExercise
+            {
+                Id = we.Id,
+                ExerciseId = we.ExerciseId,
+                Note = we.Note,
+                Sets = we.Sets.Select(s => new Set { Id = s.Id, Weight = s.Weight, Reps = s.Reps }).ToList()
+            }).ToList();
+            incoming.Single().Sets.Add(new Set { Weight = 110, Reps = 4 });
+
+            var result = await _service.UpdateAsync(created.Id, created.Name, incoming);
+
+            Assert.That(result.WorkoutExercises.Single().Sets.Count, Is.EqualTo(2));
+        }
+
+        [Test]
+        public async Task UpdateAsync_RemovesSetNotInIncomingList()
+        {
+            var exercise = new Exercise { Name = "Bench Press" };
+            _context.Exercises.Add(exercise);
+            await _context.SaveChangesAsync();
+
+            var created = await _service.CreateAsync("Push Template", isTemplate: true, workoutExercises: new List<WorkoutExercise>
+            {
+                new WorkoutExercise
+                {
+                    ExerciseId = exercise.Id,
+                    Sets = new List<Set> { new Set { Weight = 100, Reps = 5 }, new Set { Weight = 110, Reps = 3 } }
+                }
+            });
+
+            var keptSet = created.WorkoutExercises.Single().Sets.First();
+
+            var incoming = new List<WorkoutExercise>
+            {
+                new WorkoutExercise
+                {
+                    Id = created.WorkoutExercises.Single().Id,
+                    ExerciseId = exercise.Id,
+                    Sets = new List<Set> { new Set { Id = keptSet.Id, Weight = keptSet.Weight, Reps = keptSet.Reps } }
+                }
+            };
+
+            var result = await _service.UpdateAsync(created.Id, created.Name, incoming);
+
+            Assert.That(result.WorkoutExercises.Single().Sets.Count, Is.EqualTo(1));
+            Assert.That(result.WorkoutExercises.Single().Sets.Single().Id, Is.EqualTo(keptSet.Id));
+        }
+
+        [Test]
+        public async Task UpdateAsync_RemovedSet_IsDeletedFromDatabase()
+        {
+            var exercise = new Exercise { Name = "Bench Press" };
+            _context.Exercises.Add(exercise);
+            await _context.SaveChangesAsync();
+
+            var created = await _service.CreateAsync("Push Template", isTemplate: true, workoutExercises: new List<WorkoutExercise>
+            {
+                new WorkoutExercise { ExerciseId = exercise.Id, Sets = new List<Set> { new Set { Weight = 100, Reps = 5 } } }
+            });
+            var removedSetId = created.WorkoutExercises.Single().Sets.Single().Id;
+
+            var incoming = new List<WorkoutExercise>
+            {
+                new WorkoutExercise { Id = created.WorkoutExercises.Single().Id, ExerciseId = exercise.Id, Sets = new List<Set>() }
+            };
+
+            await _service.UpdateAsync(created.Id, created.Name, incoming);
+
+            var stillThere = await _context.Sets.FindAsync(removedSetId);
+            Assert.That(stillThere, Is.Null);
+        }
+
+        [Test]
+        public async Task UpdateAsync_ChangesExerciseIdAndNoteOnExistingWorkoutExercise()
+        {
+            var exercise = new Exercise { Name = "Bench Press" };
+            var newExercise = new Exercise { Name = "Deadlift" };
+            _context.Exercises.AddRange(exercise, newExercise);
+            await _context.SaveChangesAsync();
+
+            var created = await _service.CreateAsync("Push Template", isTemplate: true, workoutExercises: new List<WorkoutExercise>
+            {
+                new WorkoutExercise { ExerciseId = exercise.Id, Sets = new List<Set> { new Set { Weight = 100, Reps = 5 } } }
+            });
+
+            var incoming = created.WorkoutExercises.Select(we => new WorkoutExercise
+            {
+                Id = we.Id,
+                ExerciseId = newExercise.Id,
+                Note = "Go heavy",
+                Sets = we.Sets.Select(s => new Set { Id = s.Id, Weight = s.Weight, Reps = s.Reps }).ToList()
+            }).ToList();
+
+            var result = await _service.UpdateAsync(created.Id, created.Name, incoming);
+
+            var we2 = result.WorkoutExercises.Single();
+            Assert.That(we2.ExerciseId, Is.EqualTo(newExercise.Id));
+            Assert.That(we2.Note, Is.EqualTo("Go heavy"));
+        }
+
+        [Test]
         public async Task EndWorkoutAsync_WithActiveWorkout_SetsEndTime()
         {
             var created = await _service.CreateAsync("Leg Day", isTemplate: false, workoutExercises: null);

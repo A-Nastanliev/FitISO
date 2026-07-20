@@ -5,8 +5,16 @@
              xmlns:vm="clr-namespace:FitISO.Maui.ViewModels"
              x:DataType="vm:ExercisePageViewModel"
              xmlns:views="clr-namespace:FitISO.Maui.Views"
-             Shell.NavBarIsVisible="False"
-             Title="Exercises">
+             Shell.NavBarIsVisible="True">
+
+    <Shell.TitleView>
+        <Grid Padding="10,0" ColumnDefinitions="auto, *,auto" ColumnSpacing="10">
+            <Image Source="{FontImageSource FontFamily=MaterialRound, Glyph='&#xEB43;'}" Grid.Column="0"/>
+            <Label Text="Exercises" FontSize="Medium" Grid.Column="1" FontAttributes="Bold" VerticalTextAlignment="Center" HorizontalTextAlignment="Center"/>
+            <ImageButton Source="{FontImageSource FontFamily=MaterialRound, Glyph='&#xE145;'}" BackgroundColor="{StaticResource Gray800}"
+                Command="{Binding AddExerciseCommand}" Grid.Column="2"/>
+        </Grid>
+    </Shell.TitleView>
 
     <AbsoluteLayout>
         <CollectionView VerticalOptions="Fill"  AbsoluteLayout.LayoutBounds="0,0,1,1" AbsoluteLayout.LayoutFlags="All"
@@ -28,8 +36,5 @@
             </CollectionView.ItemTemplate>
 
         </CollectionView>
-        <ImageButton AbsoluteLayout.LayoutBounds="0.95,0.97,AutoSize,AutoSize" AbsoluteLayout.LayoutFlags="PositionProportional" HeightRequest="50"
-                Source="{FontImageSource FontFamily=MaterialRound, Glyph='&#xE145;'}" BackgroundColor="{StaticResource Gray800}" CornerRadius="25"
-                Command="{Binding AddExerciseCommand}"/>
     </AbsoluteLayout>
 </ContentPage>

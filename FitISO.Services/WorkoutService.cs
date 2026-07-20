@@ -97,6 +97,76 @@ namespace FitISO.Services
             return workout;
         }
 
+        public async Task<Workout> UpdateAsync(int id, string name, List<WorkoutExercise> incomingExercises)
+        {
+            using var _context = _contextFactory.CreateDbContext();
+
+            var workout = await _context.Workouts
+                .Include(w => w.WorkoutExercises)
+                    .ThenInclude(we => we.Sets)
+                .Include(w=>w.WorkoutExercises)
+                    .ThenInclude(e=>e.Exercise)
+                .AsSplitQuery()
+                .FirstOrDefaultAsync(w => w.Id == id);
+
+            if (workout == null)
+                throw new KeyNotFoundException($"Workout {id} was not found.");
+
+            workout.Name = name;
+
+            var existingExercisesById = workout.WorkoutExercises.ToDictionary(we => we.Id);
+            var incomingExerciseIds = incomingExercises.Where(we => we.Id != 0).Select(we => we.Id).ToHashSet();
+
+            foreach (var existing in existingExercisesById.Values.ToList())
+            {
+                if (!incomingExerciseIds.Contains(existing.Id))
+                    workout.WorkoutExercises.Remove(existing);
+            }
+
+            foreach (var incoming in incomingExercises)
+            {
+                if (incoming.Id != 0 && existingExercisesById.TryGetValue(incoming.Id, out var existingExercise))
+                {
+                    existingExercise.ExerciseId = incoming.ExerciseId;
+                    existingExercise.Note = incoming.Note;
+
+                    var existingSetsById = existingExercise.Sets.ToDictionary(s => s.Id);
+                    var incomingSetIds = incoming.Sets.Where(s => s.Id != 0).Select(s => s.Id).ToHashSet();
+
+                    foreach (var existingSet in existingSetsById.Values.ToList())
+                    {
+                        if (!incomingSetIds.Contains(existingSet.Id))
+                            existingExercise.Sets.Remove(existingSet);
+                    }
+
+                    foreach (var incomingSet in incoming.Sets)
+                    {
+                        if (incomingSet.Id != 0 && existingSetsById.TryGetValue(incomingSet.Id, out var existingSet))
+                        {
+                            existingSet.Weight = incomingSet.Weight;
+                            existingSet.Reps = incomingSet.Reps;
+                        }
+                        else
+                        {
+                            existingExercise.Sets.Add(new Set { Weight = incomingSet.Weight, Reps = incomingSet.Reps });
+                        }
+                    }
+                }
+                else
+                {
+                    workout.WorkoutExercises.Add(new WorkoutExercise
+                    {
+                        ExerciseId = incoming.ExerciseId,
+                        Note = incoming.Note,
+                        Sets = incoming.Sets.Select(s => new Set { Weight = s.Weight, Reps = s.Reps }).ToList()
+                    });
+                }
+            }
+
+            await _context.SaveChangesAsync();
+            return workout;
+        }
+
         public async Task<Workout> EndWorkoutAsync(int id)
         {
             using var _context = _contextFactory.CreateDbContext();

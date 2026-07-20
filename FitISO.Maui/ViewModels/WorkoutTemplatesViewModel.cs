@@ -100,5 +100,13 @@ namespace FitISO.Maui.ViewModels
             WorkoutTemplates.Remove(workout);
             cursor = WorkoutTemplates[^1].Id;
         }
+
+
+        [RelayCommand]
+        public async Task EditWorkoutTemplate(Workout workout)
+        {
+            await Shell.Current.GoToAsync(nameof(WorkoutFormPage), true,
+                new Dictionary<string, object> { [nameof(WorkoutFormViewModel.NavigationWorkout)] = workout });
+        }
     }
 }
