@@ -51,6 +51,8 @@ namespace FitISO.Maui
             builder.Services.AddTransient<WorkoutFormViewModel>();
 
             builder.Services.AddSingleton<WorkoutTemplatesViewModel>();
+
+            builder.Services.AddSingleton<ActiveWorkoutViewModel>();
 #if DEBUG
             builder.Logging.AddDebug();
 #endif
@@ -78,6 +80,7 @@ namespace FitISO.Maui
                     Android.Content.Res.ColorStateList.ValueOf(Android.Graphics.Color.Transparent);
             });
 #endif
+            app.Services.GetRequiredService<ActiveWorkoutViewModel>();
 
             return app;
         }

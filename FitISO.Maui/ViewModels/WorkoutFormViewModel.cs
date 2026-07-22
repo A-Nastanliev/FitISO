@@ -59,7 +59,7 @@ namespace FitISO.Maui.ViewModels
                         }
                         workoutExercises.Add(workoutExercise);
                     }
-                    var workout = await workoutService.CreateAsync(Workout.Name, true, workoutExercises);
+                    var workout = await workoutService.CreateAsync(Workout.Name, workoutExercises);
                     WeakReferenceMessenger.Default.Send(new WorkoutTemplateCreatedMessage(new Workout(workout)));
                     _ = Toast.Make($"{workout.Name} created").Show();
                     await NavigateBack();

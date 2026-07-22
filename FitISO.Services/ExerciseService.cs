@@ -50,7 +50,8 @@ namespace FitISO.Services
 
             var bestSets = await _context.Sets
                 .AsNoTracking()
-                .Where(s => exerciseIds.Contains(s.WorkoutExercise.ExerciseId))
+                .Where(s => exerciseIds.Contains(s.WorkoutExercise.ExerciseId)
+                    && s.WorkoutExercise.Workout.EndTime != null)
                 .GroupBy(s => s.WorkoutExercise.ExerciseId)
                 .Select(g => new
                 {
@@ -66,7 +67,7 @@ namespace FitISO.Services
             var lastWorkoutExercises = await _context.WorkoutExercises
                 .AsNoTracking()
                 .Include(we => we.Workout)
-                .Where(we => exerciseIds.Contains(we.ExerciseId) && we.Workout.StartTime != null)
+                .Where(we => exerciseIds.Contains(we.ExerciseId) && we.Workout.EndTime != null)
                 .GroupBy(we => we.ExerciseId)
                 .Select(g => g.OrderByDescending(we => we.Workout.StartTime).First())
                 .ToListAsync();

@@ -32,7 +32,6 @@ namespace FitISO.Maui.ViewModels
             WeakReferenceMessenger.Default.RegisterAll(this);
         }
 
-
         private bool CanStartLoading()
         => !Loading && canLoadMore;
 
@@ -107,6 +106,16 @@ namespace FitISO.Maui.ViewModels
         {
             await Shell.Current.GoToAsync(nameof(WorkoutFormPage), true,
                 new Dictionary<string, object> { [nameof(WorkoutFormViewModel.NavigationWorkout)] = workout });
+        }
+
+        [RelayCommand]
+        public async Task StartWorkout(Workout workout)
+        {
+            if (ActiveWorkoutState.Instance.HasActiveWorkout) return;
+
+            Workout startWorkout =new Workout(await workoutService.StartFromTemplateAsync(workout.Id));
+            WeakReferenceMessenger.Default.Send(new WorkoutStartedMessage(startWorkout));
+            ActiveWorkoutState.Instance.HasActiveWorkout = true;
         }
     }
 }

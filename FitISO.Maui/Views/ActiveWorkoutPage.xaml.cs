@@ -1,13 +1,27 @@
+using FitISO.Maui.ViewModels;
+
 namespace FitISO.Maui.Views;
 
 public partial class ActiveWorkoutPage : ContentPage
 {
-	public ActiveWorkoutPage()
+	readonly ActiveWorkoutViewModel viewModel;
+
+	public ActiveWorkoutPage(ActiveWorkoutViewModel activeWorkoutViewModel)
 	{
 		InitializeComponent();
+		BindingContext = activeWorkoutViewModel;
+		viewModel = activeWorkoutViewModel;
 	}
-    private void ToggleActiveWorkoutClicked(object? sender, EventArgs e)
+
+    protected override void OnAppearing()
     {
-        ActiveWorkoutState.Instance.HasActiveWorkout = !ActiveWorkoutState.Instance.HasActiveWorkout;
+        base.OnAppearing();
+        viewModel.EnsureTimerRunning();
+    }
+
+    protected override void OnDisappearing()
+    {
+        base.OnDisappearing();
+        viewModel.Stop();
     }
 }

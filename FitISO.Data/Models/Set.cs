@@ -14,8 +14,8 @@ namespace FitISO.Data.Models
         [ForeignKey(nameof(WorkoutExerciseId))]
         public WorkoutExercise WorkoutExercise { get; set; }
 
-        public double Weight { get; set; }
-        public double Reps { get; set; }
+        public double? Weight { get; set; }
+        public double? Reps { get; set; }
 
     }
 }

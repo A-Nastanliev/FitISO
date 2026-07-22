@@ -13,19 +13,12 @@ namespace FitISO.Services
             _contextFactory = contextFactory;
         }
 
-        public async Task<Workout> CreateAsync(string name, bool isTemplate, List<WorkoutExercise> workoutExercises)
+        public async Task<Workout> CreateAsync(string name, List<WorkoutExercise> workoutExercises)
         {
-            if (!isTemplate)
-            {
-                var activeWorkout = await GetActiveWorkoutAsync();
-                if (activeWorkout != null)
-                    throw new InvalidOperationException($"Workout {activeWorkout.Name} is already active. Finish it before starting another.");
-            }
-
             var workout = new Workout
             {
                 Name = name,
-                StartTime = isTemplate ? null : DateTime.UtcNow,
+                StartTime = null,
                 EndTime = null,
                 WorkoutExercises = workoutExercises ?? new List<WorkoutExercise>()
             };
@@ -45,15 +38,82 @@ namespace FitISO.Services
             return savedWorkout!;
         }
 
+        public async Task<Workout> StartFromTemplateAsync(int templateId)
+        {
+            using var _context = _contextFactory.CreateDbContext();
+
+            var activeWorkout = await _context.Workouts
+                .Where(w => w.StartTime != null && w.EndTime == null)
+                .Select(w => new { w.Name })
+                .FirstOrDefaultAsync();
+
+            if (activeWorkout != null)
+                throw new InvalidOperationException($"Workout {activeWorkout.Name} is already active. Finish it before starting another.");
+
+            var template = await _context.Workouts
+                .Include(w => w.WorkoutExercises)
+                    .ThenInclude(we => we.Sets)
+                .AsNoTracking()
+                .AsSplitQuery()
+                .FirstOrDefaultAsync(w => w.Id == templateId);
+
+            if (template == null)
+                throw new KeyNotFoundException($"Workout {templateId} was not found.");
+
+            if (template.StartTime != null)
+                throw new InvalidOperationException($"Workout {templateId} is not a template.");
+
+            var newWorkout = new Workout
+            {
+                Name = template.Name,
+                StartTime = DateTime.UtcNow,
+                EndTime = null,
+                WorkoutExercises = template.WorkoutExercises.Select(we => new WorkoutExercise
+                {
+                    ExerciseId = we.ExerciseId,
+                    Note = we.Note,
+                    Sets = we.Sets.Select(s => new Set
+                    {
+                        Weight = s.Weight,
+                        Reps = s.Reps
+                    }).ToList()
+                }).ToList()
+            };
+
+            _context.Workouts.Add(newWorkout);
+            await _context.SaveChangesAsync();
+
+            var savedWorkout = await _context.Workouts
+                .Include(w => w.WorkoutExercises)
+                    .ThenInclude(we => we.Exercise)
+                .Include(w => w.WorkoutExercises)
+                    .ThenInclude(we => we.Sets)
+                .AsSplitQuery()
+                .FirstOrDefaultAsync(w => w.Id == newWorkout.Id);
+
+            var exercises = savedWorkout!.WorkoutExercises.Select(we => we.Exercise).ToList();
+            await PopulateExerciseHistoryAsync(_context, exercises, excludeWorkoutId: newWorkout.Id);
+
+            return savedWorkout!;
+        }
+
         public async Task<Workout> GetActiveWorkoutAsync()
         {
             using var _context = _contextFactory.CreateDbContext();
-            return await _context.Workouts
+            var workout = await _context.Workouts
                 .Include(w => w.WorkoutExercises)
                     .ThenInclude(we => we.Sets)
                 .Include(w => w.WorkoutExercises)
                     .ThenInclude(we => we.Exercise)
                 .FirstOrDefaultAsync(w => w.StartTime != null && w.EndTime == null);
+
+            if (workout != null)
+            {
+                var exercises = workout.WorkoutExercises.Select(we => we.Exercise).ToList();
+                await PopulateExerciseHistoryAsync(_context, exercises, excludeWorkoutId: workout.Id);
+            }
+
+            return workout;
         }
 
         private async Task<List<Workout>> GetNextAsync(bool templatesOnly, int pageSize, int? cursor = null)
@@ -104,8 +164,8 @@ namespace FitISO.Services
             var workout = await _context.Workouts
                 .Include(w => w.WorkoutExercises)
                     .ThenInclude(we => we.Sets)
-                .Include(w=>w.WorkoutExercises)
-                    .ThenInclude(e=>e.Exercise)
+                .Include(w => w.WorkoutExercises)
+                    .ThenInclude(e => e.Exercise)
                 .AsSplitQuery()
                 .FirstOrDefaultAsync(w => w.Id == id);
 
@@ -127,7 +187,11 @@ namespace FitISO.Services
             {
                 if (incoming.Id != 0 && existingExercisesById.TryGetValue(incoming.Id, out var existingExercise))
                 {
-                    existingExercise.ExerciseId = incoming.ExerciseId;
+                    if (existingExercise.ExerciseId != incoming.ExerciseId)
+                    {
+                        existingExercise.ExerciseId = incoming.ExerciseId;
+                        existingExercise.Exercise = await _context.Exercises.FindAsync(incoming.ExerciseId);
+                    }
                     existingExercise.Note = incoming.Note;
 
                     var existingSetsById = existingExercise.Sets.ToDictionary(s => s.Id);
@@ -154,9 +218,12 @@ namespace FitISO.Services
                 }
                 else
                 {
+                    var exercise = await _context.Exercises.FindAsync(incoming.ExerciseId);
+
                     workout.WorkoutExercises.Add(new WorkoutExercise
                     {
                         ExerciseId = incoming.ExerciseId,
+                        Exercise = exercise,
                         Note = incoming.Note,
                         Sets = incoming.Sets.Select(s => new Set { Weight = s.Weight, Reps = s.Reps }).ToList()
                     });
@@ -196,6 +263,66 @@ namespace FitISO.Services
 
             _context.Workouts.Remove(workout);
             await _context.SaveChangesAsync();
+        }
+
+        private async Task PopulateExerciseHistoryAsync( FitDbContext _context, IEnumerable<Exercise> exercises, int? excludeWorkoutId = null)
+        {
+            var exerciseIds = exercises.Select(e => e.Id).Distinct().ToList();
+            if (exerciseIds.Count == 0)
+                return;
+
+            var bestSets = await _context.Sets
+                .AsNoTracking()
+                .Where(s => exerciseIds.Contains(s.WorkoutExercise.ExerciseId)
+                         && s.WorkoutExercise.Workout.EndTime != null
+                         && (excludeWorkoutId == null || s.WorkoutExercise.WorkoutId != excludeWorkoutId))
+                .GroupBy(s => s.WorkoutExercise.ExerciseId)
+                .Select(g => new
+                {
+                    ExerciseId = g.Key,
+                    Set = g.OrderByDescending(s => s.Weight)
+                           .ThenByDescending(s => s.Reps)
+                           .First()
+                })
+                .ToListAsync();
+
+            var bestSetByExercise = bestSets.ToDictionary(x => x.ExerciseId, x => x.Set);
+
+            var lastWorkoutExercises = await _context.WorkoutExercises
+                .AsNoTracking()
+                .Include(we => we.Workout)
+                .Where(we => exerciseIds.Contains(we.ExerciseId)
+                          && we.Workout.EndTime != null
+                          && (excludeWorkoutId == null || we.WorkoutId != excludeWorkoutId))
+                .GroupBy(we => we.ExerciseId)
+                .Select(g => g.OrderByDescending(we => we.Workout.StartTime).First())
+                .ToListAsync();
+
+            var lastWeIds = lastWorkoutExercises.Select(we => we.Id).ToList();
+
+            var lastSets = await _context.Sets
+                .AsNoTracking()
+                .Where(s => lastWeIds.Contains(s.WorkoutExerciseId))
+                .ToListAsync();
+
+            var lastSetsByWeId = lastSets
+                .GroupBy(s => s.WorkoutExerciseId)
+                .ToDictionary(g => g.Key, g => g.ToList());
+
+            var lastInfoByExercise = lastWorkoutExercises.ToDictionary(
+                we => we.ExerciseId,
+                we => (we.Workout.StartTime, Sets: lastSetsByWeId.GetValueOrDefault(we.Id, new List<Set>())));
+
+            foreach (var exercise in exercises)
+            {
+                exercise.BestSet = bestSetByExercise.GetValueOrDefault(exercise.Id);
+
+                if (lastInfoByExercise.TryGetValue(exercise.Id, out var lastInfo))
+                {
+                    exercise.LastSetsDate = lastInfo.StartTime;
+                    exercise.LastSets = lastInfo.Sets;
+                }
+            }
         }
     }
 }

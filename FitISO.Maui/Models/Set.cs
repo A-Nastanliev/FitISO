@@ -12,9 +12,9 @@ namespace FitISO.Maui.Models
         [ObservableProperty]
         int id;
         [ObservableProperty]
-        double weight;
+        double? weight;
         [ObservableProperty]
-        double reps;
+        double? reps;
 
         public Set()
         {

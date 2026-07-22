@@ -13,7 +13,7 @@ namespace FitISO.Services
             _contextFactory = contextFactory;
         }
 
-        public async Task<Set> CreateAsync(int workoutExerciseId, double weight, double reps)
+        public async Task<Set> CreateAsync(int workoutExerciseId, double? weight, double? reps)
         {
             ValidateWeightAndReps(weight, reps);
 
@@ -60,7 +60,7 @@ namespace FitISO.Services
             await _context.SaveChangesAsync();
         }
 
-        private static void ValidateWeightAndReps(double weight, double reps)
+        private static void ValidateWeightAndReps(double? weight, double? reps)
         {
             if (weight < 0)
                 throw new ArgumentException("Weight cannot be negative.", nameof(weight));
