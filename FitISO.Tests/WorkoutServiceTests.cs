@@ -104,7 +104,6 @@ namespace FitISO.Tests.Services
                 new WorkoutExercise
                 {
                     ExerciseId = exercise.Id,
-                    Note = "Warm up first",
                     Sets = new List<Set> { new Set { Weight = 100, Reps = 5 } }
                 }
             });
@@ -118,8 +117,6 @@ namespace FitISO.Tests.Services
 
             var copiedExercise = started.WorkoutExercises.Single();
             Assert.That(copiedExercise.ExerciseId, Is.EqualTo(exercise.Id));
-            Assert.That(copiedExercise.Note, Is.EqualTo("Warm up first"));
-
             var copiedSet = copiedExercise.Sets.Single();
             Assert.That(copiedSet.Weight, Is.EqualTo(100));
             Assert.That(copiedSet.Reps, Is.EqualTo(5));
@@ -364,7 +361,6 @@ namespace FitISO.Tests.Services
             {
                 Id = we.Id,
                 ExerciseId = we.ExerciseId,
-                Note = we.Note,
                 Sets = we.Sets.Select(s => new Set { Id = s.Id, Weight = s.Weight, Reps = s.Reps }).ToList()
             }).ToList();
 
@@ -397,7 +393,6 @@ namespace FitISO.Tests.Services
             {
                 Id = we.Id,
                 ExerciseId = we.ExerciseId,
-                Note = we.Note,
                 Sets = we.Sets.Select(s => new Set { Id = s.Id, Weight = s.Weight, Reps = s.Reps }).ToList()
             }).ToList();
 
@@ -465,7 +460,6 @@ namespace FitISO.Tests.Services
             {
                 Id = we.Id,
                 ExerciseId = we.ExerciseId,
-                Note = we.Note,
                 Sets = we.Sets.Select(s => new Set { Id = s.Id, Weight = s.Weight, Reps = s.Reps }).ToList()
             }).ToList();
             incoming.Single().Sets.Single().Weight = 120;
@@ -494,7 +488,6 @@ namespace FitISO.Tests.Services
             {
                 Id = we.Id,
                 ExerciseId = we.ExerciseId,
-                Note = we.Note,
                 Sets = we.Sets.Select(s => new Set { Id = s.Id, Weight = s.Weight, Reps = s.Reps }).ToList()
             }).ToList();
             incoming.Single().Sets.Add(new Set { Weight = 110, Reps = 4 });
@@ -579,7 +572,6 @@ namespace FitISO.Tests.Services
             {
                 Id = we.Id,
                 ExerciseId = newExercise.Id,
-                Note = "Go heavy",
                 Sets = we.Sets.Select(s => new Set { Id = s.Id, Weight = s.Weight, Reps = s.Reps }).ToList()
             }).ToList();
 
@@ -587,7 +579,6 @@ namespace FitISO.Tests.Services
 
             var we2 = result.WorkoutExercises.Single();
             Assert.That(we2.ExerciseId, Is.EqualTo(newExercise.Id));
-            Assert.That(we2.Note, Is.EqualTo("Go heavy"));
         }
 
 

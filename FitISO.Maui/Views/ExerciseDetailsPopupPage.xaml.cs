@@ -17,4 +17,10 @@ public partial class ExerciseDetailsPopupPage : Nalu.PopupPageBase
         base.OnDisappearing();
         viewModel.CompleteIfNotAlready();
     }
+
+    protected async override void OnAppearing()
+    {
+        base.OnAppearing();
+        await viewModel.CheckIfDeletable();
+    }
 }

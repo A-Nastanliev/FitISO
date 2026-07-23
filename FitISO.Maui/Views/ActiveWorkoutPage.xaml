@@ -5,6 +5,7 @@
              xmlns:local="clr-namespace:FitISO.Maui"
              xmlns:vm="clr-namespace:FitISO.Maui.ViewModels"
              xmlns:models="clr-namespace:FitISO.Maui.Models"
+             xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
              xmlns:views="clr-namespace:FitISO.Maui.Views"
              x:DataType="vm:ActiveWorkoutViewModel"
              x:Name="Root"
@@ -13,10 +14,11 @@
     <Shell.TitleView>
         <Grid Padding="10,0" ColumnDefinitions="auto, *,auto" ColumnSpacing="10">
             <Label Text="{Binding Duration, StringFormat='{0:hh\\:mm\\:ss}'}" Grid.Column="0" FontSize="Medium" VerticalOptions="Center" VerticalTextAlignment="Center"/>
-            <Entry Grid.Column="1" Text="{Binding Workout.Name, Mode=TwoWay}" FontSize="Medium"
-                FontAttributes="Bold" VerticalTextAlignment="Center" HorizontalTextAlignment="Center" VerticalOptions="Center"/>
+            <Entry Grid.Column="1" Text="{Binding Workout.Name, Mode=TwoWay}" FontSize="Medium" MaxLength="40"
+                FontAttributes="Bold" VerticalTextAlignment="Center" HorizontalTextAlignment="Center" VerticalOptions="Center"
+                 />
             <ImageButton Source="{FontImageSource FontFamily=MaterialRound, Glyph='&#xEAF8;'}" 
-                Command="{Binding AddExerciseCommand}" Grid.Column="2" VerticalOptions="Center"/>
+                Command="{Binding FinishWorkoutCommand}" Grid.Column="2" VerticalOptions="Center"/>
         </Grid>
     </Shell.TitleView>
 
@@ -44,11 +46,72 @@
                                     </SwipeItems>
                                 </SwipeView.LeftItems>
                                 <Border StrokeThickness="0" StrokeShape="RoundRectangle 25" BackgroundColor="{StaticResource Gray800}" x:Name="OuterBorder">
-                                    <Grid Padding="0" RowDefinitions="Auto, Auto" RowSpacing="6">
+                                    <Grid Padding="0" RowDefinitions="Auto, Auto, Auto" RowSpacing="0">
                                         <Label HorizontalOptions="Center" VerticalOptions="Center" HorizontalTextAlignment="Center" LineBreakMode="WordWrap"
                                            Text="{Binding Exercise.Name}" FontSize="Medium" Padding="0,4"/>
+                                        <Border Grid.Row="1" StrokeShape="RoundRectangle 25" StrokeThickness="0"
+                                            IsVisible="{Binding Exercise.VisibleSets}" Stroke="Transparent">
+                                            <toolkit:Expander>
+                                                <toolkit:Expander.Header>
+                                                    <Grid RowDefinitions="Auto, Auto" BackgroundColor="{StaticResource Gray200}">
+                                                        <Border HorizontalOptions="Center" StrokeShape="RoundRectangle 25"
+                                                            BackgroundColor="{StaticResource Gray500}" StrokeThickness="0"
+                                                            Padding="4,0" Margin="0,2" Grid.Row="0">
+                                                            <Label Text="PERSONAL RECORD" Margin="4,0" VerticalOptions="Center"
+                                                               VerticalTextAlignment="Center" TextColor="{StaticResource Gray200}"
+                                                               FontAttributes="Bold" HorizontalOptions="Center" FontSize="Small"/>
+                                                        </Border>
+                                                        <Grid Margin="30,0" Grid.Row="1" ColumnDefinitions="65*,35*" ColumnSpacing="24" VerticalOptions="Center">
+                                                            <Grid Grid.Column="0" ColumnSpacing="8" HorizontalOptions="Fill"
+                                                                IsClippedToBounds="True" ColumnDefinitions="5*,auto,4*">
+                                                                <Label Text="{Binding Exercise.BestSet.Weight, StringFormat='{0:0.##}'}"
+                                                                   TextColor="{StaticResource Gray800}" HorizontalOptions="Fill"
+                                                                   HorizontalTextAlignment="End" FontSize="Small"/>
+                                                                <Label Text="kg" VerticalTextAlignment="Center" Grid.Column="1"
+                                                                    FontSize="Small" TextColor="{StaticResource Gray800}"/>
+                                                            </Grid>
+                                                            <Label Text="{Binding Exercise.BestSet.Reps, StringFormat='{0:0.##}'}"
+                                                                 Grid.Column="1" TextColor="{StaticResource Gray800}"
+                                                                 HorizontalOptions="Center" HorizontalTextAlignment="End" FontSize="Small"/>
+                                                        </Grid>
+                                                    </Grid>
+                                                </toolkit:Expander.Header>
+
+                                                <toolkit:Expander.Content>
+                                                    <Grid RowDefinitions="Auto,Auto" BackgroundColor="{StaticResource Gray500}">
+                                                        <Border HorizontalOptions="Center" StrokeShape="RoundRectangle 25"
+                                                            BackgroundColor="{StaticResource Gray200}" StrokeThickness="0"
+                                                            Padding="4,0" Margin="0,2" Grid.Row="0">
+                                                            <Label Text="{Binding Exercise.LastSetsDate, Converter={StaticResource DateConverter}}"
+                                                               Margin="4,0" VerticalOptions="Center" VerticalTextAlignment="Center"
+                                                               TextColor="{StaticResource Gray500}" HorizontalOptions="Center"
+                                                               FontAttributes="Bold" FontSize="Small"/>
+                                                        </Border>
+                                                        <CollectionView ItemsSource="{Binding Exercise.LastSets}" Grid.Row="1">
+                                                            <CollectionView.ItemTemplate>
+                                                                <DataTemplate x:DataType="models:Set">
+                                                                    <Grid Margin="30,0" ColumnDefinitions="65*,35*" ColumnSpacing="24" VerticalOptions="Center">
+                                                                        <Grid Grid.Column="0" ColumnSpacing="8" HorizontalOptions="Fill"
+                                                                            IsClippedToBounds="True" ColumnDefinitions="5*,auto,4*">
+                                                                            <Label Text="{Binding Weight, StringFormat='{0:0.##}'}"
+                                                                               TextColor="{StaticResource Gray800}" HorizontalOptions="Fill"
+                                                                               HorizontalTextAlignment="End" FontSize="Small"/>
+                                                                            <Label Text="kg" VerticalTextAlignment="Center" Grid.Column="1"
+                                                                                FontSize="Small" TextColor="{StaticResource Gray950}"/>
+                                                                        </Grid>
+                                                                        <Label Text="{Binding Reps, StringFormat='{0:0.##}'}" Grid.Column="1"
+                                                                           TextColor="{StaticResource Gray800}" HorizontalOptions="Center"
+                                                                           HorizontalTextAlignment="End" FontSize="Small"/>
+                                                                    </Grid>
+                                                                </DataTemplate>
+                                                            </CollectionView.ItemTemplate>
+                                                        </CollectionView>
+                                                    </Grid>
+                                                </toolkit:Expander.Content>
+                                            </toolkit:Expander>
+                                        </Border>
                                         <CollectionView VerticalOptions="Fill"  AbsoluteLayout.LayoutBounds="0,0,1,1" AbsoluteLayout.LayoutFlags="All"
-                                        ItemsSource="{Binding Sets}" Margin="0" SelectionMode="None" VerticalScrollBarVisibility="Never" Grid.Row="1">
+                                            ItemsSource="{Binding Sets}" Margin="0" SelectionMode="None" VerticalScrollBarVisibility="Never" Grid.Row="2">
                                             <CollectionView.ItemTemplate>
                                                 <DataTemplate x:DataType="models:Set">
                                                     <Grid RowDefinitions="Auto, Auto">
@@ -60,7 +123,7 @@
                                                                 <Entry Text="{Binding Weight, Mode=TwoWay}" Keyboard="Numeric" MaxLength="7" 
                                                                    PlaceholderColor="{StaticResource Gray400}" Placeholder="W"
                                                                    HorizontalOptions="Fill" HorizontalTextAlignment="End" FontSize="Small"/>
-                                                                <Label Text="kg" VerticalTextAlignment="Center" Grid.Column="1"/>
+                                                                <Label Text="kg" FontSize="Small" VerticalTextAlignment="Center" Grid.Column="1"/>
                                                             </Grid>
                                                             <Entry Text="{Binding Reps, Mode=TwoWay}" Keyboard="Numeric" Grid.Column="1" MaxLength="5"
                                                                HorizontalOptions="Center" HorizontalTextAlignment="End" FontSize="Small"
@@ -79,7 +142,8 @@
 
             </CollectionView>
             <ImageButton Source="{FontImageSource FontFamily=MaterialRound, Glyph='&#xE145;'}" BackgroundColor="{StaticResource Gray800}"
-                HorizontalOptions="Center" Margin="10" HeightRequest="50" WidthRequest="50" CornerRadius="25"/>
+                HorizontalOptions="Center" Margin="10" HeightRequest="50" WidthRequest="50" CornerRadius="25"
+                Command="{Binding AddExerciseCommand}"/>
         </VerticalStackLayout>
     </ScrollView>
 </ContentPage>

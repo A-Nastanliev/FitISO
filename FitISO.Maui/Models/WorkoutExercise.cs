@@ -18,9 +18,6 @@ namespace FitISO.Maui.Models
         Exercise exercise;
 
         [ObservableProperty]
-        string note;
-
-        [ObservableProperty]
         ObservableCollection<Set> sets = new();
 
         [ObservableProperty]
@@ -31,7 +28,6 @@ namespace FitISO.Maui.Models
         public WorkoutExercise(FitISO.Data.Models.WorkoutExercise workoutExercise)
         {
             Id = workoutExercise.Id;
-            Note = workoutExercise.Note;
             Exercise = new Exercise(workoutExercise.Exercise);
             foreach (var set in workoutExercise.Sets)
             {

@@ -17,9 +17,6 @@ namespace FitISO.Data.Models
         [ForeignKey(nameof(ExerciseId))]
         public Exercise Exercise { get; set; }
 
-        [MaxLength(100)]
-        public string Note { get; set; }
-
         public List<Set> Sets { get; set; }
     }
 }

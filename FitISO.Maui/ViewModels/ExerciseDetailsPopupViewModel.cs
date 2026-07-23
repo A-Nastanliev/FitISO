@@ -26,7 +26,9 @@ namespace FitISO.Maui.ViewModels
 
         string nameBeforeEdit;
 
-        public bool ShowDeleteButton => Exercise.Deletable && IsNotEditingName;
+        public bool ShowDeleteButton => Deletable && IsNotEditingName;
+
+        public bool Deletable;
 
         public bool WasDeleted { get; private set; }
         public bool WasRenamed { get; private set; }
@@ -39,6 +41,12 @@ namespace FitISO.Maui.ViewModels
         public ExerciseDetailsPopupViewModel(ExerciseService exerciseService)
         {
             this.exerciseService = exerciseService;
+        }
+
+        public async Task CheckIfDeletable()
+        {
+            Deletable = await exerciseService.IsDeletable(Exercise.Id);
+            OnPropertyChanged(nameof(ShowDeleteButton));
         }
 
         public void SetExercise(Exercise exercise)

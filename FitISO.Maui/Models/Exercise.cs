@@ -23,7 +23,7 @@ namespace FitISO.Maui.Models
         ObservableCollection<Set> lastSets;
 
         [ObservableProperty]
-        bool deletable;
+        bool visibleSets;
 
         public Exercise()
         {
@@ -37,7 +37,8 @@ namespace FitISO.Maui.Models
             BestSet = exercise.BestSet != null ? new Set(exercise.BestSet) : null;
             LastSetsDate = exercise.LastSetsDate;
             LastSets = new ObservableCollection<Set>((exercise.LastSets ?? new List<FitISO.Data.Models.Set>()).Select(s => new Set(s)));
-            Deletable = bestSet is null;
+            VisibleSets = bestSet is not null && bestSet?.Reps > 0 && bestSet?.Weight > 0;
+            LastSetsDate = DateTime.UtcNow;
         }
     }
 }

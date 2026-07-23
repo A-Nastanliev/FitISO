@@ -1,5 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
+using FitISO.Maui.Messages;
 using FitISO.Maui.Models;
 using FitISO.Services;
 using System;
@@ -10,7 +12,7 @@ using System.Text;
 
 namespace FitISO.Maui.ViewModels
 {
-    public partial class ExerciseCollection : ObservableObject
+    public partial class ExerciseCollection : ObservableObject, IRecipient<WorkoutFinishedMessage>
     {
         [ObservableProperty]
         ObservableCollection<Exercise> exercises = new();
@@ -24,6 +26,7 @@ namespace FitISO.Maui.ViewModels
         public ExerciseCollection(ExerciseService exerciseService)
         {
             this.exerciseService = exerciseService;
+            WeakReferenceMessenger.Default.RegisterAll(this);
         }
 
         private bool CanStartLoading()
@@ -98,5 +101,38 @@ namespace FitISO.Maui.ViewModels
         }
 
         public void Remove(Exercise exercise) => Exercises.Remove(exercise);
+
+        public void Receive(WorkoutFinishedMessage message)
+        {
+            foreach(var workoutExercise in message.Value.WorkoutExercises)
+            {
+                var exercise = Exercises.FirstOrDefault(e => e.Id == workoutExercise.Exercise.Id);
+                if(exercise is not null)
+                {
+                    exercise.LastSets = workoutExercise.Sets;
+                    if (exercise.BestSet is null || exercise.BestSet.Weight is 0 || exercise.BestSet.Weight is null)
+                        exercise.BestSet = workoutExercise.Sets[0];
+
+                    foreach (var set in workoutExercise.Sets)
+                    {
+                        if (IsBetterSet(set, exercise.BestSet))
+                        {
+                            exercise.BestSet = set;
+                        }
+                    }
+                }
+            }
+        }
+
+        private static bool IsBetterSet(Set candidate, Set? currentBest)
+        {
+            if (candidate.Weight > currentBest.Weight)
+                return true;
+
+            if (candidate.Weight == currentBest.Weight && candidate.Reps > currentBest.Reps)
+                return true;
+
+            return false;
+        }
     }
 }

@@ -25,10 +25,12 @@ namespace FitISO.Maui.ViewModels
         bool canLoadMore = true;
 
         readonly WorkoutService workoutService;
+        readonly WorkoutExerciseService workoutExerciseService;
 
-        public WorkoutTemplatesViewModel(WorkoutService workoutService) 
+        public WorkoutTemplatesViewModel(WorkoutService workoutService, WorkoutExerciseService workoutExerciseService) 
         {
             this.workoutService = workoutService;
+            this.workoutExerciseService = workoutExerciseService;
             WeakReferenceMessenger.Default.RegisterAll(this);
         }
 
@@ -116,6 +118,7 @@ namespace FitISO.Maui.ViewModels
             Workout startWorkout =new Workout(await workoutService.StartFromTemplateAsync(workout.Id));
             WeakReferenceMessenger.Default.Send(new WorkoutStartedMessage(startWorkout));
             ActiveWorkoutState.Instance.HasActiveWorkout = true;
+            await Shell.Current.GoToAsync("//active");
         }
     }
 }

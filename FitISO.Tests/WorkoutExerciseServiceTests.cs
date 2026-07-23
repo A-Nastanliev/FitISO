@@ -58,44 +58,14 @@ namespace FitISO.Tests.Services
         [Test]
         public async Task CreateAsync_WithValidData_PersistsAndReturnsWorkoutExercise()
         {
-            var result = await _service.CreateAsync(_workoutId, _exerciseId, "Felt strong today");
+            var result = await _service.CreateAsync(_workoutId, _exerciseId);
 
             Assert.That(result.Id, Is.GreaterThan(0));
             Assert.That(result.WorkoutId, Is.EqualTo(_workoutId));
             Assert.That(result.ExerciseId, Is.EqualTo(_exerciseId));
-            Assert.That(result.Note, Is.EqualTo("Felt strong today"));
 
             var stored = await _context.WorkoutExercises.FindAsync(result.Id);
             Assert.That(stored, Is.Not.Null);
-        }
-
-        [Test]
-        public async Task CreateAsync_WithNullNote_IsAllowed()
-        {
-            var result = await _service.CreateAsync(_workoutId, _exerciseId);
-
-            Assert.That(result.Note, Is.Null);
-        }
-
-        [Test]
-        public async Task CreateAsync_WithNoteAtMaxLength_IsAllowed()
-        {
-            var note = new string('a', 100);
-
-            var result = await _service.CreateAsync(_workoutId, _exerciseId, note);
-
-            Assert.That(result.Note, Is.EqualTo(note));
-        }
-
-        [Test]
-        public void CreateAsync_WithNoteExceedingMaxLength_ThrowsArgumentException()
-        {
-            var note = new string('a', 101);
-
-            var ex = Assert.ThrowsAsync<ArgumentException>(
-                () => _service.CreateAsync(_workoutId, _exerciseId, note));
-
-            Assert.That(ex.ParamName, Is.EqualTo("note"));
         }
 
         [Test]
@@ -113,66 +83,33 @@ namespace FitISO.Tests.Services
         }
 
         [Test]
-        public async Task UpdateAsync_WithNewExerciseId_UpdatesExerciseId()
+        public async Task UpdateAsync_WithValidExerciseId_UpdatesAndPersists()
         {
-            var created = await _service.CreateAsync(_workoutId, _exerciseId, "Original note");
+            var created = await _service.CreateAsync(_workoutId, _exerciseId);
 
-            var updated = await _service.UpdateAsync(created.Id, exerciseId: _otherExerciseId);
+            var result = await _service.UpdateAsync(created.Id, exerciseId: _otherExerciseId);
 
-            Assert.That(updated.ExerciseId, Is.EqualTo(_otherExerciseId));
-            Assert.That(updated.Note, Is.EqualTo("Original note"));
-        }
-
-        [Test]
-        public async Task UpdateAsync_WithNewNote_UpdatesNoteOnly()
-        {
-            var created = await _service.CreateAsync(_workoutId, _exerciseId, "Original note");
-
-            var updated = await _service.UpdateAsync(created.Id, note: "Updated note");
-
-            Assert.That(updated.ExerciseId, Is.EqualTo(_exerciseId));
-            Assert.That(updated.Note, Is.EqualTo("Updated note"));
-        }
-
-        [Test]
-        public async Task UpdateAsync_WithEmptyStringNote_ClearsNote()
-        {
-            var created = await _service.CreateAsync(_workoutId, _exerciseId, "Original note");
-
-            var updated = await _service.UpdateAsync(created.Id, note: "");
-
-            Assert.That(updated.Note, Is.EqualTo(""));
-        }
-
-        [Test]
-        public async Task UpdateAsync_WithNoArguments_LeavesWorkoutExerciseUnchanged()
-        {
-            var created = await _service.CreateAsync(_workoutId, _exerciseId, "Original note");
-
-            var updated = await _service.UpdateAsync(created.Id);
-
-            Assert.That(updated.ExerciseId, Is.EqualTo(_exerciseId));
-            Assert.That(updated.Note, Is.EqualTo("Original note"));
-        }
-
-        [Test]
-        public async Task UpdateAsync_WithNoteExceedingMaxLength_ThrowsArgumentExceptionAndDoesNotPersist()
-        {
-            var created = await _service.CreateAsync(_workoutId, _exerciseId, "Original note");
-            var tooLong = new string('a', 101);
-
-            Assert.ThrowsAsync<ArgumentException>(
-                () => _service.UpdateAsync(created.Id, note: tooLong));
+            Assert.That(result.ExerciseId, Is.EqualTo(_otherExerciseId));
 
             var stored = await _context.WorkoutExercises.FindAsync(created.Id);
-            Assert.That(stored.Note, Is.EqualTo("Original note"));
+            Assert.That(stored.ExerciseId, Is.EqualTo(_otherExerciseId));
+        }
+
+        [Test]
+        public async Task UpdateAsync_WithNoExerciseId_LeavesExerciseIdUnchanged()
+        {
+            var created = await _service.CreateAsync(_workoutId, _exerciseId);
+
+            var result = await _service.UpdateAsync(created.Id);
+
+            Assert.That(result.ExerciseId, Is.EqualTo(_exerciseId));
         }
 
         [Test]
         public void UpdateAsync_WithNonExistentId_ThrowsKeyNotFoundException()
         {
             Assert.ThrowsAsync<KeyNotFoundException>(
-                () => _service.UpdateAsync(id: 9999, note: "Updated note"));
+                () => _service.UpdateAsync(9999, exerciseId: _exerciseId));
         }
 
         [Test]

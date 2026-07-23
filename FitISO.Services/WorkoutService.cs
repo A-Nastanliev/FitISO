@@ -71,7 +71,6 @@ namespace FitISO.Services
                 WorkoutExercises = template.WorkoutExercises.Select(we => new WorkoutExercise
                 {
                     ExerciseId = we.ExerciseId,
-                    Note = we.Note,
                     Sets = we.Sets.Select(s => new Set
                     {
                         Weight = s.Weight,
@@ -192,7 +191,6 @@ namespace FitISO.Services
                         existingExercise.ExerciseId = incoming.ExerciseId;
                         existingExercise.Exercise = await _context.Exercises.FindAsync(incoming.ExerciseId);
                     }
-                    existingExercise.Note = incoming.Note;
 
                     var existingSetsById = existingExercise.Sets.ToDictionary(s => s.Id);
                     var incomingSetIds = incoming.Sets.Where(s => s.Id != 0).Select(s => s.Id).ToHashSet();
@@ -224,7 +222,6 @@ namespace FitISO.Services
                     {
                         ExerciseId = incoming.ExerciseId,
                         Exercise = exercise,
-                        Note = incoming.Note,
                         Sets = incoming.Sets.Select(s => new Set { Weight = s.Weight, Reps = s.Reps }).ToList()
                     });
                 }

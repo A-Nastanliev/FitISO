@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<nlayouts:PopupPageBase xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:nlayouts="https://nalu-development.github.com/nalu/layouts"
+             xmlns:vm="clr-namespace:FitISO.Maui.ViewModels"
+             xmlns:models="clr-namespace:FitISO.Maui.Models"
+             xmlns:views="clr-namespace:FitISO.Maui.Views"
+             x:Class="FitISO.Maui.Views.SelectExercisePopupPage"
+             x:DataType="vm:SelectExercisePopupViewModel"
+             CloseOnScrimTapped="True">
+
+    <nlayouts:PopupPageBase.Resources>
+        <Style TargetType="nlayouts:PopupContainer">
+            <Setter Property="Background" Value="{StaticResource Gray800}" />
+            <Setter Property="Margin" Value="0" />
+            <Setter Property="StrokeShape" Value="RoundRectangle 24,24,0,0" />
+            <Setter Property="StrokeThickness" Value="0" />
+            <Setter Property="VerticalOptions" Value="End" />
+            <Setter Property="HorizontalOptions" Value="Fill" />
+            <Setter Property="MaximumHeightRequest" Value="500" />
+        </Style>
+    </nlayouts:PopupPageBase.Resources>
+
+    <Grid Padding="20,20,20,4" RowDefinitions="Auto, Auto, *" RowSpacing="12">
+
+        <Label Text="Select" Grid.Row="0"
+               FontSize="Medium" FontAttributes="Bold"
+               HorizontalOptions="Center" />
+
+        <BoxView Grid.Row="1" Margin="-20,0" HeightRequest="1" Color="{StaticResource Gray400}" />
+
+        <CollectionView Grid.Row="2" ItemsSource="{Binding ExerciseCollection.Exercises}"
+                         SelectionMode="Single" SelectedItem="{Binding SelectedExercise, Mode=TwoWay}"
+                         RemainingItemsThreshold="5"
+                         RemainingItemsThresholdReachedCommand="{Binding ExerciseCollection.LoadCommand}"
+                         VerticalScrollBarVisibility="Never">
+
+            <CollectionView.ItemTemplate>
+                <DataTemplate>
+                    <views:ExerciseView
+                     x:DataType="views:ExerciseView" Margin="0,4" />
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+
+        </CollectionView>
+    </Grid>
+</nlayouts:PopupPageBase>

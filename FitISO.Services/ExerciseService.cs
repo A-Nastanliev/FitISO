@@ -1,6 +1,8 @@
 ﻿using FitISO.Data;
 using FitISO.Data.Models;
 using Microsoft.EntityFrameworkCore;
+using System.ComponentModel;
+using System.Diagnostics;
 
 namespace FitISO.Services
 {
@@ -128,6 +130,12 @@ namespace FitISO.Services
 
             _context.Exercises.Remove(exercise);
             await _context.SaveChangesAsync();
+        }
+
+        public async Task<bool> IsDeletable(int id)
+        {
+            using var _context = _contextFactory.CreateDbContext();
+            return ! await _context.WorkoutExercises.AnyAsync(we => we.ExerciseId == id);
         }
 
 

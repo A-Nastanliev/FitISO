@@ -70,7 +70,6 @@ namespace FitISO.Maui.ViewModels
                     {
                         Id = we.Id,
                         ExerciseId = we.Exercise.Id,
-                        Note = we.Note,
                         Sets = we.Sets.Select(s => new FitISO.Data.Models.Set
                         {
                             Id = s.Id,
@@ -147,7 +146,6 @@ namespace FitISO.Maui.ViewModels
                     {
                         Id = we.Id,
                         Exercise = we.Exercise,
-                        Note = we.Note,
                         Sets = new ObservableCollection<Set>()
                     };
 

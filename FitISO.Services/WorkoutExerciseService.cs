@@ -6,8 +6,6 @@ namespace FitISO.Services
 {
     public class WorkoutExerciseService
     {
-        private const int MaxNoteLength = 100;
-
         readonly IDbContextFactory<FitDbContext> _contextFactory;
 
         public WorkoutExerciseService(IDbContextFactory<FitDbContext> contextFactory)
@@ -15,15 +13,12 @@ namespace FitISO.Services
             _contextFactory = contextFactory;
         }
 
-        public async Task<WorkoutExercise> CreateAsync(int workoutId, int exerciseId, string? note = null)
+        public async Task<WorkoutExercise> CreateAsync(int workoutId, int exerciseId)
         {
-            ValidateNote(note);
-
             var workoutExercise = new WorkoutExercise
             {
                 WorkoutId = workoutId,
-                ExerciseId = exerciseId,
-                Note = note
+                ExerciseId = exerciseId
             };
 
             using var _context = _contextFactory.CreateDbContext();
@@ -32,10 +27,8 @@ namespace FitISO.Services
             return workoutExercise;
         }
 
-        public async Task<WorkoutExercise> UpdateAsync(int id, int? exerciseId = null, string? note = null)
+        public async Task<WorkoutExercise> UpdateAsync(int id, int? exerciseId = null)
         {
-            ValidateNote(note);
-
             using var _context = _contextFactory.CreateDbContext();
             var workoutExercise = await _context.WorkoutExercises.FindAsync(id);
             if (workoutExercise == null)
@@ -43,9 +36,6 @@ namespace FitISO.Services
 
             if (exerciseId.HasValue)
                 workoutExercise.ExerciseId = exerciseId.Value;
-
-            if (note != null)
-                workoutExercise.Note = note;
 
             await _context.SaveChangesAsync();
             return workoutExercise;
@@ -60,12 +50,6 @@ namespace FitISO.Services
 
             _context.WorkoutExercises.Remove(workoutExercise);
             await _context.SaveChangesAsync();
-        }
-
-        private static void ValidateNote(string? note)
-        {
-            if (note != null && note.Length > MaxNoteLength)
-                throw new ArgumentException($"Note cannot exceed {MaxNoteLength} characters.", nameof(note));
         }
     }
 }

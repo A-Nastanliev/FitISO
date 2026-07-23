@@ -54,7 +54,8 @@ namespace FitISO.Tests.Services
 
         private async Task<WorkoutExercise> SeedWorkoutExerciseAsync(int exerciseId, DateTime? startTime)
         {
-            var workout = new Workout { Name = "Workout", StartTime = startTime };
+            var endTime = startTime.HasValue ? startTime.Value.AddMinutes(30) : (DateTime?)null;
+            var workout = new Workout { Name = "Workout", StartTime = startTime, EndTime = endTime };
             _context.Workouts.Add(workout);
             await _context.SaveChangesAsync();
 
@@ -392,6 +393,27 @@ namespace FitISO.Tests.Services
         {
             Assert.ThrowsAsync<KeyNotFoundException>(
                 () => _service.DeleteAsync(9999));
+        }
+
+        [Test]
+        public async Task IsDeletable_WithNoWorkoutExercises_ReturnsTrue()
+        {
+            var exercise = await SeedExerciseAsync("Squat");
+
+            var result = await _service.IsDeletable(exercise.Id);
+
+            Assert.That(result, Is.True);
+        }
+
+        [Test]
+        public async Task IsDeletable_WithExistingWorkoutExercise_ReturnsFalse()
+        {
+            var exercise = await SeedExerciseAsync("Squat");
+            await SeedWorkoutExerciseAsync(exercise.Id, DateTime.UtcNow);
+
+            var result = await _service.IsDeletable(exercise.Id);
+
+            Assert.That(result, Is.False);
         }
 
     }

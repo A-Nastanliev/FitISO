@@ -15,7 +15,7 @@
     <Shell.TitleView>
         <Grid Padding="10,0" ColumnDefinitions="Auto, *, Auto">
             <ImageButton  Source="{FontImageSource FontFamily=MaterialRound, Glyph='&#xE408;'}" Command="{Binding NavigateBackCommand}"/>
-            <Entry Placeholder="Workout Name" FontSize="Medium" MaxLength="100" Text="{Binding Workout.Name}" Margin="10,0" Grid.Column="1"
+            <Entry Placeholder="Workout Name" FontSize="Medium" MaxLength="40" Text="{Binding Workout.Name}" Margin="10,0" Grid.Column="1"
                 VerticalTextAlignment="Center" HorizontalTextAlignment="Center"/>
             <ImageButton  Source="{FontImageSource FontFamily=MaterialRound, Glyph='&#xE161;'}" Grid.Column="2" Command="{Binding SaveCommand}"/>
         </Grid>
