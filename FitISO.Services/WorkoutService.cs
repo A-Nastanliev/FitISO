@@ -127,16 +127,43 @@ namespace FitISO.Services
 
             query = templatesOnly
                 ? query.Where(w => w.StartTime == null && w.EndTime == null)
-                : query.Where(w => w.StartTime != null);
+                : query.Where(w => w.StartTime != null && w.EndTime != null);
+
+            if (templatesOnly)
+            {
+                if (cursor.HasValue)
+                    query = query.Where(w => w.Id > cursor.Value);
+
+                return await query
+                    .OrderBy(w => w.Id)
+                    .Take(pageSize)
+                    .ToListAsync();
+            }
 
             if (cursor.HasValue)
-                query = query.Where(w => w.Id > cursor.Value);
+            {
+                var cursorWorkout = await _context.Workouts
+                    .AsNoTracking()
+                    .Where(w => w.Id == cursor.Value)
+                    .Select(w => new { w.StartTime, w.Id })
+                    .FirstOrDefaultAsync();
+
+                if (cursorWorkout != null)
+                {
+                    query = query.Where(w =>
+                        w.StartTime < cursorWorkout.StartTime ||
+                        (w.StartTime == cursorWorkout.StartTime && w.Id < cursorWorkout.Id));
+                }
+            }
 
             return await query
-                .OrderBy(w => w.Id)
+                .OrderByDescending(w => w.StartTime)
+                    .ThenByDescending(w => w.Id)
                 .Take(pageSize)
                 .ToListAsync();
         }
+
+
         public Task<List<Workout>> GetWorkoutsAsync(int pageSize,int? cursor = null)
             => GetNextAsync(templatesOnly: false, pageSize, cursor);
 

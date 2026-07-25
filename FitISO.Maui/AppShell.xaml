@@ -12,9 +12,13 @@
     <TabBar Route="main" nalu:NaluShell.TabBarView="{local:AppShellTabBar}">
 
         <Tab Title="Workouts" Route="workouts" Icon="{FontImageSource FontFamily=MaterialRound, Glyph='&#xe85d;'}">
-            <ShellContent ContentTemplate="{DataTemplate pages:WorkoutTemplatesPage}" Title="Templates"  />
+            <ShellContent ContentTemplate="{DataTemplate pages:WorkoutTemplatesPage}" Title="Workouts" 
+               Icon="{FontImageSource FontFamily=MaterialRound, Glyph='&#xe85d;'}"/>
         </Tab>
-
+        <Tab Title="History" Route="history" Icon="{FontImageSource FontFamily=MaterialRound, Glyph='&#xe889;'}">
+            <ShellContent ContentTemplate="{DataTemplate pages:HistoryPage}" Title="History" 
+                Icon="{FontImageSource FontFamily=MaterialRound, Glyph='&#xe889;'}" />
+        </Tab>
         <Tab Title="Active" Route="active" Icon="{FontImageSource FontFamily=MaterialRound, Glyph='&#xe1c4;'}"
              IsVisible="{Binding Source={x:Static local:ActiveWorkoutState.Instance}, Path=HasActiveWorkout}">
             <ShellContent ContentTemplate="{DataTemplate pages:ActiveWorkoutPage}" />

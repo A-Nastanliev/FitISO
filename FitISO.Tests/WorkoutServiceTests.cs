@@ -229,7 +229,7 @@ namespace FitISO.Tests.Services
         }
 
         [Test]
-        public async Task GetWorkoutsAsync_ReturnsOnlyStartedWorkoutsOrderedById()
+        public async Task GetWorkoutsAsync_ReturnsOnlyStartedWorkoutsOrderedByStartTimeDescending()
         {
             var t1 = await _service.CreateAsync("Leg Day Template", workoutExercises: null);
             var w1 = await _service.StartFromTemplateAsync(t1.Id);
@@ -243,7 +243,7 @@ namespace FitISO.Tests.Services
 
             var result = await _service.GetWorkoutsAsync(pageSize: 10);
 
-            Assert.That(result.Select(w => w.Id), Is.EqualTo(new[] { w1.Id, w2.Id }));
+            Assert.That(result.Select(w => w.Id), Is.EqualTo(new[] { w2.Id, w1.Id }));
         }
 
         [Test]
@@ -260,7 +260,7 @@ namespace FitISO.Tests.Services
             var result = await _service.GetWorkoutsAsync(pageSize: 1);
 
             Assert.That(result.Count, Is.EqualTo(1));
-            Assert.That(result.Single().Id, Is.EqualTo(w1.Id));
+            Assert.That(result.Single().Id, Is.EqualTo(w2.Id));
         }
 
         [Test]
@@ -274,9 +274,9 @@ namespace FitISO.Tests.Services
             var w2 = await _service.StartFromTemplateAsync(t2.Id);
             await _service.EndWorkoutAsync(w2.Id);
 
-            var result = await _service.GetWorkoutsAsync(pageSize: 10, cursor: w1.Id);
+            var result = await _service.GetWorkoutsAsync(pageSize: 10, cursor: w2.Id);
 
-            Assert.That(result.Select(w => w.Id), Is.EqualTo(new[] { w2.Id }));
+            Assert.That(result.Select(w => w.Id), Is.EqualTo(new[] { w1.Id }));
         }
 
         [Test]

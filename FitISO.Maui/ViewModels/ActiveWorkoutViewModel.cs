@@ -182,6 +182,7 @@ namespace FitISO.Maui.ViewModels
             _ = Toast.Make($"{Workout.Name} finished").Show();
             WeakReferenceMessenger.Default.Send(new WorkoutFinishedMessage(Workout));
             ActiveWorkoutState.Instance.HasActiveWorkout = false;
+            await Shell.Current.GoToAsync("//main/history");
         }
 
         [RelayCommand]

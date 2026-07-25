@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="FitISO.Maui.Views.HistoryPage"
+             xmlns:vm="clr-namespace:FitISO.Maui.ViewModels"
+             x:DataType="vm:HistoryPageViewModel"
+             xmlns:models="clr-namespace:FitISO.Maui.Models">
+
+    <Shell.TitleView>
+        <Grid Padding="10,0" ColumnDefinitions="auto, *,auto" ColumnSpacing="10">
+            <Image Source="{FontImageSource FontFamily=MaterialRound, Glyph='&#xE889;'}" Grid.Column="0"/>
+            <Label Text="History" FontSize="Medium" Grid.Column="1" FontAttributes="Bold" VerticalTextAlignment="Center" HorizontalTextAlignment="Center"/>
+            <ImageButton   IsEnabled="False" Grid.Column="2"/>
+        </Grid>
+    </Shell.TitleView>
+
+    <ScrollView VerticalScrollBarVisibility="Never">
+        <CollectionView VerticalOptions="Fill"
+                   ItemsSource="{Binding Workouts}" Margin="6"
+                   RemainingItemsThreshold="3" VerticalScrollBarVisibility="Never"
+                   RemainingItemsThresholdReachedCommand="{Binding LoadCommand}">
+
+            <CollectionView.EmptyView>
+                <Label  Text="No workouts found"
+                        HorizontalOptions="Center"
+                        VerticalOptions="Center"/>
+            </CollectionView.EmptyView>
+
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="models:Workout">
+                    <Grid Margin="8">
+                        <Border StrokeThickness="0" StrokeShape="RoundRectangle 25" BackgroundColor="{StaticResource Gray800}">
+                            <Grid RowDefinitions="Auto, Auto, Auto" RowSpacing="4" Padding="0,4">
+                                <Label FontSize="Medium" Text="{Binding Name}" HorizontalTextAlignment="Center" 
+                                   HorizontalOptions="Center" Grid.Row="0" VerticalOptions="End"/>
+                                <Grid Grid.Row="1" ColumnDefinitions="Auto, Auto" HorizontalOptions="Center" ColumnSpacing="16" Margin="0,0,0,4">
+                                    <Border Grid.Column="0" Padding="10,1"
+                                    StrokeThickness="0" StrokeShape="RoundRectangle 25" Background="{StaticResource Gray500}">
+                                        <Label Text="{Binding StartTime, Converter={StaticResource DateConverter}}" FontSize="Small"/>
+                                    </Border>
+                                    <Border Grid.Column="1" Padding="10,1"
+                                    StrokeThickness="0" StrokeShape="RoundRectangle 25" Background="{StaticResource Gray500}">
+                                        <Grid ColumnDefinitions="Auto, Auto, Auto" ColumnSpacing="4">
+                                            <Label Text="{Binding StartTime, Converter={StaticResource TimeConverter}}" FontSize="Small"
+                                            Grid.Column="0"/>
+                                            <Label Text="&#xE01f;" FontFamily="MaterialRound" FontSize="Small" Grid.Column="1" VerticalOptions="Center"/>
+                                            <Label Text="{Binding EndTime, Converter={StaticResource TimeConverter}}" FontSize="Small"
+                                            Grid.Column="2"/>
+                                        </Grid>
+                                    </Border>
+                                </Grid>
+                                <CollectionView Grid.Row="2" ItemsSource="{Binding WorkoutExercises}" VerticalScrollBarVisibility="Never"
+                                VerticalOptions="Fill">
+                                    <CollectionView.ItemTemplate>
+                                        <DataTemplate x:DataType="models:WorkoutExercise">
+                                            <Grid RowDefinitions="Auto, Auto">
+                                                <Label Text="{Binding Exercise.Name}" HorizontalOptions="Fill" HorizontalTextAlignment="Center"
+                                                   FontSize="Small" BackgroundColor="{StaticResource Gray600}"/>
+                                                <CollectionView ItemsSource="{Binding Sets}" VerticalScrollBarVisibility="Never"
+                                                VerticalOptions="Fill" Grid.Row="1">
+                                                    <CollectionView.ItemTemplate>
+                                                        <DataTemplate x:DataType="models:Set">
+                                                            <Grid ColumnDefinitions="1.15*,40,2*" ColumnSpacing="12">
+                                                                <Label Text="{Binding Weight, StringFormat='{0:0.##}'}" FontSize="Small"
+                                                                       HorizontalTextAlignment="End"/>
+                                                                <Label Text="kg" FontSize="Small" Grid.Column="1"/>
+                                                                <Label Grid.Column="2" Text="{Binding Reps, StringFormat='{0:0.##}'}" HorizontalTextAlignment="Center" FontSize="Small"/>
+                                                            </Grid>
+                                                        </DataTemplate>
+                                                    </CollectionView.ItemTemplate>
+                                                </CollectionView>
+                                            </Grid>
+                                        </DataTemplate>
+                                    </CollectionView.ItemTemplate>
+                                </CollectionView>
+                            </Grid>
+                        </Border>
+                    </Grid>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+    </ScrollView>
+</ContentPage>
