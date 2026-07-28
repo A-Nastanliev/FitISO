@@ -12,6 +12,7 @@
             </ResourceDictionary.MergedDictionaries>
             <converters:UtcToLocalDateConverter x:Key="DateConverter" />
             <converters:UtcToLocalTimeConverter x:Key="TimeConverter"/>
+            <converters:NullableDoubleConverter x:Key="NullableDoubleConverter"/>
         </ResourceDictionary>
     </Application.Resources>
 </Application>

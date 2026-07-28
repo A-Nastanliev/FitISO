@@ -1,5 +1,6 @@
 using System.Collections.Specialized;
 using System.ComponentModel;
+using System.Windows.Input;
 
 namespace FitISO.Maui;
 
@@ -11,9 +12,70 @@ public partial class AppShellTabBar
 
     private readonly List<ShellSection> _trackedSections = new();
 
+    public static AppShellTabBar? Current { get; private set; }
+
+    private string _currentDefaultGlyph = string.Empty;
+
+    public static readonly BindableProperty CommandProperty =
+        BindableProperty.CreateAttached("Command", typeof(ICommand), typeof(AppShellTabBar),
+            null, propertyChanged: OnTabBarAppearancePropertyChanged);
+
+    public static readonly BindableProperty CommandParameterProperty =
+        BindableProperty.CreateAttached("CommandParameter", typeof(object), typeof(AppShellTabBar),
+            null, propertyChanged: OnTabBarAppearancePropertyChanged);
+
+    public static readonly BindableProperty IconProperty =
+        BindableProperty.CreateAttached("Icon", typeof(string), typeof(AppShellTabBar),
+            null, propertyChanged: OnTabBarAppearancePropertyChanged);
+
+    public static ICommand? GetCommand(BindableObject view) => (ICommand?)view.GetValue(CommandProperty);
+    public static void SetCommand(BindableObject view, ICommand? value) => view.SetValue(CommandProperty, value);
+
+    public static object? GetCommandParameter(BindableObject view) => view.GetValue(CommandParameterProperty);
+    public static void SetCommandParameter(BindableObject view, object? value) => view.SetValue(CommandParameterProperty, value);
+
+    public static string? GetIcon(BindableObject view) => (string?)view.GetValue(IconProperty);
+    public static void SetIcon(BindableObject view, string? value) => view.SetValue(IconProperty, value);
+
+
+    private void OnLoaded(object? sender, EventArgs e)
+    {
+        RefreshSelectedButtonCommand();
+    }
+
+    private static void OnTabBarAppearancePropertyChanged(BindableObject bindable, object oldValue, object newValue)
+    {
+        if (Current is not null && ReferenceEquals(bindable, Shell.Current?.CurrentPage))
+        {
+            Current.RefreshSelectedButtonCommand();
+        }
+    }
+
+    public void RefreshSelectedButtonCommand()
+    {
+        var page = Shell.Current?.CurrentPage;
+        if (page is null)
+            return;
+
+        ApplySelectedGlyph(page);
+    }
+
+    private void ApplySelectedGlyph(Page? page)
+    {
+        var overrideGlyph = page is not null ? GetIcon(page) : null;
+        var glyph = !string.IsNullOrEmpty(overrideGlyph) ? overrideGlyph : _currentDefaultGlyph;
+        ((FontImageSource)SelectedButton.Source).Glyph = glyph;
+    }
+
+    private void OnShellNavigated(object? sender, ShellNavigatedEventArgs e)
+    {
+        RefreshSelectedButtonCommand();
+    }
+
     public AppShellTabBar()
     {
         InitializeComponent();
+        Loaded += OnLoaded;
     }
 
     protected override void OnBindingContextChanged()
@@ -31,6 +93,11 @@ public partial class AppShellTabBar
 
         UnsubscribeFromSections();
 
+        if (Shell.Current is not null)
+        {
+            Shell.Current.Navigated -= OnShellNavigated;
+        }
+
         if (BindingContext is ShellItem item)
         {
             ShellItem = item;
@@ -42,7 +109,15 @@ public partial class AppShellTabBar
             }
 
             SubscribeToSections();
+
+            Current = this;
+            if (Shell.Current is not null)
+            {
+                Shell.Current.Navigated += OnShellNavigated;
+            }
+
             RebuildButtons(animate: false);
+            RefreshSelectedButtonCommand();
         }
     }
 
@@ -176,7 +251,8 @@ public partial class AppShellTabBar
                 Buttons.Children[selectedIndex] is ImageButton currentButton &&
                 currentButton.Source is FontImageSource currentSource)
             {
-                ((FontImageSource)SelectedButton.Source).Glyph = currentSource.Glyph;
+                _currentDefaultGlyph = currentSource.Glyph;
+                RefreshSelectedButtonCommand();
             }
 
             return;
@@ -225,7 +301,8 @@ public partial class AppShellTabBar
                     Buttons.Children[selectedIndex] is ImageButton selectedSourceButton &&
                     selectedSourceButton.Source is FontImageSource selectedFontSource)
                 {
-                    ((FontImageSource)SelectedButton.Source).Glyph = selectedFontSource.Glyph;
+                    _currentDefaultGlyph = selectedFontSource.Glyph;
+                    RefreshSelectedButtonCommand();
                 }
 
                 this.Animate(
@@ -274,6 +351,17 @@ public partial class AppShellTabBar
     {
         this.AbortAnimation(SelectedJumpIn);
         this.AbortAnimation(SelectedJumpOut);
+
+        var page = Shell.Current?.CurrentPage;
+        if (page is not null)
+        {
+            var command = GetCommand(page);
+            var parameter = GetCommandParameter(page);
+
+            if (command?.CanExecute(parameter) == true)
+                command.Execute(parameter);
+        }
+
         var index = VisibleSections.IndexOf(Item.CurrentItem);
         AnimateSelectedShapeJump(Math.Max(0, index), 25);
     }

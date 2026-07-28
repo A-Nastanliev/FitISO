@@ -8,8 +8,9 @@ using FitISO.Services;
 using FitISO.Maui.Views;
 using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
+using System.ComponentModel;
 using System.Text;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace FitISO.Maui.ViewModels
 {
@@ -20,6 +21,19 @@ namespace FitISO.Maui.ViewModels
 
         [ObservableProperty]
         TimeSpan duration;
+
+        [ObservableProperty]
+        int completedSets;
+
+        [ObservableProperty]
+        int totalSets;
+
+        double progress;
+        public double Progress
+        {
+            get => progress;
+            private set => SetProperty(ref progress, value);
+        }
 
         IDispatcherTimer? _timer;
 
@@ -44,20 +58,84 @@ namespace FitISO.Maui.ViewModels
         public void Receive(WorkoutStartedMessage message)
         {
             Workout = message.Value;
-
-            foreach (var we in Workout.WorkoutExercises)
-                foreach (var s in we.Sets)
-                    WireSet(s);
-
             StartTimer();
         }
 
         partial void OnWorkoutChanged(Workout oldValue, Workout newValue)
         {
             if (oldValue is not null)
+            {
                 oldValue.PropertyChanged -= Workout_PropertyChanged;
+                oldValue.WorkoutExercises.CollectionChanged -= WorkoutExercises_CollectionChanged;
+                foreach (var we in oldValue.WorkoutExercises)
+                    UnwireWorkoutExercise(we);
+            }
 
             newValue.PropertyChanged += Workout_PropertyChanged;
+            newValue.WorkoutExercises.CollectionChanged += WorkoutExercises_CollectionChanged;
+            foreach (var we in newValue.WorkoutExercises)
+                WireWorkoutExercise(we);
+
+            RecalculateProgress();
+        }
+
+        void WorkoutExercises_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+        {
+            if (e.NewItems is not null)
+                foreach (WorkoutExercise we in e.NewItems)
+                    WireWorkoutExercise(we);
+
+            if (e.OldItems is not null)
+                foreach (WorkoutExercise we in e.OldItems)
+                    UnwireWorkoutExercise(we);
+
+            RecalculateProgress();
+        }
+
+        void WireWorkoutExercise(WorkoutExercise we)
+        {
+            we.Sets.CollectionChanged += Sets_CollectionChanged;
+            foreach (var s in we.Sets)
+                WireSet(s);
+        }
+
+        void UnwireWorkoutExercise(WorkoutExercise we)
+        {
+            we.Sets.CollectionChanged -= Sets_CollectionChanged;
+            foreach (var s in we.Sets)
+                UnwireSet(s);
+        }
+
+        void Sets_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+        {
+            if (e.NewItems is not null)
+                foreach (Set s in e.NewItems)
+                    WireSet(s);
+
+            if (e.OldItems is not null)
+                foreach (Set s in e.OldItems)
+                    UnwireSet(s);
+
+            RecalculateProgress();
+        }
+
+        void RecalculateProgress()
+        {
+            int total = 0, completed = 0;
+
+            foreach (var we in Workout.WorkoutExercises)
+            {
+                foreach (var s in we.Sets)
+                {
+                    total++;
+                    if (s.Weight is > 0 && s.Reps is > 0)
+                        completed++;
+                }
+            }
+
+            TotalSets = total;
+            CompletedSets = completed;
+            Progress = total == 0 ? 0 : (double)completed / total;
         }
 
         void Workout_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
@@ -96,7 +174,7 @@ namespace FitISO.Maui.ViewModels
             _timer.Tick += (s, e) => UpdateRemaining();
             _timer.Start();
 
-            UpdateRemaining(); 
+            UpdateRemaining();
         }
 
         private void UpdateRemaining()
@@ -123,13 +201,24 @@ namespace FitISO.Maui.ViewModels
         void WireSet(Set set)
         {
             set.SaveAction = s => setService.UpdateAsync(s.Id, s.Weight, s.Reps);
+            set.PropertyChanged += Set_PropertyChanged;
+        }
+
+        void UnwireSet(Set set)
+        {
+            set.PropertyChanged -= Set_PropertyChanged;
+        }
+
+        void Set_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(Set.Weight) || e.PropertyName == nameof(Set.Reps))
+                RecalculateProgress();
         }
 
         [RelayCommand]
         public async Task IncreaseSets(WorkoutExercise workoutExercise)
         {
             Set set = new Set(await setService.CreateAsync(workoutExercise.Id, null, null));
-            WireSet(set);
             workoutExercise.Sets.Add(set);
             workoutExercise.SetCount = workoutExercise.Sets.Count;
         }
@@ -150,10 +239,10 @@ namespace FitISO.Maui.ViewModels
                 Workout.WorkoutExercises.Remove(workoutExercise);
             }
 
-            if(Workout.WorkoutExercises.Count == 0)
+            if (Workout.WorkoutExercises.Count == 0)
             {
                 Stop();
-                await workoutService.DeleteAsync(Workout.Id);    
+                await workoutService.DeleteAsync(Workout.Id);
                 ActiveWorkoutState.Instance.HasActiveWorkout = false;
                 _ = Toast.Make($"{Workout.Name} terminated").Show();
                 Workout = new();
@@ -165,16 +254,10 @@ namespace FitISO.Maui.ViewModels
         {
             if (string.IsNullOrWhiteSpace(Workout.Name) || Workout.Name.Length < 4) return;
 
-            foreach (var we in Workout.WorkoutExercises)
+            if (CompletedSets != TotalSets)
             {
-                foreach (var set in we.Sets)
-                {
-                    if (set.Weight is not > 0 || set.Reps is not > 0)
-                    {
-                        _ = Toast.Make($"All sets need a weight and reps").Show();
-                        return;
-                    }
-                }
+                _ = Toast.Make($"All sets need a weight and reps").Show();
+                return;
             }
 
             await workoutService.EndWorkoutAsync(Workout.Id);
@@ -194,6 +277,11 @@ namespace FitISO.Maui.ViewModels
             await Shell.Current.Navigation.PushModalAsync(popup);
 
             var exercise = await viewModel.Result;
+
+            await Task.Yield();
+
+            AppShellTabBar.Current?.RefreshSelectedButtonCommand();
+
             if (exercise is null) return;
 
             var workoutExerciseDto = await workoutExerciseService.CreateAsync(Workout.Id, exercise.Id);
@@ -205,7 +293,6 @@ namespace FitISO.Maui.ViewModels
             };
 
             var set = new Set(await setService.CreateAsync(workoutExercise.Id, null, null));
-            WireSet(set);
             workoutExercise.Sets.Add(set);
             workoutExercise.SetCount = workoutExercise.Sets.Count;
 

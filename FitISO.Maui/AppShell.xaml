@@ -21,7 +21,7 @@
         </Tab>
         <Tab Title="Active" Route="active" Icon="{FontImageSource FontFamily=MaterialRound, Glyph='&#xe1c4;'}"
              IsVisible="{Binding Source={x:Static local:ActiveWorkoutState.Instance}, Path=HasActiveWorkout}">
-            <ShellContent ContentTemplate="{DataTemplate pages:ActiveWorkoutPage}" />
+            <ShellContent ContentTemplate="{DataTemplate pages:ActiveWorkoutPage}"/>
         </Tab>
 
         <Tab Title="Exercises" Route="exercises" Icon="{FontImageSource FontFamily=MaterialRound, Glyph='&#xEB43;'}">

@@ -9,7 +9,9 @@
 
     <Shell.TitleView>
         <Grid Padding="10,0" ColumnDefinitions="auto, *,auto" ColumnSpacing="10">
-            <Image Source="{FontImageSource FontFamily=MaterialRound, Glyph='&#xEB43;'}" Grid.Column="0"/>
+            <ImageButton Source="{FontImageSource FontFamily=MaterialRound, Glyph='&#xEB43;'}" BackgroundColor="{StaticResource Gray800}"
+              IsEnabled="False" Grid.Column="0"/>
+            <Image Source="{FontImageSource FontFamily=MaterialRound, Glyph='&#xEB43;'}" Grid.Column="0" HorizontalOptions="Center"/>
             <Label Text="Exercises" FontSize="Medium" Grid.Column="1" FontAttributes="Bold" VerticalTextAlignment="Center" HorizontalTextAlignment="Center"/>
             <ImageButton Source="{FontImageSource FontFamily=MaterialRound, Glyph='&#xE145;'}" BackgroundColor="{StaticResource Gray800}"
                 Command="{Binding AddExerciseCommand}" Grid.Column="2"/>

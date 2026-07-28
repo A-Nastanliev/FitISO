@@ -10,7 +10,7 @@
         <Grid Padding="10,0" ColumnDefinitions="auto, *,auto" ColumnSpacing="10">
             <Image Source="{FontImageSource FontFamily=MaterialRound, Glyph='&#xE889;'}" Grid.Column="0"/>
             <Label Text="History" FontSize="Medium" Grid.Column="1" FontAttributes="Bold" VerticalTextAlignment="Center" HorizontalTextAlignment="Center"/>
-            <ImageButton   IsEnabled="False" Grid.Column="2"/>
+            <Image Source="{FontImageSource FontFamily=MaterialRound, Glyph='&#xE889;'}" Grid.Column="2"/>
         </Grid>
     </Shell.TitleView>
 
