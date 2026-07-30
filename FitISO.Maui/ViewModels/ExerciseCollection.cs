@@ -12,7 +12,7 @@ using System.Text;
 
 namespace FitISO.Maui.ViewModels
 {
-    public partial class ExerciseCollection : ObservableObject, IRecipient<WorkoutFinishedMessage>
+    public partial class ExerciseCollection : ObservableObject, IRecipient<WorkoutFinishedMessage>, IRecipient<DbImportedMessage>
     {
         [ObservableProperty]
         ObservableCollection<Exercise> exercises = new();
@@ -133,6 +133,14 @@ namespace FitISO.Maui.ViewModels
                 return true;
 
             return false;
+        }
+
+        public async void Receive(DbImportedMessage message)
+        {
+            Exercises.Clear();
+            cursor = null;
+            canLoadMore = true;
+            await Load();
         }
     }
 }

@@ -13,7 +13,7 @@ using System.Text;
 
 namespace FitISO.Maui.ViewModels
 {
-    public partial class WorkoutTemplatesViewModel : ObservableObject, IRecipient<WorkoutTemplateCreatedMessage>
+    public partial class WorkoutTemplatesViewModel : ObservableObject, IRecipient<WorkoutTemplateCreatedMessage>, IRecipient<DbImportedMessage>
     {
         [ObservableProperty]
         ObservableCollection<Workout> workoutTemplates = new();
@@ -119,6 +119,14 @@ namespace FitISO.Maui.ViewModels
             WeakReferenceMessenger.Default.Send(new WorkoutStartedMessage(startWorkout));
             ActiveWorkoutState.Instance.HasActiveWorkout = true;
             await Shell.Current.GoToAsync("//active");
+        }
+
+        public async void Receive(DbImportedMessage message)
+        {
+            WorkoutTemplates.Clear();
+            cursor = null;
+            canLoadMore = true;       
+            await Load();
         }
     }
 }

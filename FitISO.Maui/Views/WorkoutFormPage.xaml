@@ -43,17 +43,17 @@
                                 </SwipeItems>
                             </SwipeView.LeftItems>
 
-                            <Border StrokeShape="RoundRectangle 20" StrokeThickness="0" BackgroundColor="{StaticResource Gray400}" Margin="0,4">
+                            <Border StrokeShape="RoundRectangle 20" StrokeThickness="0" BackgroundColor="{StaticResource Gray700}" Margin="0,4">
                                 <Grid Padding="12,8" ColumnDefinitions="10*, *" >
-                                    <Label Text="{Binding Exercise.Name}" VerticalOptions="Center"/>
-                                    <Label Grid.Column="1" Text="{Binding SetCount}" VerticalOptions="Center"/>
+                                    <Label Text="{Binding Exercise.Name}" TextColor="White" VerticalOptions="Center"/>
+                                    <Label Grid.Column="1" Text="{Binding SetCount}" TextColor="White" VerticalOptions="Center"/>
                                 </Grid>
                             </Border>
                         </SwipeView>
                     </DataTemplate>
                 </CollectionView.ItemTemplate>
             </CollectionView>
-            <BoxView HeightRequest="1" Color="{StaticResource Gray400}"/>
+            <BoxView HeightRequest="1" Color="{StaticResource Gray600}"/>
             <CollectionView VerticalOptions="Fill"  RemainingItemsThreshold="3" VerticalScrollBarVisibility="Never"
                        ItemsSource="{Binding ExerciseCollection.Exercises}" Margin="16,6" SelectionMode="Single" SelectedItem="{Binding SelectedExercise}"
                        RemainingItemsThresholdReachedCommand="{Binding ExerciseCollection.LoadCommand}">

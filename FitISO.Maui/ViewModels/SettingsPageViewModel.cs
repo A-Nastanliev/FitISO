@@ -1,6 +1,9 @@
-﻿using CommunityToolkit.Maui.Storage;
+﻿using CommunityToolkit.Maui.Alerts;
+using CommunityToolkit.Maui.Storage;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
+using FitISO.Maui.Messages;
 using Microsoft.Data.Sqlite;
 
 namespace FitISO.Maui.ViewModels
@@ -104,9 +107,8 @@ namespace FitISO.Maui.ViewModels
                     await sourceStream.CopyToAsync(destinationStream);
                 }
 
-                await Shell.Current.DisplayAlertAsync("Import complete", "The backup was imported successfully. The app will now close.", "OK");
-
-                Application.Current?.Quit();
+                _ = Toast.Make($"Database imported").Show();
+                WeakReferenceMessenger.Default.Send(new DbImportedMessage());
             }
             catch (Exception ex)
             {

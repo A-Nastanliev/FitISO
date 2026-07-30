@@ -11,7 +11,7 @@ using System.Text;
 
 namespace FitISO.Maui.ViewModels
 {
-    public partial class HistoryPageViewModel : ObservableObject, IRecipient<WorkoutFinishedMessage>
+    public partial class HistoryPageViewModel : ObservableObject, IRecipient<WorkoutFinishedMessage>, IRecipient<DbImportedMessage>
     {
         [ObservableProperty]
         ObservableCollection<Workout> workouts = new();
@@ -70,6 +70,14 @@ namespace FitISO.Maui.ViewModels
         public void Receive(WorkoutFinishedMessage message)
         {
             Workouts.Insert(0, message.Value);
+        }
+
+        public async void Receive(DbImportedMessage message)
+        {
+            Workouts.Clear();
+            cursor = null;
+            canLoadMore = true;
+            await Load();
         }
     }
 }

@@ -14,7 +14,7 @@ using System.Text;
 
 namespace FitISO.Maui.ViewModels
 {
-    public partial class ActiveWorkoutViewModel : ObservableObject, IRecipient<WorkoutStartedMessage>
+    public partial class ActiveWorkoutViewModel : ObservableObject, IRecipient<WorkoutStartedMessage>, IRecipient<DbImportedMessage>
     {
         [ObservableProperty]
         Workout workout = new();
@@ -128,7 +128,7 @@ namespace FitISO.Maui.ViewModels
                 foreach (var s in we.Sets)
                 {
                     total++;
-                    if (s.Weight is > 0 && s.Reps is > 0)
+                    if (s.Weight is >= 0 && s.Reps is > 0)
                         completed++;
                 }
             }
@@ -297,6 +297,21 @@ namespace FitISO.Maui.ViewModels
             workoutExercise.SetCount = workoutExercise.Sets.Count;
 
             Workout.WorkoutExercises.Add(workoutExercise);
+        }
+
+        public async void Receive(DbImportedMessage message)
+        {
+            var activeWorkout = await workoutService.GetActiveWorkoutAsync();
+
+            if (activeWorkout != null && activeWorkout?.Id != 0)
+            {
+                Workout = new Workout(activeWorkout);
+                ActiveWorkoutState.Instance.HasActiveWorkout = true;
+            }
+            else
+            {
+                ActiveWorkoutState.Instance.HasActiveWorkout = false;
+            }
         }
     }
 }

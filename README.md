@@ -6,15 +6,14 @@
 <p align="center">
   A local-first, single-user workout tracker built with .NET MAUI.
 </p>
----
  
 ## About the name
  
 **FitISO** = *Fit*ness + *ISO*lation. It's a local-only app, no accounts, no cloud sync, no server - just you and a SQLite file on your phone. Single user, isolated data, hence the name.
  
-The logo is a bird holding a dumbbell because it's also a pun on [**Fitis**](https://birdwatchingalentejo.com/willow-warbler-fitis-felosa-musical-mosquitero-de-los-sauces/), the Iberian name for the Willow Warbler. That's it, that's the whole joke.
+The logo is a bird holding a dumbbell because it's also a wordplay with [**Fitis**](https://birdwatchingalentejo.com/willow-warbler-fitis-felosa-musical-mosquitero-de-los-sauces/), the Iberian name for the Willow Warbler. That's it, that's the whole joke.
  
-Congrats, you just read a whole paragraph about a bird pun. Anyway, here's what the app actually does:
+Congrats, you just read a whole paragraph about a bird. Anyway, here's what the app actually does:
  
 ## Features
  
@@ -25,7 +24,7 @@ Congrats, you just read a whole paragraph about a bird pun. Anyway, here's what 
 - **Workout templates** - save and reuse workout structures instead of building them from scratch every time.
 - **Workout history** - review past completed workouts.
 - **Custom tab bar** - a shaped bottom navigation bar (via `Nalu.Maui`) with a context-sensitive action button (e.g. "add exercise" while a workout is active).
-- **Backup & restore** - export the SQLite database to a `.db3` file from Settings, and import a backup back in later (this fully replaces current data and restarts the app).
+- **Backup & restore** - export the SQLite database to a `.db3` file from Settings, and import a backup back in later.
 
 ## Tech stack
  
