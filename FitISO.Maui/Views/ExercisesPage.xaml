@@ -5,17 +5,14 @@
              xmlns:vm="clr-namespace:FitISO.Maui.ViewModels"
              x:DataType="vm:ExercisePageViewModel"
              xmlns:views="clr-namespace:FitISO.Maui.Views"
+             xmlns:local="clr-namespace:FitISO.Maui"
+             local:AppShellTabBar.Command="{Binding AddExerciseCommand}"
+             local:AppShellTabBar.CommandParameter="{x:Null}"
+             local:AppShellTabBar.Icon="&#xE145;"
              Shell.NavBarIsVisible="True">
 
     <Shell.TitleView>
-        <Grid Padding="10,0" ColumnDefinitions="auto, *,auto" ColumnSpacing="10">
-            <ImageButton Source="{FontImageSource FontFamily=MaterialRound, Glyph='&#xEB43;'}" BackgroundColor="{StaticResource Gray800}"
-              IsEnabled="False" Grid.Column="0"/>
-            <Image Source="{FontImageSource FontFamily=MaterialRound, Glyph='&#xEB43;'}" Grid.Column="0" HorizontalOptions="Center"/>
-            <Label Text="Exercises" FontSize="Medium" Grid.Column="1" FontAttributes="Bold" VerticalTextAlignment="Center" HorizontalTextAlignment="Center"/>
-            <ImageButton Source="{FontImageSource FontFamily=MaterialRound, Glyph='&#xE145;'}" BackgroundColor="{StaticResource Gray800}"
-                Command="{Binding AddExerciseCommand}" Grid.Column="2"/>
-        </Grid>
+        <Label Text="Exercises" FontSize="Medium" FontAttributes="Bold" VerticalTextAlignment="Center" HorizontalTextAlignment="Center"/>
     </Shell.TitleView>
 
     <AbsoluteLayout>

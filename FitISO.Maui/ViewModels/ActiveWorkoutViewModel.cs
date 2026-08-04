@@ -14,7 +14,7 @@ using System.Text;
 
 namespace FitISO.Maui.ViewModels
 {
-    public partial class ActiveWorkoutViewModel : ObservableObject, IRecipient<WorkoutStartedMessage>, IRecipient<DbImportedMessage>
+    public partial class ActiveWorkoutViewModel : ObservableObject, IRecipient<WorkoutStartedMessage>, IRecipient<DbImportedMessage>, IRecipient<ExerciseUpdatedMessage>
     {
         [ObservableProperty]
         Workout workout = new();
@@ -311,6 +311,18 @@ namespace FitISO.Maui.ViewModels
             else
             {
                 ActiveWorkoutState.Instance.HasActiveWorkout = false;
+            }
+        }
+
+        public void Receive(ExerciseUpdatedMessage message)
+        {
+            Exercise exercise = message.Value;
+            foreach(var we in Workout.WorkoutExercises)
+            {
+                if(we.Exercise.Id == exercise.Id)
+                {
+                    we.Exercise.Name = exercise.Name;
+                }
             }
         }
     }

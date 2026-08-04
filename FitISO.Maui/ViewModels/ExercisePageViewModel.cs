@@ -38,6 +38,10 @@ namespace FitISO.Maui.ViewModels
 
             var exercise = await viewModel.Result;
 
+            await Task.Yield();
+
+            AppShellTabBar.Current?.RefreshSelectedButtonCommand();
+
             if (exercise is not null)
                 ExerciseCollection.Add(exercise);
         }

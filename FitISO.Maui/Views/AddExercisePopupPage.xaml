@@ -4,6 +4,8 @@
              xmlns:nlayouts="https://nalu-development.github.com/nalu/layouts"
              xmlns:vm="clr-namespace:FitISO.Maui.ViewModels"
              x:Class="FitISO.Maui.Views.AddExercisePopupPage"
+             xmlns:local="clr-namespace:FitISO.Maui"
+             local:AppShellTabBar.Icon="&#xE145;"
              x:DataType="vm:AddExercisePopupViewModel"
              CloseOnScrimTapped="True">
 

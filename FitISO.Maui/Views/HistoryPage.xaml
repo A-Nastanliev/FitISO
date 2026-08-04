@@ -7,10 +7,8 @@
              xmlns:models="clr-namespace:FitISO.Maui.Models">
 
     <Shell.TitleView>
-        <Grid Padding="10,0" ColumnDefinitions="auto, *,auto" ColumnSpacing="10">
-            <Image Source="{FontImageSource FontFamily=MaterialRound, Glyph='&#xE889;'}" Grid.Column="0"/>
-            <Label Text="History" FontSize="Medium" Grid.Column="1" FontAttributes="Bold" VerticalTextAlignment="Center" HorizontalTextAlignment="Center"/>
-            <Image Source="{FontImageSource FontFamily=MaterialRound, Glyph='&#xE889;'}" Grid.Column="2"/>
+        <Grid Padding="10,0" ColumnDefinitions="*" ColumnSpacing="10">
+            <Label Text="History" FontSize="Medium" Grid.Column="0" FontAttributes="Bold" VerticalTextAlignment="Center" HorizontalTextAlignment="Center"/>
         </Grid>
     </Shell.TitleView>
 

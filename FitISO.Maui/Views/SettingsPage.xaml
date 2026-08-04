@@ -4,11 +4,7 @@
              x:Class="FitISO.Maui.Views.SettingsPage">
 
     <Shell.TitleView>
-        <Grid Padding="10,0" ColumnDefinitions="auto, *,auto" ColumnSpacing="10">
-            <Image Source="{FontImageSource FontFamily=MaterialRound, Glyph='&#xE8B8;'}" Grid.Column="0"/>
-            <Label Text="Settings" FontSize="Medium" Grid.Column="1" FontAttributes="Bold" VerticalTextAlignment="Center" HorizontalTextAlignment="Center"/>
-            <Image Source="{FontImageSource FontFamily=MaterialRound, Glyph='&#xE8B8;'}" Grid.Column="2"/>
-        </Grid>
+        <Label Text="Settings" FontSize="Medium" FontAttributes="Bold" VerticalTextAlignment="Center" HorizontalTextAlignment="Center"/>
     </Shell.TitleView>
 
     <VerticalStackLayout Padding="24" Spacing="16">

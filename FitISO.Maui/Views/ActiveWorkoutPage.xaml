@@ -36,115 +36,115 @@
                 <CollectionView.ItemTemplate>
                     <DataTemplate  x:DataType="models:WorkoutExercise">
                         <Grid Margin="8,16">
-                            <SwipeView>
-                                <SwipeView.RightItems>
-                                    <SwipeItems Mode="Execute">
-                                        <SwipeItem Text="" BackgroundColor="Transparent"
-                                             Command="{Binding BindingContext.DecreaseSetsCommand, Source={x:Reference Root}}"
-                                             CommandParameter="{Binding .}" />
-                                    </SwipeItems>
-                                </SwipeView.RightItems>
-                                <SwipeView.LeftItems>
-                                    <SwipeItems Mode="Execute">
-                                        <SwipeItem Text="" BackgroundColor="Transparent"
-                                             Command="{Binding BindingContext.IncreaseSetsCommand, Source={x:Reference Root}}"
-                                             CommandParameter="{Binding .}" />
-                                    </SwipeItems>
-                                </SwipeView.LeftItems>
-                                <Border StrokeThickness="0" StrokeShape="RoundRectangle 25" BackgroundColor="{StaticResource Gray900}" x:Name="OuterBorder">
-                                    <Grid Padding="0" RowDefinitions="Auto, Auto, Auto" RowSpacing="0">
+                            <Border StrokeThickness="0" StrokeShape="RoundRectangle 25" BackgroundColor="{StaticResource Gray900}" x:Name="OuterBorder">
+                                <Grid Padding="0" RowDefinitions="Auto, Auto, Auto" RowSpacing="0">
+                                    <SwipeView>
+                                        <SwipeView.RightItems>
+                                            <SwipeItems Mode="Execute">
+                                                <SwipeItem Text="" BackgroundColor="Transparent"
+                                                  Command="{Binding BindingContext.DecreaseSetsCommand, Source={x:Reference Root}}"
+                                                  CommandParameter="{Binding .}" />
+                                            </SwipeItems>
+                                        </SwipeView.RightItems>
+                                        <SwipeView.LeftItems>
+                                            <SwipeItems Mode="Execute">
+                                                <SwipeItem Text="" BackgroundColor="Transparent"
+                                                  Command="{Binding BindingContext.IncreaseSetsCommand, Source={x:Reference Root}}"
+                                                  CommandParameter="{Binding .}" />
+                                            </SwipeItems>
+                                        </SwipeView.LeftItems>
                                         <Label HorizontalOptions="Center" VerticalOptions="Center" HorizontalTextAlignment="Center" LineBreakMode="WordWrap"
-                                           Text="{Binding Exercise.Name}" FontSize="Medium" Padding="0,4"/>
-                                        <Border Grid.Row="1" StrokeShape="RoundRectangle 25" StrokeThickness="0"
+                                            Text="{Binding Exercise.Name}" FontSize="Medium" Padding="0,4"/>
+                                    </SwipeView>
+                                    <Border Grid.Row="1" StrokeShape="RoundRectangle 25" StrokeThickness="0"
                                             IsVisible="{Binding Exercise.VisibleSets}" Stroke="Transparent">
-                                            <toolkit:Expander>
-                                                <toolkit:Expander.Header>
-                                                    <Grid RowDefinitions="Auto, Auto" BackgroundColor="{StaticResource Gray800}">
-                                                        <Border HorizontalOptions="Center" StrokeShape="RoundRectangle 25"
+                                        <toolkit:Expander>
+                                            <toolkit:Expander.Header>
+                                                <Grid RowDefinitions="Auto, Auto" BackgroundColor="{StaticResource Gray800}">
+                                                    <Border HorizontalOptions="Center" StrokeShape="RoundRectangle 25"
                                                             BackgroundColor="{StaticResource Gray600}" StrokeThickness="0"
                                                             Padding="4,0" Margin="0,2" Grid.Row="0">
-                                                            <Label Text="PERSONAL RECORD" Margin="4,0" VerticalOptions="Center"
+                                                        <Label Text="PERSONAL RECORD" Margin="4,0" VerticalOptions="Center"
                                                                VerticalTextAlignment="Center" TextColor="White"
                                                                FontAttributes="Bold" HorizontalOptions="Center" FontSize="Small"/>
-                                                        </Border>
-                                                        <Grid Margin="0,0,30,0" Grid.Row="1" ColumnDefinitions="3*,2*" ColumnSpacing="12" VerticalOptions="Center">
-                                                            <Grid Grid.Column="0" ColumnSpacing="8" HorizontalOptions="Center"
+                                                    </Border>
+                                                    <Grid Margin="0,0,30,0" Grid.Row="1" ColumnDefinitions="3*,2*" ColumnSpacing="12" VerticalOptions="Center">
+                                                        <Grid Grid.Column="0" ColumnSpacing="8" HorizontalOptions="Center"
                                                                 IsClippedToBounds="True" ColumnDefinitions="5*,auto,4*">
-                                                                <Label Text="{Binding Exercise.BestSet.Weight, StringFormat='{0:0.##}'}"
+                                                            <Label Text="{Binding Exercise.BestSet.Weight, StringFormat='{0:0.##}'}"
                                                                    TextColor="White" HorizontalOptions="Fill"
                                                                    HorizontalTextAlignment="End" FontSize="Small" MinimumWidthRequest="90"/>
-                                                                <Label Text="kg" VerticalTextAlignment="Center" Grid.Column="1"
+                                                            <Label Text="kg" VerticalTextAlignment="Center" Grid.Column="1"
                                                                     FontSize="Small" TextColor="{StaticResource Gray400}"/>
-                                                            </Grid>
-                                                            <Label Text="{Binding Exercise.BestSet.Reps, StringFormat='{0:0.##}'}"
+                                                        </Grid>
+                                                        <Label Text="{Binding Exercise.BestSet.Reps, StringFormat='{0:0.##}'}"
                                                                  Grid.Column="1" TextColor="White" MinimumWidthRequest="90"
                                                                  HorizontalOptions="Center" HorizontalTextAlignment="End" FontSize="Small"/>
-                                                        </Grid>
                                                     </Grid>
-                                                </toolkit:Expander.Header>
+                                                </Grid>
+                                            </toolkit:Expander.Header>
 
-                                                <toolkit:Expander.Content>
-                                                    <Grid RowDefinitions="Auto,Auto" BackgroundColor="{StaticResource Gray700}">
-                                                        <Border HorizontalOptions="Center" StrokeShape="RoundRectangle 25"
+                                            <toolkit:Expander.Content>
+                                                <Grid RowDefinitions="Auto,Auto" BackgroundColor="{StaticResource Gray700}">
+                                                    <Border HorizontalOptions="Center" StrokeShape="RoundRectangle 25"
                                                             BackgroundColor="{StaticResource Gray600}" StrokeThickness="0"
                                                             Padding="4,0" Margin="0,2" Grid.Row="0">
-                                                            <Label Text="{Binding Exercise.LastSetsDate, Converter={StaticResource DateConverter}}"
+                                                        <Label Text="{Binding Exercise.LastSetsDate, Converter={StaticResource DateConverter}}"
                                                                Margin="4,0" VerticalOptions="Center" VerticalTextAlignment="Center"
                                                                TextColor="White" HorizontalOptions="Center"
                                                                FontAttributes="Bold" FontSize="Small"/>
-                                                        </Border>
-                                                        <CollectionView ItemsSource="{Binding Exercise.LastSets}" Grid.Row="1">
-                                                            <CollectionView.ItemTemplate>
-                                                                <DataTemplate x:DataType="models:Set">
-                                                                    <Grid Margin="0,0,30,0" Grid.Row="1" ColumnDefinitions="3*,2*" ColumnSpacing="12" VerticalOptions="Center">
-                                                                        <Grid Grid.Column="0" ColumnSpacing="8" HorizontalOptions="Center"
+                                                    </Border>
+                                                    <CollectionView ItemsSource="{Binding Exercise.LastSets}" Grid.Row="1">
+                                                        <CollectionView.ItemTemplate>
+                                                            <DataTemplate x:DataType="models:Set">
+                                                                <Grid Margin="0,0,30,0" Grid.Row="1" ColumnDefinitions="3*,2*" ColumnSpacing="12" VerticalOptions="Center">
+                                                                    <Grid Grid.Column="0" ColumnSpacing="8" HorizontalOptions="Center"
                                                                             IsClippedToBounds="True" ColumnDefinitions="5*,auto,4*">
-                                                                            <Label Text="{Binding Weight, StringFormat='{0:0.##}'}"
+                                                                        <Label Text="{Binding Weight, StringFormat='{0:0.##}'}"
                                                                                   TextColor="White" HorizontalOptions="Fill"
                                                                                   HorizontalTextAlignment="End" FontSize="Small" MinimumWidthRequest="90"/>
-                                                                            <Label Text="kg" VerticalTextAlignment="Center" Grid.Column="1"
+                                                                        <Label Text="kg" VerticalTextAlignment="Center" Grid.Column="1"
                                                                                 FontSize="Small" TextColor="{StaticResource Gray400}"/>
-                                                                        </Grid>
-                                                                        <Label Text="{Binding Reps, StringFormat='{0:0.##}'}"
+                                                                    </Grid>
+                                                                    <Label Text="{Binding Reps, StringFormat='{0:0.##}'}"
                                                                             Grid.Column="1" TextColor="White" MinimumWidthRequest="90"
                                                                             HorizontalOptions="Center" HorizontalTextAlignment="End" FontSize="Small"/>
-                                                                    </Grid>
-                                                                </DataTemplate>
-                                                            </CollectionView.ItemTemplate>
-                                                        </CollectionView>
-                                                    </Grid>
-                                                </toolkit:Expander.Content>
-                                            </toolkit:Expander>
-                                        </Border>
-                                        <CollectionView VerticalOptions="Fill"  AbsoluteLayout.LayoutBounds="0,0,1,1" AbsoluteLayout.LayoutFlags="All"
+                                                                </Grid>
+                                                            </DataTemplate>
+                                                        </CollectionView.ItemTemplate>
+                                                    </CollectionView>
+                                                </Grid>
+                                            </toolkit:Expander.Content>
+                                        </toolkit:Expander>
+                                    </Border>
+                                    <CollectionView VerticalOptions="Fill"  AbsoluteLayout.LayoutBounds="0,0,1,1" AbsoluteLayout.LayoutFlags="All"
                                             ItemsSource="{Binding Sets}" Margin="0" SelectionMode="None" VerticalScrollBarVisibility="Never" Grid.Row="2">
-                                            <CollectionView.ItemTemplate>
-                                                <DataTemplate x:DataType="models:Set">
-                                                    <Grid RowDefinitions="Auto, Auto">
-                                                        <BoxView HeightRequest="1" Color="{StaticResource Gray600}"/>
-                                                        <Grid Margin="0,0,30,0" Grid.Row="1" ColumnDefinitions="3* , 2*" ColumnSpacing="12" VerticalOptions="Center">
-                                                            <Grid Grid.Column="0" ColumnSpacing="8" HorizontalOptions="Center" 
+                                        <CollectionView.ItemTemplate>
+                                            <DataTemplate x:DataType="models:Set">
+                                                <Grid RowDefinitions="Auto, Auto">
+                                                    <BoxView HeightRequest="1" Color="{StaticResource Gray600}"/>
+                                                    <Grid Margin="0,0,30,0" Grid.Row="1" ColumnDefinitions="3* , 2*" ColumnSpacing="12" VerticalOptions="Center">
+                                                        <Grid Grid.Column="0" ColumnSpacing="8" HorizontalOptions="Center" 
                                                               IsClippedToBounds="True" ColumnDefinitions="5*,auto,4*">
-                                                                <BoxView Color="{Binding BackgroundColor, Source={x:Reference OuterBorder}}"  />
-                                                                <Entry   Text="{Binding Weight, StringFormat='{0:0.##}', Mode=TwoWay, 
+                                                            <BoxView Color="{Binding BackgroundColor, Source={x:Reference OuterBorder}}"  />
+                                                            <Entry   Text="{Binding Weight, StringFormat='{0:0.##}', Mode=TwoWay, 
                                                                    Converter={StaticResource NullableDoubleConverter}}"  Keyboard="Numeric" MaxLength="7" 
                                                                    PlaceholderColor="{StaticResource Gray400}" Placeholder="W" MinimumWidthRequest="90"
                                                                    HorizontalOptions="Fill" HorizontalTextAlignment="End" FontSize="Small"/>
-                                                                <Label Text="kg" FontSize="Small" VerticalTextAlignment="Center" 
+                                                            <Label Text="kg" FontSize="Small" VerticalTextAlignment="Center" 
                                                                        Grid.Column="1" TextColor="{StaticResource Gray400}"/>
-                                                            </Grid>
-                                                            <Entry  Text="{Binding Reps, StringFormat='{0:0.##}', Mode=TwoWay, 
+                                                        </Grid>
+                                                        <Entry  Text="{Binding Reps, StringFormat='{0:0.##}', Mode=TwoWay, 
                                                                Converter={StaticResource NullableDoubleConverter}}"  Keyboard="Numeric" Grid.Column="1" MaxLength="5" 
                                                                HorizontalOptions="Center" HorizontalTextAlignment="End" FontSize="Small" MinimumWidthRequest="90"
                                                                PlaceholderColor="{StaticResource Gray400}" Placeholder="R"/>
-                                                        </Grid>
                                                     </Grid>
-                                                </DataTemplate>
-                                            </CollectionView.ItemTemplate>
-                                        </CollectionView>
-                                    </Grid>
-                                </Border>
-                            </SwipeView>
+                                                </Grid>
+                                            </DataTemplate>
+                                        </CollectionView.ItemTemplate>
+                                    </CollectionView>
+                                </Grid>
+                            </Border>
                         </Grid>
                     </DataTemplate>
                 </CollectionView.ItemTemplate>

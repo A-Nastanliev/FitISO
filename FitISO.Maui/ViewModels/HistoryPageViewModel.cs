@@ -11,7 +11,7 @@ using System.Text;
 
 namespace FitISO.Maui.ViewModels
 {
-    public partial class HistoryPageViewModel : ObservableObject, IRecipient<WorkoutFinishedMessage>, IRecipient<DbImportedMessage>
+    public partial class HistoryPageViewModel : ObservableObject, IRecipient<WorkoutFinishedMessage>, IRecipient<DbImportedMessage>, IRecipient<ExerciseUpdatedMessage>
     {
         [ObservableProperty]
         ObservableCollection<Workout> workouts = new();
@@ -78,6 +78,21 @@ namespace FitISO.Maui.ViewModels
             cursor = null;
             canLoadMore = true;
             await Load();
+        }
+
+        public void Receive(ExerciseUpdatedMessage message)
+        {
+            Exercise exercise = message.Value;
+            foreach (var w in Workouts)
+            {
+                foreach(var we in w.WorkoutExercises)
+                {
+                    if(we.Exercise.Id == exercise.Id)
+                    {
+                        we.Exercise.Name = exercise.Name;
+                    }
+                }
+            }
         }
     }
 }

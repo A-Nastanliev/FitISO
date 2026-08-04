@@ -25,6 +25,9 @@ namespace FitISO.Maui.Models
         [ObservableProperty]
         bool visibleSets;
 
+        [ObservableProperty]
+        ObservableCollection<ExerciseHistoryPoint>? history;
+
         public Exercise()
         {
 
@@ -38,7 +41,6 @@ namespace FitISO.Maui.Models
             LastSetsDate = exercise.LastSetsDate;
             LastSets = new ObservableCollection<Set>((exercise.LastSets ?? new List<FitISO.Data.Models.Set>()).Select(s => new Set(s)));
             VisibleSets = bestSet is not null && bestSet?.Reps > 0 && bestSet?.Weight > 0;
-            LastSetsDate = DateTime.UtcNow;
         }
     }
 }

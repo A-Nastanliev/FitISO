@@ -16,6 +16,7 @@ namespace FitISO.Tests.Services
         private FitDbContext _context;
         private SetService _service;
         private int _workoutExerciseId;
+        private int _exerciseId;
         private TestDbContextFactory _contextFactory;
 
         [SetUp]
@@ -48,6 +49,29 @@ namespace FitISO.Tests.Services
             await _context.SaveChangesAsync();
 
             _workoutExerciseId = workoutExercise.Id;
+            _exerciseId = exercise.Id;
+        }
+
+        private async Task<int> CreateCompletedWorkoutExerciseAsync(int exerciseId, DateTime startTime)
+        {
+            var workout = new Workout
+            {
+                Name = $"Workout {startTime:O}",
+                StartTime = startTime,
+                EndTime = startTime.AddHours(1)
+            };
+            _context.Workouts.Add(workout);
+            await _context.SaveChangesAsync();
+
+            var workoutExercise = new WorkoutExercise
+            {
+                WorkoutId = workout.Id,
+                ExerciseId = exerciseId
+            };
+            _context.WorkoutExercises.Add(workoutExercise);
+            await _context.SaveChangesAsync();
+
+            return workoutExercise.Id;
         }
 
         [TearDown]
@@ -190,6 +214,117 @@ namespace FitISO.Tests.Services
         {
             Assert.ThrowsAsync<KeyNotFoundException>(
                 () => _service.DeleteAsync(9999));
+        }
+
+        [Test]
+        public async Task GetBestSetPerWorkoutAsync_ReturnsOnePointPerWorkout_OrderedByStartTime()
+        {
+            var we1 = await CreateCompletedWorkoutExerciseAsync(_exerciseId, new DateTime(2026, 1, 1));
+            var we2 = await CreateCompletedWorkoutExerciseAsync(_exerciseId, new DateTime(2026, 1, 8));
+            var we3 = await CreateCompletedWorkoutExerciseAsync(_exerciseId, new DateTime(2026, 1, 15));
+
+            await _service.CreateAsync(we1, weight: 10, reps: 3);
+            await _service.CreateAsync(we2, weight: 10, reps: 5);
+            await _service.CreateAsync(we3, weight: 12.5, reps: 3);
+
+            var result = await _service.GetBestSetPerWorkoutAsync(_exerciseId);
+
+            Assert.That(result, Has.Count.EqualTo(3));
+            Assert.That(result[0].Weight, Is.EqualTo(10));
+            Assert.That(result[0].Reps, Is.EqualTo(3));
+            Assert.That(result[1].Weight, Is.EqualTo(10));
+            Assert.That(result[1].Reps, Is.EqualTo(5));
+            Assert.That(result[2].Weight, Is.EqualTo(12.5));
+            Assert.That(result[2].Reps, Is.EqualTo(3));
+        }
+
+        [Test]
+        public async Task GetBestSetPerWorkoutAsync_WithMultipleSetsInSameWorkout_PicksHeaviestThenMostReps()
+        {
+            var we = await CreateCompletedWorkoutExerciseAsync(_exerciseId, new DateTime(2026, 1, 1));
+
+            await _service.CreateAsync(we, weight: 80, reps: 10);
+            await _service.CreateAsync(we, weight: 100, reps: 5);
+            await _service.CreateAsync(we, weight: 100, reps: 8);
+            await _service.CreateAsync(we, weight: 90, reps: 12);
+
+            var result = await _service.GetBestSetPerWorkoutAsync(_exerciseId);
+
+            Assert.That(result, Has.Count.EqualTo(1));
+            Assert.That(result[0].Weight, Is.EqualTo(100));
+            Assert.That(result[0].Reps, Is.EqualTo(8));
+        }
+
+        [Test]
+        public async Task GetBestSetPerWorkoutAsync_ExcludesWorkoutsWithoutEndTime()
+        {
+            await _service.CreateAsync(_workoutExerciseId, weight: 999, reps: 1);
+
+            var activeWorkout = new Workout
+            {
+                Name = "In-progress workout",
+                StartTime = new DateTime(2026, 2, 1),
+                EndTime = null
+            };
+            _context.Workouts.Add(activeWorkout);
+            await _context.SaveChangesAsync();
+
+            var activeWorkoutExercise = new WorkoutExercise { WorkoutId = activeWorkout.Id, ExerciseId = _exerciseId };
+            _context.WorkoutExercises.Add(activeWorkoutExercise);
+            await _context.SaveChangesAsync();
+
+            await _service.CreateAsync(activeWorkoutExercise.Id, weight: 999, reps: 1);
+
+            var completed = await CreateCompletedWorkoutExerciseAsync(_exerciseId, new DateTime(2026, 3, 1));
+            await _service.CreateAsync(completed, weight: 50, reps: 5);
+
+            var result = await _service.GetBestSetPerWorkoutAsync(_exerciseId);
+
+            Assert.That(result, Has.Count.EqualTo(1));
+            Assert.That(result[0].Weight, Is.EqualTo(50));
+        }
+
+        [Test]
+        public async Task GetBestSetPerWorkoutAsync_ExcludesSetsWithNullWeightOrReps()
+        {
+            var we = await CreateCompletedWorkoutExerciseAsync(_exerciseId, new DateTime(2026, 1, 1));
+
+            await _service.CreateAsync(we, weight: null, reps: 10);
+            await _service.CreateAsync(we, weight: 60, reps: null);
+            await _service.CreateAsync(we, weight: 60, reps: 10);
+
+            var result = await _service.GetBestSetPerWorkoutAsync(_exerciseId);
+
+            Assert.That(result, Has.Count.EqualTo(1));
+            Assert.That(result[0].Weight, Is.EqualTo(60));
+            Assert.That(result[0].Reps, Is.EqualTo(10));
+        }
+
+        [Test]
+        public async Task GetBestSetPerWorkoutAsync_WithDifferentExercise_ExcludesOtherExerciseSets()
+        {
+            var otherExercise = new Exercise { Name = "Squat" };
+            _context.Exercises.Add(otherExercise);
+            await _context.SaveChangesAsync();
+
+            var otherWe = await CreateCompletedWorkoutExerciseAsync(otherExercise.Id, new DateTime(2026, 1, 1));
+            await _service.CreateAsync(otherWe, weight: 200, reps: 5);
+
+            var thisWe = await CreateCompletedWorkoutExerciseAsync(_exerciseId, new DateTime(2026, 1, 1));
+            await _service.CreateAsync(thisWe, weight: 60, reps: 10);
+
+            var result = await _service.GetBestSetPerWorkoutAsync(_exerciseId);
+
+            Assert.That(result, Has.Count.EqualTo(1));
+            Assert.That(result[0].Weight, Is.EqualTo(60));
+        }
+
+        [Test]
+        public async Task GetBestSetPerWorkoutAsync_WithNoHistory_ReturnsEmptyList()
+        {
+            var result = await _service.GetBestSetPerWorkoutAsync(_exerciseId);
+
+            Assert.That(result, Is.Empty);
         }
     }
 }

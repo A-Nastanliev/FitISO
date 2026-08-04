@@ -9,15 +9,13 @@
              xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
              xmlns:views="clr-namespace:FitISO.Maui.Views"
              x:Name="Root"
+             local:AppShellTabBar.Command="{Binding AddWorkoutTemplateCommand}"
+             local:AppShellTabBar.CommandParameter="{x:Null}"
+             local:AppShellTabBar.Icon="&#xE145;"
              Title="Workouts">
 
     <Shell.TitleView>
-        <Grid Padding="10,0" ColumnDefinitions="auto, *,auto" ColumnSpacing="10">
-            <Image Source="{FontImageSource FontFamily=MaterialRound, Glyph='&#xE85D;'}" Grid.Column="0"/>
-            <Label Text="Workouts" FontSize="Medium" Grid.Column="1" FontAttributes="Bold" VerticalTextAlignment="Center" HorizontalTextAlignment="Center"/>
-            <ImageButton   Source="{FontImageSource FontFamily=MaterialRound, Glyph='&#xE145;'}" Grid.Column="2"
-                    Command="{Binding AddWorkoutTemplateCommand}"/>
-        </Grid>
+        <Label Text="Workouts" FontSize="Medium" FontAttributes="Bold" VerticalTextAlignment="Center" HorizontalTextAlignment="Center"/>
     </Shell.TitleView>
 
     <AbsoluteLayout>

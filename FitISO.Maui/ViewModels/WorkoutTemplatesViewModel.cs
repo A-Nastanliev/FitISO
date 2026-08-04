@@ -13,7 +13,7 @@ using System.Text;
 
 namespace FitISO.Maui.ViewModels
 {
-    public partial class WorkoutTemplatesViewModel : ObservableObject, IRecipient<WorkoutTemplateCreatedMessage>, IRecipient<DbImportedMessage>
+    public partial class WorkoutTemplatesViewModel : ObservableObject, IRecipient<WorkoutTemplateCreatedMessage>, IRecipient<DbImportedMessage>, IRecipient<ExerciseUpdatedMessage>
     {
         [ObservableProperty]
         ObservableCollection<Workout> workoutTemplates = new();
@@ -127,6 +127,21 @@ namespace FitISO.Maui.ViewModels
             cursor = null;
             canLoadMore = true;       
             await Load();
+        }
+
+        public void Receive(ExerciseUpdatedMessage message)
+        {
+            Exercise exercise = message.Value;
+            foreach (var w in WorkoutTemplates)
+            {
+                foreach (var we in w.WorkoutExercises)
+                {
+                    if (we.Exercise.Id == exercise.Id)
+                    {
+                        we.Exercise.Name = exercise.Name;
+                    }
+                }
+            }
         }
     }
 }

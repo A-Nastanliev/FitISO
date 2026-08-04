@@ -30,6 +30,30 @@ namespace FitISO.Services
             return set;
         }
 
+        public async Task<List<Set>> GetBestSetPerWorkoutAsync(int exerciseId)
+        {
+            using var _context = _contextFactory.CreateDbContext();
+
+            var sets = await _context.Sets
+                .AsNoTracking()
+                .Include(s => s.WorkoutExercise)
+                    .ThenInclude(we => we.Workout)
+                .Where(s => s.WorkoutExercise.ExerciseId == exerciseId
+                    && s.WorkoutExercise.Workout.StartTime != null
+                    && s.WorkoutExercise.Workout.EndTime != null
+                    && s.Weight != null && s.Reps != null)
+                .ToListAsync();
+
+            return sets
+                .GroupBy(s => s.WorkoutExercise.WorkoutId)
+                .Select(g => g
+                    .OrderByDescending(s => s.Weight)
+                    .ThenByDescending(s => s.Reps)
+                    .First())
+                .OrderBy(s => s.WorkoutExercise.Workout.StartTime)
+                .ToList();
+        }
+
         public async Task<Set> UpdateAsync(int id, double? weight = null, double? reps = null)
         {
             using var _context = _contextFactory.CreateDbContext();

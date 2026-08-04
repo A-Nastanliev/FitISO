@@ -3,8 +3,10 @@ using FitISO.Data;
 using FitISO.Maui.ViewModels;
 using FitISO.Maui.Views;
 using FitISO.Services;
+using LiveChartsCore.SkiaSharpView.Maui;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using SkiaSharp.Views.Maui.Controls.Hosting;
 
 namespace FitISO.Maui
 {
@@ -14,11 +16,13 @@ namespace FitISO.Maui
         {
             var builder = MauiApp.CreateBuilder();
             builder
+                .UseSkiaSharp()
+                .UseLiveCharts()
                 .UseMauiApp<App>()
-                .UseNaluLayouts()
                 .UseMauiCommunityToolkit()
                 .UseNaluTabBar()
                 .UseNaluLayouts()
+                .UseLiveCharts()
                 .ConfigureFonts(fonts =>
                 {
                     fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");

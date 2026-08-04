@@ -5,13 +5,14 @@
              xmlns:vm="clr-namespace:FitISO.Maui.ViewModels"
              x:Class="FitISO.Maui.Views.ExerciseDetailsPopupPage"
              x:DataType="vm:ExerciseDetailsPopupViewModel"
+             xmlns:lvc="clr-namespace:LiveChartsCore.SkiaSharpView.Maui;assembly=LiveChartsCore.SkiaSharpView.Maui"
              xmlns:models="clr-namespace:FitISO.Maui.Models"
              CloseOnScrimTapped="True">
 
     <nlayouts:PopupPageBase.Resources>
         <Style TargetType="nlayouts:PopupContainer">
-            <Setter Property="Background" Value="{StaticResource Gray800}" />
-            <Setter Property="Margin" Value="0" />
+            <Setter Property="Background" Value="{StaticResource Gray900}" />
+            <Setter Property="Margin" Value="0,200,0,0" />
             <Setter Property="StrokeShape" Value="RoundRectangle 24,24,0,0" />
             <Setter Property="StrokeThickness" Value="0" />
             <Setter Property="VerticalOptions" Value="End" />
@@ -19,97 +20,104 @@
         </Style>
     </nlayouts:PopupPageBase.Resources>
 
-    <Grid MaximumHeightRequest="500" RowDefinitions="Auto, Auto">
-
-        <Grid Padding="20,10" RowSpacing="12" ColumnDefinitions="*, auto, auto" ColumnSpacing="12">
-            <Label Text="{Binding Exercise.Name}" Grid.Row="0" Grid.Column="0"
+    <Grid RowDefinitions="*, auto" >
+        <Grid Grid.Row="2" RowDefinitions="Auto, Auto">
+            <Grid Padding="20,10" RowSpacing="12" ColumnDefinitions="*, auto, auto" ColumnSpacing="12">
+                <Label Text="{Binding Exercise.Name}" Grid.Row="0" Grid.Column="0"
                FontSize="Medium" VerticalOptions="Center" FontAttributes="Bold"
                HorizontalOptions="Start" IsVisible="{Binding IsNotEditingName}" />
 
-            <Entry Text="{Binding Exercise.Name}" Grid.Row="0" Grid.Column="0"
+                <Entry Text="{Binding Exercise.Name}" Grid.Row="0" Grid.Column="0"
                FontSize="Medium" FontAttributes="Bold"  VerticalTextAlignment="End"
                IsVisible="{Binding IsEditingName}"
                ReturnCommand="{Binding SaveRenameCommand}" />
 
-            <ImageButton Grid.Row="0" Grid.Column="1" HeightRequest="50" WidthRequest="50"
+                <ImageButton Grid.Row="0" Grid.Column="1" HeightRequest="50" WidthRequest="50"
                      Source="{FontImageSource FontFamily=MaterialRound, Glyph='&#xE3C9;'}" CornerRadius="25" Padding="8"
                      IsVisible="{Binding IsNotEditingName}"  BackgroundColor="{StaticResource Gray500}" 
                      Command="{Binding StartRenameCommand}" />
 
-            <ImageButton Grid.Row="0" Grid.Column="1" HeightRequest="50" WidthRequest="50"
+                <ImageButton Grid.Row="0" Grid.Column="1" HeightRequest="50" WidthRequest="50"
                      Source="{FontImageSource FontFamily=MaterialRound, Glyph='&#xE5C9;'}" 
                      BackgroundColor="Transparent"   CornerRadius="25" Padding="-4"
                      IsVisible="{Binding IsEditingName}"
                      Command="{Binding CancelRenameCommand}" IsEnabled="{Binding IsNotBusy}" />
 
-            <ImageButton Grid.Row="0" Grid.Column="2" HeightRequest="50" WidthRequest="50"
+                <ImageButton Grid.Row="0" Grid.Column="2" HeightRequest="50" WidthRequest="50"
                      Source="{FontImageSource FontFamily=MaterialRound, Glyph='&#xE872;'}" BackgroundColor="IndianRed"
                      CornerRadius="24" Padding="8"
                      IsVisible="{Binding ShowDeleteButton}"
                      Command="{Binding DeleteCommand}" IsEnabled="{Binding IsNotBusy}" />
 
-            <ImageButton Grid.Row="0" Grid.Column="2" HeightRequest="50" WidthRequest="50"
+                <ImageButton Grid.Row="0" Grid.Column="2" HeightRequest="50" WidthRequest="50"
                      Source="{FontImageSource FontFamily=MaterialRound, Glyph='&#xE876;'}"
                      BackgroundColor="{StaticResource Gray500}"  CornerRadius="25" Padding="8"
                      IsVisible="{Binding IsEditingName}" 
                      Command="{Binding SaveRenameCommand}" IsEnabled="{Binding IsNotBusy}" />
-        </Grid>
+            </Grid>
 
-        <ScrollView IsVisible="{Binding Exercise.VisibleSets}" Grid.Row="1" Grid.ColumnSpan="2" VerticalScrollBarVisibility="Never">
-            <Grid RowDefinitions="Auto, Auto"> 
-                <Grid RowDefinitions="Auto, Auto" BackgroundColor="{StaticResource Gray200}" 
+            <ScrollView IsVisible="{Binding Exercise.VisibleSets}" Grid.Row="1" Grid.ColumnSpan="2" VerticalScrollBarVisibility="Never">
+                <Grid RowDefinitions="Auto, Auto">
+                    <Grid RowDefinitions="Auto, Auto" BackgroundColor="{StaticResource Gray800}" 
                       Grid.Row="0">
-                    <Border HorizontalOptions="Center" StrokeShape="RoundRectangle 25"
-                                         BackgroundColor="{StaticResource Gray500}" StrokeThickness="0"
-                                         Padding="4,0" Margin="0,2" Grid.Row="0">
-                        <Label Text="PERSONAL RECORD" Margin="4,0" VerticalOptions="Center"
-                             VerticalTextAlignment="Center" TextColor="{StaticResource Gray200}"
+                        <Border HorizontalOptions="Center" StrokeShape="RoundRectangle 25"
+                        BackgroundColor="{StaticResource Gray600}" StrokeThickness="0"
+                        Padding="4,0" Margin="0,2" Grid.Row="0">
+                            <Label Text="PERSONAL RECORD" Margin="4,0" VerticalOptions="Center"
+                             VerticalTextAlignment="Center" TextColor="White"
                                             FontAttributes="Bold" HorizontalOptions="Center" FontSize="Small"/>
-                    </Border>
-                    <Grid Margin="0,0,30,0" Grid.Row="1" ColumnDefinitions="3*,2*" ColumnSpacing="12" VerticalOptions="Center">
-                        <Grid Grid.Column="0" ColumnSpacing="8" HorizontalOptions="Center"
+                        </Border>
+                        <Grid Margin="0,0,30,0" Grid.Row="1" ColumnDefinitions="3*,2*" ColumnSpacing="12" VerticalOptions="Center">
+                            <Grid Grid.Column="0" ColumnSpacing="8" HorizontalOptions="Center"
                                              IsClippedToBounds="True" ColumnDefinitions="5*,auto,4*">
-                            <Label Text="{Binding Exercise.BestSet.Weight, StringFormat='{0:0.##}'}"
-                                                TextColor="{StaticResource Gray800}" HorizontalOptions="Fill"
+                                <Label Text="{Binding Exercise.BestSet.Weight, StringFormat='{0:0.##}'}"
+                                                TextColor="White" HorizontalOptions="Fill"
                                                 HorizontalTextAlignment="End" FontSize="Small" MinimumWidthRequest="90"/>
-                            <Label Text="kg" VerticalTextAlignment="Center" Grid.Column="1"
-                                                 FontSize="Small" TextColor="{StaticResource Gray800}"/>
-                        </Grid>
-                        <Label Text="{Binding Exercise.BestSet.Reps, StringFormat='{0:0.##}'}"
-                                              Grid.Column="1" TextColor="{StaticResource Gray800}" MinimumWidthRequest="90"
+                                <Label Text="kg" VerticalTextAlignment="Center" Grid.Column="1"
+                                                 FontSize="Small" TextColor="{StaticResource Gray400}"/>
+                            </Grid>
+                            <Label Text="{Binding Exercise.BestSet.Reps, StringFormat='{0:0.##}'}"
+                                              Grid.Column="1" TextColor="White" MinimumWidthRequest="90"
                                               HorizontalOptions="Center" HorizontalTextAlignment="End" FontSize="Small"/>
+                        </Grid>
+                    </Grid>
+                    <Grid RowDefinitions="Auto,Auto" BackgroundColor="{StaticResource Gray700}" Grid.Row="2">
+                        <Border HorizontalOptions="Center" StrokeShape="RoundRectangle 25"
+                                         BackgroundColor="{StaticResource Gray600}" StrokeThickness="0"
+                                         Padding="4,0" Margin="0,2" Grid.Row="0">
+                            <Label Text="{Binding Exercise.LastSetsDate, Converter={StaticResource DateConverter}}"
+                            Margin="4,0" VerticalOptions="Center" VerticalTextAlignment="Center"
+                           TextColor="White" HorizontalOptions="Center"
+                             FontAttributes="Bold" FontSize="Small"/>
+                        </Border>
+                        <CollectionView ItemsSource="{Binding Exercise.LastSets}" Grid.Row="1">
+                            <CollectionView.ItemTemplate>
+                                <DataTemplate x:DataType="models:Set">
+                                    <Grid Margin="0,0,30,0" Grid.Row="1" ColumnDefinitions="3*,2*" ColumnSpacing="12" VerticalOptions="Center">
+                                        <Grid Grid.Column="0" ColumnSpacing="8" HorizontalOptions="Center"
+                                        IsClippedToBounds="True" ColumnDefinitions="5*,auto,4*">
+                                            <Label Text="{Binding Weight, StringFormat='{0:0.##}'}"
+                                            TextColor="White" HorizontalOptions="Fill"
+                                            HorizontalTextAlignment="End" FontSize="Small" MinimumWidthRequest="90"/>
+                                            <Label Text="kg" VerticalTextAlignment="Center" Grid.Column="1"
+                                            FontSize="Small" TextColor="{StaticResource Gray400}"/>
+                                        </Grid>
+                                        <Label Text="{Binding Reps, StringFormat='{0:0.##}'}"
+                                        Grid.Column="1" TextColor="White" MinimumWidthRequest="90"
+                                        HorizontalOptions="Center" HorizontalTextAlignment="End" FontSize="Small"/>
+                                    </Grid>
+                                </DataTemplate>
+                            </CollectionView.ItemTemplate>
+                        </CollectionView>
                     </Grid>
                 </Grid>
-                <Grid RowDefinitions="Auto,Auto" BackgroundColor="{StaticResource Gray500}" Grid.Row="2">
-                    <Border HorizontalOptions="Center" StrokeShape="RoundRectangle 25"
-                                         BackgroundColor="{StaticResource Gray200}" StrokeThickness="0"
-                                         Padding="4,0" Margin="0,2" Grid.Row="0">
-                        <Label Text="{Binding Exercise.LastSetsDate, Converter={StaticResource DateConverter}}"
-                            Margin="4,0" VerticalOptions="Center" VerticalTextAlignment="Center"
-                            TextColor="{StaticResource Gray500}" HorizontalOptions="Center"
-                             FontAttributes="Bold" FontSize="Small"/>
-                    </Border>
-                    <CollectionView ItemsSource="{Binding Exercise.LastSets}" Grid.Row="1">
-                        <CollectionView.ItemTemplate>
-                            <DataTemplate x:DataType="models:Set">
-                                <Grid Margin="0,0,30,0" Grid.Row="1" ColumnDefinitions="3*,2*" ColumnSpacing="12" VerticalOptions="Center">
-                                    <Grid Grid.Column="0" ColumnSpacing="8" HorizontalOptions="Center"
-                                        IsClippedToBounds="True" ColumnDefinitions="5*,auto,4*">
-                                        <Label Text="{Binding Weight, StringFormat='{0:0.##}'}"
-                                            TextColor="{StaticResource Gray800}" HorizontalOptions="Fill"
-                                            HorizontalTextAlignment="End" FontSize="Small" MinimumWidthRequest="90"/>
-                                        <Label Text="kg" VerticalTextAlignment="Center" Grid.Column="1"
-                                            FontSize="Small" TextColor="{StaticResource Gray800}"/>
-                                    </Grid>
-                                    <Label Text="{Binding Reps, StringFormat='{0:0.##}'}"
-                                        Grid.Column="1" TextColor="{StaticResource Gray800}" MinimumWidthRequest="90"
-                                        HorizontalOptions="Center" HorizontalTextAlignment="End" FontSize="Small"/>
-                                </Grid>
-                            </DataTemplate>
-                        </CollectionView.ItemTemplate>
-                    </CollectionView>
-                </Grid>
-            </Grid>
-        </ScrollView>
+            </ScrollView>
+        </Grid>
+        <lvc:CartesianChart Grid.Row="0"
+              Series="{Binding ChartSeries}"
+              XAxes="{Binding ChartXAxes}"
+              BackgroundColor="{StaticResource Gray900}"
+              IsVisible="{Binding HasHistory}"
+              Margin="0,0,0,0" />
     </Grid>
 </nlayouts:PopupPageBase>
