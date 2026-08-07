@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.Maui;
 using FitISO.Data;
+using FitISO.Maui.Services;
 using FitISO.Maui.ViewModels;
 using FitISO.Maui.Views;
 using FitISO.Services;
@@ -62,6 +63,8 @@ namespace FitISO.Maui
             builder.Services.AddTransient<SelectExercisePopupViewModel>();
 
             builder.Services.AddSingleton<HistoryPageViewModel>();
+
+            builder.Services.AddSingleton<FavoriteExerciseService>();
 #if DEBUG
             builder.Logging.AddDebug();
 #endif

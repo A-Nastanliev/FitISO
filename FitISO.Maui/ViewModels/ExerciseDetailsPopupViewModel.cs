@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using FitISO.Maui.Messages;
 using FitISO.Maui.Models;
+using FitISO.Maui.Services;
 using FitISO.Services;
 using LiveChartsCore;
 using LiveChartsCore.Measure;
@@ -50,21 +51,29 @@ namespace FitISO.Maui.ViewModels
         static readonly SKColor AccentColor = new SKColor(205, 92, 92);
 
         [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(CanFavourite))]
         bool hasHistory;
+
+        [ObservableProperty]
+        bool isFavourite;
+
+        public bool CanFavourite => HasHistory;
 
         readonly TaskCompletionSource closedSource = new();
         readonly ExerciseService exerciseService;
         readonly SetService setService;
+        readonly FavoriteExerciseService favoriteExerciseService;
 
         public Task Closed => closedSource.Task;
 
         const double RepsInfluence = 0.01;
         const double MaxRepsOffset = 0.5;
 
-        public ExerciseDetailsPopupViewModel(ExerciseService exerciseService, SetService setService)
+        public ExerciseDetailsPopupViewModel(ExerciseService exerciseService, SetService setService, FavoriteExerciseService favoriteExerciseService)
         {
             this.exerciseService = exerciseService;
             this.setService = setService;
+            this.favoriteExerciseService = favoriteExerciseService;
         }
 
         static double WeightWithRepsTiebreak(double weight, double reps) =>
@@ -72,17 +81,12 @@ namespace FitISO.Maui.ViewModels
 
         public async Task LoadChartData()
         {
-            if (Exercise.History is null)
+            if (Exercise.History.Count == 0)
             {
                 var sets = await setService.GetBestSetPerWorkoutAsync(Exercise.Id);
-
-                Exercise.History = new ObservableCollection<ExerciseHistoryPoint>(
-                    sets.Select(s => new ExerciseHistoryPoint(
-                        s.WorkoutExercise.Workout.StartTime!.Value,
-                        s.Weight!.Value,
-                        s.Reps!.Value)));
+                foreach (var s in sets)
+                    Exercise.History.Add(new ExerciseHistoryPoint(s.WorkoutExercise.Workout.StartTime!.Value, s.Weight!.Value, s.Reps!.Value));
             }
-
             BuildChart();
         }
 
@@ -133,6 +137,17 @@ namespace FitISO.Maui.ViewModels
             };
         }
 
+        public async Task LoadFavouriteStatus()
+        {
+            if (!HasHistory)
+            {
+                IsFavourite = false;
+                return;
+            }
+
+            IsFavourite = await favoriteExerciseService.IsFavoriteAsync(Exercise.Id);
+        }
+
         public async Task CheckIfDeletable()
         {
             Deletable = await exerciseService.IsDeletable(Exercise.Id);
@@ -172,6 +187,24 @@ namespace FitISO.Maui.ViewModels
 
         public void CompleteIfNotAlready()
             => closedSource.TrySetResult();
+
+
+        [RelayCommand]
+        async Task ToggleFavourite()
+        {
+            if (!CanFavourite) return;
+
+            if (IsFavourite)
+            {
+                favoriteExerciseService.ClearFavorite();
+                IsFavourite = false;
+            }
+            else
+            {
+                await favoriteExerciseService.SetFavoriteAsync(Exercise);
+                IsFavourite = true;
+            }
+        }
 
         [RelayCommand]
         void StartRename()

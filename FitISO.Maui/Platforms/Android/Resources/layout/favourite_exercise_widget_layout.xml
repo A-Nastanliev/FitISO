@@ -1,0 +1,44 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/widget_background"
+    android:padding="10dp">
+
+	<TextView
+        android:id="@+id/widget_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="4dp"
+        android:textStyle="bold"
+        android:textSize="18sp"
+        android:textColor="#FFFFFF"
+        android:gravity="center"
+        android:maxLines="1"
+        android:ellipsize="end"
+        android:text="Favourite Exercise" />
+
+	<ImageView
+        android:id="@+id/widget_chart"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/widget_title"
+        android:scaleType="fitXY"
+        android:contentDescription="@null" />
+
+	<TextView
+        android:id="@+id/widget_empty_state"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/widget_title"
+        android:gravity="center"
+        android:textColor="#AAAAAA"
+        android:textSize="12sp"
+        android:padding="8dp"
+        android:visibility="gone"
+        android:text="Mark a favourite exercise in FitISO to see its progress here" />
+
+</RelativeLayout>

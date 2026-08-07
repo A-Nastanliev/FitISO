@@ -14,7 +14,6 @@
             <Setter Property="Background" Value="{StaticResource Gray900}" />
             <Setter Property="Margin" Value="0,200,0,0" />
             <Setter Property="StrokeShape" Value="RoundRectangle 24,24,0,0" />
-            <Setter Property="StrokeThickness" Value="0" />
             <Setter Property="VerticalOptions" Value="End" />
             <Setter Property="HorizontalOptions" Value="Fill" />
         </Style>
@@ -22,7 +21,7 @@
 
     <Grid RowDefinitions="*, auto" >
         <Grid Grid.Row="2" RowDefinitions="Auto, Auto">
-            <Grid Padding="20,10" RowSpacing="12" ColumnDefinitions="*, auto, auto" ColumnSpacing="12">
+            <Grid Padding="20,10" RowSpacing="12" ColumnDefinitions="*, auto, auto, auto" ColumnSpacing="12">
                 <Label Text="{Binding Exercise.Name}" Grid.Row="0" Grid.Column="0"
                FontSize="Medium" VerticalOptions="Center" FontAttributes="Bold"
                HorizontalOptions="Start" IsVisible="{Binding IsNotEditingName}" />
@@ -33,23 +32,39 @@
                ReturnCommand="{Binding SaveRenameCommand}" />
 
                 <ImageButton Grid.Row="0" Grid.Column="1" HeightRequest="50" WidthRequest="50"
+                     Source="{FontImageSource FontFamily=MaterialRound, Glyph='&#xE838;'}"
+                     BackgroundColor="{StaticResource Gray500}" CornerRadius="25" Padding="8"
+                     IsVisible="{Binding IsNotEditingName}"
+                     Command="{Binding ToggleFavouriteCommand}"
+                     IsEnabled="{Binding CanFavourite}">
+                    <ImageButton.Triggers>
+                        <DataTrigger TargetType="ImageButton" Binding="{Binding IsFavourite}" Value="True">
+                            <Setter Property="Source" Value="{FontImageSource FontFamily=MaterialRound, Glyph='&#xE838;', Color=White   }" />
+                        </DataTrigger>
+                        <DataTrigger TargetType="ImageButton" Binding="{Binding IsFavourite}" Value="False">
+                            <Setter Property="Source" Value="{FontImageSource FontFamily=MaterialRound, Glyph='&#xE83A;'}" />
+                        </DataTrigger>
+                    </ImageButton.Triggers>
+                </ImageButton>
+
+                <ImageButton Grid.Row="0" Grid.Column="2" HeightRequest="50" WidthRequest="50"
                      Source="{FontImageSource FontFamily=MaterialRound, Glyph='&#xE3C9;'}" CornerRadius="25" Padding="8"
                      IsVisible="{Binding IsNotEditingName}"  BackgroundColor="{StaticResource Gray500}" 
                      Command="{Binding StartRenameCommand}" />
 
-                <ImageButton Grid.Row="0" Grid.Column="1" HeightRequest="50" WidthRequest="50"
+                <ImageButton Grid.Row="0" Grid.Column="2" HeightRequest="50" WidthRequest="50"
                      Source="{FontImageSource FontFamily=MaterialRound, Glyph='&#xE5C9;'}" 
                      BackgroundColor="Transparent"   CornerRadius="25" Padding="-4"
                      IsVisible="{Binding IsEditingName}"
                      Command="{Binding CancelRenameCommand}" IsEnabled="{Binding IsNotBusy}" />
 
-                <ImageButton Grid.Row="0" Grid.Column="2" HeightRequest="50" WidthRequest="50"
+                <ImageButton Grid.Row="0" Grid.Column="3" HeightRequest="50" WidthRequest="50"
                      Source="{FontImageSource FontFamily=MaterialRound, Glyph='&#xE872;'}" BackgroundColor="IndianRed"
                      CornerRadius="24" Padding="8"
                      IsVisible="{Binding ShowDeleteButton}"
                      Command="{Binding DeleteCommand}" IsEnabled="{Binding IsNotBusy}" />
 
-                <ImageButton Grid.Row="0" Grid.Column="2" HeightRequest="50" WidthRequest="50"
+                <ImageButton Grid.Row="0" Grid.Column="3" HeightRequest="50" WidthRequest="50"
                      Source="{FontImageSource FontFamily=MaterialRound, Glyph='&#xE876;'}"
                      BackgroundColor="{StaticResource Gray500}"  CornerRadius="25" Padding="8"
                      IsVisible="{Binding IsEditingName}" 

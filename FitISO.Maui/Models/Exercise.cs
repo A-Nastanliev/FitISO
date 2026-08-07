@@ -26,7 +26,7 @@ namespace FitISO.Maui.Models
         bool visibleSets;
 
         [ObservableProperty]
-        ObservableCollection<ExerciseHistoryPoint>? history;
+        ObservableCollection<ExerciseHistoryPoint> history = new();
 
         public Exercise()
         {

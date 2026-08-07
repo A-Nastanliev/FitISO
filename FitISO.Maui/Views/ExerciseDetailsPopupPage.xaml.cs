@@ -23,5 +23,6 @@ public partial class ExerciseDetailsPopupPage : Nalu.PopupPageBase
         base.OnAppearing();
         await viewModel.CheckIfDeletable();
         await viewModel.LoadChartData();
+        await viewModel.LoadFavouriteStatus();
     }
 }
