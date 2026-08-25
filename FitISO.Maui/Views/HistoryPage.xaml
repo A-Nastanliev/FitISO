@@ -29,6 +29,10 @@
                     <Grid Margin="8">
                         <Border StrokeThickness="0" StrokeShape="RoundRectangle 25" BackgroundColor="{StaticResource Gray900}">
                             <Grid RowDefinitions="Auto, Auto, Auto" RowSpacing="4" Padding="0,4">
+                                <ImageButton Source="{FontImageSource FontFamily=MaterialRound, Glyph='&#xE415;'}"
+                                    HorizontalOptions="End" VerticalOptions="End" Margin="0,4,14,0"
+                                    Command="{Binding BindingContext.ExportWorkoutPdfCommand, Source={RelativeSource AncestorType={x:Type ContentPage}}}"
+                                    CommandParameter="{Binding .}"/>
                                 <Label FontSize="Medium" Text="{Binding Name}" HorizontalTextAlignment="Center" 
                                    HorizontalOptions="Center" Grid.Row="0" VerticalOptions="End"/>
                                 <Grid Grid.Row="1" ColumnDefinitions="Auto, Auto" HorizontalOptions="Center" ColumnSpacing="16" Margin="0,0,0,4">

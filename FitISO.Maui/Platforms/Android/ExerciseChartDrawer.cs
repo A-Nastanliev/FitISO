@@ -31,20 +31,11 @@ namespace FitISO.Maui.Platforms.Android
                 IsAntialias = true
             };
 
-            var yAxisWidth = axisFont.MeasureText("00.0") + 6f;
             var xAxisHeight = axisTextSize + 8f;
-
             var topPadding = axisFont.Metrics.CapHeight + 8f;
 
             var lastLabelWidth = axisFont.MeasureText(history[^1].Date.ToString("MMM d"));
             var rightPadding = lastLabelWidth / 2f + 6f;
-
-            var plotLeft = yAxisWidth;
-            var plotRight = width - rightPadding;
-            var plotTop = topPadding;
-            var plotBottom = height - xAxisHeight;
-            var plotWidth = Math.Max(plotRight - plotLeft, 1f);
-            var plotHeight = Math.Max(plotBottom - plotTop, 1f);
 
             var values = history
                 .Select(h => ExerciseChartMath.WeightWithRepsTiebreak(h.Weight, h.Reps))
@@ -57,6 +48,19 @@ namespace FitISO.Maui.Platforms.Android
                 max += 1;
                 min -= 1;
             }
+
+            var mid = (min + max) / 2f;
+            var yAxisLabelWidth = new[] { max, mid, min }
+                .Select(v => axisFont.MeasureText(v.ToString("0.#")))
+                .Max();
+            var yAxisWidth = yAxisLabelWidth + 6f;
+
+            var plotLeft = yAxisWidth;
+            var plotRight = width - rightPadding;
+            var plotTop = topPadding;
+            var plotBottom = height - xAxisHeight;
+            var plotWidth = Math.Max(plotRight - plotLeft, 1f);
+            var plotHeight = Math.Max(plotBottom - plotTop, 1f);
 
             var points = new SKPoint[history.Count];
             for (var i = 0; i < history.Count; i++)

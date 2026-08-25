@@ -50,8 +50,14 @@ namespace FitISO.Maui.ViewModels
                 }
                 else if (result.Exception is not null)
                 {
+                    if (result.Exception is OperationCanceledException)
+                        return;
+
                     await Shell.Current.DisplayAlertAsync("Export failed", result.Exception.Message, "OK");
                 }
+            }
+            catch (OperationCanceledException)
+            {
             }
             catch (Exception ex)
             {

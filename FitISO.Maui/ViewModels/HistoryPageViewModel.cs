@@ -1,8 +1,11 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using CommunityToolkit.Maui.Storage;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using FitISO.Maui.Messages;
 using FitISO.Maui.Models;
+using FitISO.Maui.Services;
+using CommunityToolkit.Maui.Alerts;
 using FitISO.Services;
 using System;
 using System.Collections.Generic;
@@ -40,6 +43,42 @@ namespace FitISO.Maui.ViewModels
 
             if (itemsLoaded < batchSize)
                 canLoadMore = false;
+        }
+
+        [RelayCommand]
+        private async Task ExportWorkoutPdfAsync(Workout workout)
+        {
+            if (workout is null)
+                return;
+
+            try
+            {
+                using var stream = new MemoryStream();
+                WorkoutPdfBuilder.Build(workout, stream);
+                stream.Position = 0;
+
+                var invalidChars = Path.GetInvalidFileNameChars();
+                var safeWorkoutName = string.Concat(workout.Name.Split(invalidChars));
+                var fileName = $"FitISO_{safeWorkoutName}_{workout.StartTime:yyyy_MM_dd}.pdf";
+
+                var result = await FileSaver.Default.SaveAsync(fileName, stream, CancellationToken.None);
+
+                if (result.IsSuccessful)
+                {
+                    _ = Toast.Make("PDF saved").Show();
+                }
+                else if (result.Exception is not null && result.Exception is not OperationCanceledException)
+                {
+                    await Shell.Current.DisplayAlertAsync("Export failed", result.Exception.Message, "OK");
+                }
+            }
+            catch (OperationCanceledException)
+            {
+            }
+            catch (Exception ex)
+            {
+                await Shell.Current.DisplayAlertAsync("Export failed", ex.Message, "OK");
+            }
         }
 
         [RelayCommand]
