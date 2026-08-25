@@ -18,7 +18,7 @@
     <AbsoluteLayout>
         <ScrollView VerticalScrollBarVisibility="Never" HorizontalOptions="Fill" AbsoluteLayout.LayoutBounds="0,0,1,1" AbsoluteLayout.LayoutFlags="All">
             <CollectionView VerticalOptions="Fill"  AbsoluteLayout.LayoutBounds="0,0,1,1" AbsoluteLayout.LayoutFlags="All"
-                        ItemsSource="{Binding ExerciseCollection.Exercises}" Margin="6" SelectionMode="Single" SelectedItem="{Binding SelectedExercise}"
+                        ItemsSource="{Binding ExerciseCollection.Exercises}" Margin="6" SelectionMode="Single" SelectedItem="{Binding SelectedExercise, Mode=TwoWay}"
                         RemainingItemsThreshold="3" VerticalScrollBarVisibility="Never"
                         RemainingItemsThresholdReachedCommand="{Binding ExerciseCollection.LoadCommand}">
 

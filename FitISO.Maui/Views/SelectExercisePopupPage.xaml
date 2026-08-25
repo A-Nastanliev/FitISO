@@ -11,7 +11,7 @@
 
     <nlayouts:PopupPageBase.Resources>
         <Style TargetType="nlayouts:PopupContainer">
-            <Setter Property="Background" Value="{StaticResource Gray800}" />
+            <Setter Property="Background" Value="{DynamicResource Gray800}" />
             <Setter Property="Margin" Value="0" />
             <Setter Property="StrokeShape" Value="RoundRectangle 24,24,0,0" />
             <Setter Property="StrokeThickness" Value="0" />
@@ -27,7 +27,7 @@
                FontSize="Medium" FontAttributes="Bold"
                HorizontalOptions="Center" />
 
-        <BoxView Grid.Row="1" Margin="-20,0" HeightRequest="1" Color="{StaticResource Gray400}" />
+        <BoxView Grid.Row="1" Margin="-20,0" HeightRequest="1" Color="{DynamicResource Gray400}" />
 
         <CollectionView Grid.Row="2" ItemsSource="{Binding ExerciseCollection.Exercises}"
                          SelectionMode="Single" SelectedItem="{Binding SelectedExercise, Mode=TwoWay}"

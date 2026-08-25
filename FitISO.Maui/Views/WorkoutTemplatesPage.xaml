@@ -33,10 +33,10 @@
             <CollectionView.ItemTemplate>
                 <DataTemplate>
                     <Grid>
-                        <Border StrokeThickness="0" StrokeShape="RoundRectangle 25" BackgroundColor="{StaticResource Gray900}" Margin="8,8">
+                        <Border StrokeThickness="0" StrokeShape="RoundRectangle 25" BackgroundColor="{DynamicResource Gray900}" Margin="8,8">
                             <Grid x:DataType="models:Workout" RowDefinitions="Auto, Auto, Auto" RowSpacing="10" Margin="0" Padding="10,10">
                                 <Label HorizontalTextAlignment="Center" Text="{Binding Name}" FontSize="Medium"/>
-                                <Border StrokeThickness="0" StrokeShape="RoundRectangle 25" Grid.Row="1" BackgroundColor="{StaticResource Gray700}" Padding="10,4">
+                                <Border StrokeThickness="0" StrokeShape="RoundRectangle 25" Grid.Row="1" BackgroundColor="{DynamicResource Gray700}" Padding="10,4">
                                     <CollectionView VerticalOptions="Fill" SelectionMode="None" VerticalScrollBarVisibility="Never" 
                                          ItemsSource="{Binding WorkoutExercises}">
                                         <CollectionView.ItemTemplate>
@@ -45,7 +45,7 @@
                                                     <Grid Padding="12,4" ColumnDefinitions="*, auto" ColumnSpacing="12">
                                                         <Label HorizontalTextAlignment="Start" Text="{Binding Exercise.Name}" FontSize="Small"
                                                             LineBreakMode="WordWrap" TextColor="White"/>
-                                                        <Label Text="{Binding SetCount}" TextColor="{StaticResource Gray300}" FontSize="Small" Grid.Column="1"/>
+                                                        <Label Text="{Binding SetCount}" TextColor="{DynamicResource Gray300}" FontSize="Small" Grid.Column="1"/>
                                                     </Grid>
                                                 </Border>
                                             </DataTemplate>
@@ -66,7 +66,7 @@
                                         <Image Source="{FontImageSource FontFamily=MaterialRound, Glyph='&#xE037;'}"
                                             HeightRequest="46" WidthRequest="46" BackgroundColor="Transparent">
                                             <Image.Behaviors>
-                                                <toolkit:IconTintColorBehavior TintColor="{StaticResource Gray900}" />
+                                                <toolkit:IconTintColorBehavior TintColor="#212121" />
                                             </Image.Behaviors>
                                         </Image>
                                     </Grid>

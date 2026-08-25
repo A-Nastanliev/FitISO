@@ -48,7 +48,23 @@ namespace FitISO.Maui.ViewModels
         [ObservableProperty]
         Axis[] chartXAxes = Array.Empty<Axis>();
 
-        static readonly SKColor AccentColor = new SKColor(205, 92, 92);
+        SKColor AccentColor
+        {
+            get
+            {
+                if (Application.Current?.Resources.TryGetValue("ChartAccentColor", out var value) == true
+                    && value is Color color)
+                {
+                    return new SKColor(
+                        (byte)(color.Red * 255),
+                        (byte)(color.Green * 255),
+                        (byte)(color.Blue * 255),
+                        (byte)(color.Alpha * 255));
+                }
+
+                return new SKColor(205, 92, 92);
+            }
+        }
 
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(CanFavourite))]

@@ -9,6 +9,7 @@
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="Resources/Styles/Colors.xaml" />
                 <ResourceDictionary Source="Resources/Styles/Styles.xaml" />
+                <ResourceDictionary Source="Resources/Styles/AccentThemes/Default.xaml"/>
             </ResourceDictionary.MergedDictionaries>
             <converters:UtcToLocalDateConverter x:Key="DateConverter" />
             <converters:UtcToLocalTimeConverter x:Key="TimeConverter"/>

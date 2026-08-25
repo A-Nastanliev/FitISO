@@ -1,6 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.Messaging;
 using FitISO.Maui.Messages;
 using FitISO.Services;
+using FitISO.Maui.Resources.Styles.AccentThemes;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace FitISO.Maui
@@ -17,6 +18,28 @@ namespace FitISO.Maui
         {
             InitializeComponent();
             _workoutService = workoutService;
+
+            ApplySavedAccentTheme();
+        }
+
+        private static void ApplySavedAccentTheme()
+        {
+            var savedTheme = Preferences.Get("accent_theme", nameof(Default));
+
+            ResourceDictionary theme = savedTheme switch
+            {
+                nameof(DarkBlue) => new DarkBlue(),
+                nameof(DarkRed) => new DarkRed(),
+                nameof(Olive)=> new Olive(),
+                _ => new Default()
+            };
+
+            var existing = Application.Current.Resources.MergedDictionaries.FirstOrDefault(d => d is Default);
+
+            if (existing != null)
+                Application.Current.Resources.MergedDictionaries.Remove(existing);
+
+            Application.Current.Resources.MergedDictionaries.Add(theme);
         }
 
         protected override Window CreateWindow(IActivationState? activationState)

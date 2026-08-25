@@ -22,8 +22,9 @@ Congrats, you just read a whole paragraph about a bird. Anyway, here's what the 
 - **Personal records & history at a glance** - each exercise card surfaces your best-ever set and your most recent sets for quick comparison while you train.
 - **Exercise library** - browse, search, add, and inspect exercises via dedicated popups.
 - **Workout templates** - save and reuse workout structures instead of building them from scratch every time.
-- **Workout history** - review past completed workouts.
+- **Workout history** - review past completed workouts, with one-tap PDF export for sharing.
 - **Custom tab bar** - a shaped bottom navigation bar (via `Nalu.Maui`) with a context-sensitive action button (e.g. "add exercise" while a workout is active).
+- **Accent themes** - switch the app's accent palette from Settings.
 - **Backup & restore** - export the SQLite database to a `.db3` file from Settings, and import a backup back in later.
 
 ## Tech stack

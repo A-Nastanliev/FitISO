@@ -20,7 +20,7 @@ namespace FitISO.Maui.ViewModels
         ObservableCollection<Workout> workouts = new();
         [ObservableProperty]
         bool loading;
-        const int batchSize = 20;
+        const int batchSize = 6;
         int? cursor;
         bool canLoadMore = true;
         readonly WorkoutService workoutService;

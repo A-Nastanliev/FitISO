@@ -27,7 +27,7 @@
             <CollectionView.ItemTemplate>
                 <DataTemplate x:DataType="models:Workout">
                     <Grid Margin="8">
-                        <Border StrokeThickness="0" StrokeShape="RoundRectangle 25" BackgroundColor="{StaticResource Gray900}">
+                        <Border StrokeThickness="0" StrokeShape="RoundRectangle 25" BackgroundColor="{DynamicResource Gray900}">
                             <Grid RowDefinitions="Auto, Auto, Auto" RowSpacing="4" Padding="0,4">
                                 <ImageButton Source="{FontImageSource FontFamily=MaterialRound, Glyph='&#xE415;'}"
                                     HorizontalOptions="End" VerticalOptions="End" Margin="0,4,14,0"
@@ -37,11 +37,11 @@
                                    HorizontalOptions="Center" Grid.Row="0" VerticalOptions="End"/>
                                 <Grid Grid.Row="1" ColumnDefinitions="Auto, Auto" HorizontalOptions="Center" ColumnSpacing="16" Margin="0,0,0,4">
                                     <Border Grid.Column="0" Padding="10,1"
-                                    StrokeThickness="0" StrokeShape="RoundRectangle 25" Background="{StaticResource Gray700}">
+                                    StrokeThickness="0" StrokeShape="RoundRectangle 25" Background="{DynamicResource Gray700}">
                                         <Label Text="{Binding StartTime, Converter={StaticResource DateConverter}}" FontSize="Small"/>
                                     </Border>
                                     <Border Grid.Column="1" Padding="10,1"
-                                    StrokeThickness="0" StrokeShape="RoundRectangle 25" Background="{StaticResource Gray600}">
+                                    StrokeThickness="0" StrokeShape="RoundRectangle 25" Background="{DynamicResource Gray600}">
                                         <Grid ColumnDefinitions="Auto, Auto, Auto" ColumnSpacing="4">
                                             <Label Text="{Binding StartTime, Converter={StaticResource TimeConverter}}" FontSize="Small"
                                             Grid.Column="0"/>
@@ -57,7 +57,7 @@
                                         <DataTemplate x:DataType="models:WorkoutExercise">
                                             <Grid RowDefinitions="Auto, Auto">
                                                 <Label Text="{Binding Exercise.Name}" HorizontalOptions="Fill" HorizontalTextAlignment="Center"
-                                                   FontSize="Small" BackgroundColor="{StaticResource Gray700}"/>
+                                                   FontSize="Small" BackgroundColor="{DynamicResource Gray700}"/>
                                                 <CollectionView ItemsSource="{Binding Sets}" VerticalScrollBarVisibility="Never"
                                                 VerticalOptions="Fill" Grid.Row="1">
                                                     <CollectionView.ItemTemplate>
@@ -65,7 +65,7 @@
                                                             <Grid ColumnDefinitions="1.15*,40,2*" ColumnSpacing="12">
                                                                 <Label Text="{Binding Weight, StringFormat='{0:0.##}'}" FontSize="Small"
                                                                        HorizontalTextAlignment="End"/>
-                                                                <Label Text="kg" FontSize="Small" Grid.Column="1" TextColor="{StaticResource Gray400}"/>
+                                                                <Label Text="kg" FontSize="Small" Grid.Column="1" TextColor="{DynamicResource Gray400}"/>
                                                                 <Label Grid.Column="2" Text="{Binding Reps, StringFormat='{0:0.##}'}" HorizontalTextAlignment="Center" FontSize="Small"/>
                                                             </Grid>
                                                         </DataTemplate>

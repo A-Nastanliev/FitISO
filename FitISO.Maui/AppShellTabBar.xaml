@@ -21,7 +21,7 @@
         <Border SafeAreaEdges="Container"
                 ZIndex="1"
                 StrokeThickness="0"
-                BackgroundColor="{StaticResource Gray800}">
+                BackgroundColor="{DynamicResource Gray800}">
             <Border.StrokeShape>
                 <local:FancyTabBarShape x:Name="TabBarShape"
                                         InsetHeight="40"
@@ -35,6 +35,7 @@
         </Border>
 
         <Grid x:Name="SelectedShapeContainer"
+              ZIndex="2"
               TranslationY="-24"
               TranslationX="32"
               HorizontalOptions="Start"
@@ -43,7 +44,7 @@
                 <Border HeightRequest="48"
                         StrokeThickness="0"
                         WidthRequest="48"
-                        BackgroundColor="{StaticResource Gray800}"
+                        BackgroundColor="{DynamicResource Gray800}"
                       
                         StrokeShape="RoundRectangle 24">
                     <ImageButton x:Name="SelectedButton"

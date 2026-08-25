@@ -17,5 +17,6 @@ public partial class WorkoutFormPage : ContentPage
     {
         base.OnAppearing();
         await viewModel.ExerciseCollection.LoadCommand.ExecuteAsync(null);
+        AppShellTabBar.Current?.RefreshSelectedButtonCommand();
     }
 }

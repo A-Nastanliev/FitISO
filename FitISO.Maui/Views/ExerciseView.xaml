@@ -9,10 +9,14 @@
     <VisualStateManager.VisualStateGroups>
         <VisualStateGroupList>
             <VisualStateGroup x:Name="CommonStates">
-                <VisualState x:Name="Normal" />
+                <VisualState x:Name="Normal" >
+                    <VisualState.Setters>
+                        <Setter TargetName="Border" Property="BackgroundColor" Value="{DynamicResource Gray800}" />
+                    </VisualState.Setters>
+                </VisualState>
                 <VisualState x:Name="Selected">
                     <VisualState.Setters>
-                        <Setter TargetName="Border" Property="BackgroundColor" Value="{StaticResource Gray500}" />
+                        <Setter TargetName="Border" Property="BackgroundColor" Value="{DynamicResource Gray500}" />
                     </VisualState.Setters>
                 </VisualState>
             </VisualStateGroup>

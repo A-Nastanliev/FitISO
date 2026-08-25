@@ -15,6 +15,7 @@ public partial class WorkoutTemplatesPage : ContentPage
 
     protected async override void OnAppearing()
     {
+        AppShellTabBar.Current?.RefreshSelectedButtonCommand();
         base.OnAppearing();
         await viewModel.LoadCommand.ExecuteAsync(null);
     }

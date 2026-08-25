@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:models="clr-namespace:FitISO.Maui.Models"
              x:Class="FitISO.Maui.Views.SettingsPage">
 
     <Shell.TitleView>
@@ -8,6 +9,51 @@
     </Shell.TitleView>
 
     <VerticalStackLayout Padding="24" Spacing="16">
+
+        <Label
+         Text="Appearance"
+         FontSize="Medium"
+         FontAttributes="Bold" />
+
+        <Label
+         Text="Pick an accent color."
+         FontSize="Small"
+         TextColor="{DynamicResource Gray500}" />
+
+        <CollectionView ItemsSource="{Binding AccentThemes}" SelectedItem="{Binding SelectedAccentTheme, Mode=TwoWay}"
+         SelectionMode="Single" HeightRequest="56" HorizontalOptions="Start">
+            <CollectionView.ItemsLayout>
+                <LinearItemsLayout Orientation="Horizontal" ItemSpacing="12"/>
+            </CollectionView.ItemsLayout>
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="models:AccentTheme">
+                    <Grid WidthRequest="44" HeightRequest="44">
+                        <Ellipse Fill="{DynamicResource Gray900}" WidthRequest="44" HeightRequest="44"
+                         Stroke="{DynamicResource Gray600}" StrokeThickness="2"
+                         x:Name="Ring"/>
+                        <Ellipse Fill="{Binding Swatch}" WidthRequest="30" HeightRequest="30"
+                         HorizontalOptions="Center" VerticalOptions="Center"/>
+
+                        <VisualStateManager.VisualStateGroups>
+                            <VisualStateGroupList>
+                                <VisualStateGroup x:Name="CommonStates">
+                                    <VisualState x:Name="Normal" />
+                                    <VisualState x:Name="Selected">
+                                        <VisualState.Setters>
+                                            <Setter TargetName="Ring" Property="Ellipse.Stroke" Value="{StaticResource White}" />
+                                            <Setter TargetName="Ring" Property="BackgroundColor" Value="Transparent"/>
+                                        </VisualState.Setters>
+                                    </VisualState>
+                                </VisualStateGroup>
+                            </VisualStateGroupList>
+                        </VisualStateManager.VisualStateGroups>
+                    </Grid>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+
+        <BoxView HeightRequest="1" BackgroundColor="{DynamicResource Gray700}" Margin="0,8"/>
+        
         <Label
             Text="Backup &amp; Restore"
             FontSize="Medium"
@@ -16,7 +62,7 @@
         <Label
             Text="Export a backup of your data or import a previously exported backup. Importing will replace all current data and close the app."
             FontSize="Small" HorizontalTextAlignment="Justify"
-            TextColor="{StaticResource Gray500}" />
+            TextColor="{DynamicResource Gray500}" />
 
         <ActivityIndicator
             IsRunning="{Binding IsBusy}"
@@ -25,7 +71,7 @@
 
         <Grid ColumnDefinitions="*,*" ColumnSpacing="16">
             <Button
-                Text="Export Database" CornerRadius="24" BackgroundColor="{StaticResource Gray500}" 
+                Text="Export Database" CornerRadius="24" BackgroundColor="{DynamicResource Gray500}" 
                 Command="{Binding ExportDatabaseCommand}" 
                 IsEnabled="{Binding IsNotBusy}" FontSize="Small" />
 

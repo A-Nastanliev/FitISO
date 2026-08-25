@@ -11,7 +11,7 @@
 
     <nlayouts:PopupPageBase.Resources>
         <Style TargetType="nlayouts:PopupContainer">
-            <Setter Property="Background" Value="{StaticResource Gray900}" />
+            <Setter Property="Background" Value="{DynamicResource Gray900}" />
             <Setter Property="Margin" Value="0,200,0,0" />
             <Setter Property="StrokeShape" Value="RoundRectangle 24,24,0,0" />
             <Setter Property="VerticalOptions" Value="End" />
@@ -33,7 +33,7 @@
 
                 <ImageButton Grid.Row="0" Grid.Column="1" HeightRequest="50" WidthRequest="50"
                      Source="{FontImageSource FontFamily=MaterialRound, Glyph='&#xE838;'}"
-                     BackgroundColor="{StaticResource Gray500}" CornerRadius="25" Padding="8"
+                     BackgroundColor="{DynamicResource Gray500}" CornerRadius="25" Padding="8"
                      IsVisible="{Binding IsNotEditingName}"
                      Command="{Binding ToggleFavouriteCommand}"
                      IsEnabled="{Binding CanFavourite}">
@@ -49,7 +49,7 @@
 
                 <ImageButton Grid.Row="0" Grid.Column="2" HeightRequest="50" WidthRequest="50"
                      Source="{FontImageSource FontFamily=MaterialRound, Glyph='&#xE3C9;'}" CornerRadius="25" Padding="8"
-                     IsVisible="{Binding IsNotEditingName}"  BackgroundColor="{StaticResource Gray500}" 
+                     IsVisible="{Binding IsNotEditingName}"  BackgroundColor="{DynamicResource Gray500}" 
                      Command="{Binding StartRenameCommand}" />
 
                 <ImageButton Grid.Row="0" Grid.Column="2" HeightRequest="50" WidthRequest="50"
@@ -66,17 +66,17 @@
 
                 <ImageButton Grid.Row="0" Grid.Column="3" HeightRequest="50" WidthRequest="50"
                      Source="{FontImageSource FontFamily=MaterialRound, Glyph='&#xE876;'}"
-                     BackgroundColor="{StaticResource Gray500}"  CornerRadius="25" Padding="8"
+                     BackgroundColor="{DynamicResource Gray500}"  CornerRadius="25" Padding="8"
                      IsVisible="{Binding IsEditingName}" 
                      Command="{Binding SaveRenameCommand}" IsEnabled="{Binding IsNotBusy}" />
             </Grid>
 
             <ScrollView IsVisible="{Binding Exercise.VisibleSets}" Grid.Row="1" Grid.ColumnSpan="2" VerticalScrollBarVisibility="Never">
                 <Grid RowDefinitions="Auto, Auto">
-                    <Grid RowDefinitions="Auto, Auto" BackgroundColor="{StaticResource Gray800}" 
+                    <Grid RowDefinitions="Auto, Auto" BackgroundColor="{DynamicResource Gray800}" 
                       Grid.Row="0">
                         <Border HorizontalOptions="Center" StrokeShape="RoundRectangle 25"
-                        BackgroundColor="{StaticResource Gray600}" StrokeThickness="0"
+                        BackgroundColor="{DynamicResource Gray600}" StrokeThickness="0"
                         Padding="4,0" Margin="0,2" Grid.Row="0">
                             <Label Text="PERSONAL RECORD" Margin="4,0" VerticalOptions="Center"
                              VerticalTextAlignment="Center" TextColor="White"
@@ -89,16 +89,16 @@
                                                 TextColor="White" HorizontalOptions="Fill"
                                                 HorizontalTextAlignment="End" FontSize="Small" MinimumWidthRequest="90"/>
                                 <Label Text="kg" VerticalTextAlignment="Center" Grid.Column="1"
-                                                 FontSize="Small" TextColor="{StaticResource Gray400}"/>
+                                                 FontSize="Small" TextColor="{DynamicResource Gray400}"/>
                             </Grid>
                             <Label Text="{Binding Exercise.BestSet.Reps, StringFormat='{0:0.##}'}"
                                               Grid.Column="1" TextColor="White" MinimumWidthRequest="90"
                                               HorizontalOptions="Center" HorizontalTextAlignment="End" FontSize="Small"/>
                         </Grid>
                     </Grid>
-                    <Grid RowDefinitions="Auto,Auto" BackgroundColor="{StaticResource Gray700}" Grid.Row="2">
+                    <Grid RowDefinitions="Auto,Auto" BackgroundColor="{DynamicResource Gray700}" Grid.Row="2">
                         <Border HorizontalOptions="Center" StrokeShape="RoundRectangle 25"
-                                         BackgroundColor="{StaticResource Gray600}" StrokeThickness="0"
+                                         BackgroundColor="{DynamicResource Gray600}" StrokeThickness="0"
                                          Padding="4,0" Margin="0,2" Grid.Row="0">
                             <Label Text="{Binding Exercise.LastSetsDate, Converter={StaticResource DateConverter}}"
                             Margin="4,0" VerticalOptions="Center" VerticalTextAlignment="Center"
@@ -115,7 +115,7 @@
                                             TextColor="White" HorizontalOptions="Fill"
                                             HorizontalTextAlignment="End" FontSize="Small" MinimumWidthRequest="90"/>
                                             <Label Text="kg" VerticalTextAlignment="Center" Grid.Column="1"
-                                            FontSize="Small" TextColor="{StaticResource Gray400}"/>
+                                            FontSize="Small" TextColor="{DynamicResource Gray400}"/>
                                         </Grid>
                                         <Label Text="{Binding Reps, StringFormat='{0:0.##}'}"
                                         Grid.Column="1" TextColor="White" MinimumWidthRequest="90"
@@ -131,7 +131,7 @@
         <lvc:CartesianChart Grid.Row="0"
               Series="{Binding ChartSeries}"
               XAxes="{Binding ChartXAxes}"
-              BackgroundColor="{StaticResource Gray900}"
+              BackgroundColor="{DynamicResource Gray900}"
               IsVisible="{Binding HasHistory}"
               Margin="0,0,0,0" />
     </Grid>

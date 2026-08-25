@@ -5,6 +5,9 @@ using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using FitISO.Maui.Messages;
 using Microsoft.Data.Sqlite;
+using FitISO.Maui.Models;
+using System.Collections.ObjectModel;
+using FitISO.Maui.Resources.Styles.AccentThemes;
 
 namespace FitISO.Maui.ViewModels
 {
@@ -12,12 +15,31 @@ namespace FitISO.Maui.ViewModels
     {
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(IsNotBusy))]
-        private bool isBusy;
+        bool isBusy;
 
         public bool IsNotBusy => !IsBusy;
+        public ObservableCollection<AccentTheme> AccentThemes { get; } = new();
+
+        [ObservableProperty]
+        AccentTheme selectedAccentTheme;
 
         public SettingsPageViewModel()
         {
+            AccentThemes.Add(new AccentTheme(nameof(Default), new Default()));
+            AccentThemes.Add(new AccentTheme(nameof(DarkBlue), new DarkBlue()));
+            AccentThemes.Add(new AccentTheme(nameof(DarkRed), new DarkRed()));
+            AccentThemes.Add(new AccentTheme(nameof(Olive), new Olive()));
+
+            var savedTheme = Preferences.Get("accent_theme", nameof(Default));
+            selectedAccentTheme = AccentThemes.FirstOrDefault(t => t.Name == savedTheme) ?? AccentThemes[0];
+        }
+
+        partial void OnSelectedAccentThemeChanged(AccentTheme value)
+        {
+            var existing = Application.Current.Resources.MergedDictionaries.FirstOrDefault(d => d.ContainsKey("Gray100"));
+            Application.Current.Resources.MergedDictionaries.Remove(existing);
+            Application.Current.Resources.MergedDictionaries.Add(value.Theme);
+            Preferences.Set("accent_theme", value.Name);
         }
 
         [RelayCommand]
