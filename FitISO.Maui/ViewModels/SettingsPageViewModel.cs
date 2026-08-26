@@ -40,7 +40,35 @@ namespace FitISO.Maui.ViewModels
             Application.Current.Resources.MergedDictionaries.Remove(existing);
             Application.Current.Resources.MergedDictionaries.Add(value.Theme);
             Preferences.Set("accent_theme", value.Name);
+
+#if ANDROID
+            var context = global::Android.App.Application.Context;
+
+            var prefs = context.GetSharedPreferences(
+                FitISO.Maui.Platforms.Android.FavouriteExerciseWidgetProvider.PrefsName,
+                Android.Content.FileCreationMode.Private);
+
+            var editor = prefs?.Edit();
+            editor?.PutInt(FitISO.Maui.Platforms.Android.FavouriteExerciseWidgetProvider.AccentColorKey, ToAndroidArgb(value.ChartAccentColor));
+            editor?.PutInt(FitISO.Maui.Platforms.Android.FavouriteExerciseWidgetProvider.GridColorKey, ToAndroidArgb(value.ChartGridColor));
+            editor?.PutInt(FitISO.Maui.Platforms.Android.FavouriteExerciseWidgetProvider.BackgroundColorKey, ToAndroidArgb(value.ChartBackgroundColor));
+            editor?.Commit();
+
+            var refreshIntent = new Android.Content.Intent(FitISO.Maui.Platforms.Android.FavouriteExerciseWidgetProvider.ActionRefresh);
+            refreshIntent.SetComponent(new Android.Content.ComponentName(
+                context,
+                Java.Lang.Class.FromType(typeof(FitISO.Maui.Platforms.Android.FavouriteExerciseWidgetProvider))));
+            context.SendBroadcast(refreshIntent);
+#endif
         }
+
+#if ANDROID
+        static int ToAndroidArgb(Color color) =>
+            ((int)(color.Alpha * 255) << 24) |
+            ((int)(color.Red * 255) << 16) |
+            ((int)(color.Green * 255) << 8) |
+            (int)(color.Blue * 255);
+#endif
 
         [RelayCommand]
         private async Task ExportDatabaseAsync()
@@ -68,7 +96,7 @@ namespace FitISO.Maui.ViewModels
 
                 if (result.IsSuccessful)
                 {
-                    await Shell.Current.DisplayAlertAsync("Export complete", $"Backup saved to:\n{result.FilePath}", "OK");
+                    _ = Toast.Make("Database exported").Show();
                 }
                 else if (result.Exception is not null)
                 {

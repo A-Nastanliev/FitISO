@@ -8,9 +8,7 @@ namespace FitISO.Maui.Platforms.Android
 {
     public static class ExerciseChartDrawer
     {
-        static readonly SKColor AccentColor = new SKColor(205, 92, 92);
-
-        public static SKBitmap Draw(IReadOnlyList<ExerciseHistoryPoint> history, int width, int height)
+        public static SKBitmap Draw(IReadOnlyList<ExerciseHistoryPoint> history, int width, int height, SKColor accent, SKColor gridColor)
         {
             var bitmap = new SKBitmap(width, height);
             using var canvas = new SKCanvas(bitmap);
@@ -76,7 +74,7 @@ namespace FitISO.Maui.Platforms.Android
 
             using var gridPaint = new SKPaint
             {
-                Color = SKColors.White.WithAlpha(30),
+                Color = gridColor.WithAlpha(70),
                 StrokeWidth = 1,
                 IsAntialias = false,
                 Style = SKPaintStyle.Stroke
@@ -91,14 +89,14 @@ namespace FitISO.Maui.Platforms.Android
 
             using var fillPaint = new SKPaint
             {
-                Color = AccentColor.WithAlpha(60),
+                Color = accent.WithAlpha(60),
                 IsAntialias = true,
                 Style = SKPaintStyle.Fill
             };
 
             using var linePaint = new SKPaint
             {
-                Color = AccentColor,
+                Color = accent,
                 StrokeWidth = 3,
                 IsAntialias = true,
                 Style = SKPaintStyle.Stroke,
@@ -115,7 +113,7 @@ namespace FitISO.Maui.Platforms.Android
 
             using var dotStrokePaint = new SKPaint
             {
-                Color = AccentColor,
+                Color = accent,
                 StrokeWidth = 3,
                 IsAntialias = true,
                 Style = SKPaintStyle.Stroke

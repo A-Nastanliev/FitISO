@@ -17,6 +17,13 @@ namespace FitISO.Maui.Platforms.Android
         public const string ActionRefresh = "com.fitiso.maui.widget.FAVOURITE_EXERCISE_REFRESH";
         public const string PrefsName = "FitISO.FavouriteExerciseWidget";
         public const string SnapshotKey = "snapshot";
+        public const string AccentColorKey = "accent_color";
+        public const string GridColorKey = "grid_color";
+        public const string BackgroundColorKey = "background_color";
+
+        const int DefaultAccentArgb = unchecked((int)0xFFCD5C5C);
+        const int DefaultGridArgb = unchecked((int)0xFFFFFFFF);
+        const int DefaultBackgroundArgb = unchecked((int)0xFF1E1E1E);
 
         const int WidgetWidthDp = 180;
         const int WidgetHeightDp = 110;
@@ -47,7 +54,7 @@ namespace FitISO.Maui.Platforms.Android
             {
                 var views = new RemoteViews(context.PackageName, Resource.Layout.favourite_exercise_widget_layout);
 
-                ApplyToViews(views, snapshot, widthPx, heightPx);
+                ApplyToViews(context, views, snapshot, widthPx, heightPx);
                 appWidgetManager.UpdateAppWidget(widgetId, views);
             }
         }
@@ -69,15 +76,22 @@ namespace FitISO.Maui.Platforms.Android
             }
         }
 
-        static void ApplyToViews(RemoteViews views, Exercise? snapshot, int widthPx, int heightPx)
+        static void ApplyToViews(Context context, RemoteViews views, Exercise? snapshot, int widthPx, int heightPx)
         {
+            var prefs = context.GetSharedPreferences(PrefsName, FileCreationMode.Private);
+            var backgroundArgb = prefs?.GetInt(BackgroundColorKey, DefaultBackgroundArgb) ?? DefaultBackgroundArgb;
+            ApplyBackgroundTint(views, backgroundArgb);
+
             if (snapshot is null || snapshot.History.Count == 0)
             {
                 ShowEmptyState(views, "No favourite exercise yet");
                 return;
             }
 
-            using var skBitmap = ExerciseChartDrawer.Draw(snapshot.History, Math.Max(widthPx, 1), Math.Max(heightPx, 1));
+            var accent = ReadColor(prefs, AccentColorKey, DefaultAccentArgb);
+            var gridColor = ReadColor(prefs, GridColorKey, DefaultGridArgb);
+
+            using var skBitmap = ExerciseChartDrawer.Draw(snapshot.History, Math.Max(widthPx, 1), Math.Max(heightPx, 1), accent, gridColor);
             using var image = SKImage.FromBitmap(skBitmap);
             using var data = image.Encode(SKEncodedImageFormat.Png, 100);
             using var stream = data.AsStream();
@@ -87,6 +101,31 @@ namespace FitISO.Maui.Platforms.Android
             views.SetViewVisibility(Resource.Id.widget_empty_state, ViewStates.Gone);
             views.SetViewVisibility(Resource.Id.widget_chart, ViewStates.Visible);
             views.SetImageViewBitmap(Resource.Id.widget_chart, androidBitmap);
+        }
+
+        static SKColor ReadColor(ISharedPreferences? prefs, string key, int defaultArgb)
+        {
+            var argb = prefs?.GetInt(key, defaultArgb) ?? defaultArgb;
+            return new SKColor(
+                (byte)((argb >> 16) & 0xFF),
+                (byte)((argb >> 8) & 0xFF),
+                (byte)(argb & 0xFF),
+                (byte)((argb >> 24) & 0xFF));
+        }
+
+        static void ApplyBackgroundTint(RemoteViews views, int backgroundArgb)
+        {
+            var androidColor = new global::Android.Graphics.Color(backgroundArgb);
+
+            if (OperatingSystem.IsAndroidVersionAtLeast(31))
+            {
+                views.SetColorStateList(Resource.Id.widget_root, "setBackgroundTintList",
+                    global::Android.Content.Res.ColorStateList.ValueOf(androidColor));
+            }
+            else
+            {
+                views.SetInt(Resource.Id.widget_root, "setBackgroundColor", backgroundArgb);
+            }
         }
 
         static void ShowEmptyState(RemoteViews views, string title)
