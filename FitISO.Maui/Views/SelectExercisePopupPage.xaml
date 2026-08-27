@@ -29,7 +29,7 @@
 
         <BoxView Grid.Row="1" Margin="-20,0" HeightRequest="1" Color="{DynamicResource Gray400}" />
 
-        <CollectionView Grid.Row="2" ItemsSource="{Binding ExerciseCollection.Exercises}"
+        <CollectionView Grid.Row="2" ItemsSource="{Binding ExerciseCollection.Items}"
                          SelectionMode="Single" SelectedItem="{Binding SelectedExercise, Mode=TwoWay}"
                          RemainingItemsThreshold="5"
                          RemainingItemsThresholdReachedCommand="{Binding ExerciseCollection.LoadCommand}"

@@ -22,7 +22,7 @@ namespace FitISO.Maui.ViewModels
 
         public async Task EnsureLoaded()
         {
-          await  ExerciseCollection.Load();
+          await  ExerciseCollection.LoadFirst();
         }
 
         partial void OnSelectedExerciseChanged(Exercise value)

@@ -16,6 +16,6 @@ public partial class ExercisesPage : ContentPage
     protected async override void OnAppearing()
     {
         base.OnAppearing();
-        await viewModel.ExerciseCollection.LoadCommand.ExecuteAsync(null);
+        await viewModel.ExerciseCollection.LoadFirstCommand.ExecuteAsync(null);
     }
 }

@@ -12,12 +12,16 @@
         </Grid>
     </Shell.TitleView>
 
-    <ScrollView VerticalScrollBarVisibility="Never">
+    <Grid RowDefinitions="*" SafeAreaEdges="None">
         <CollectionView VerticalOptions="Fill"
-                   ItemsSource="{Binding Workouts}" Margin="6"
+                   ItemsSource="{Binding Items}" Margin="6"
                    RemainingItemsThreshold="3" VerticalScrollBarVisibility="Never"
                    RemainingItemsThresholdReachedCommand="{Binding LoadCommand}">
 
+            <CollectionView.Footer>
+                <BoxView HeightRequest="100" Color="Transparent" BackgroundColor="Transparent" Background="Transparent"/>
+            </CollectionView.Footer>
+            
             <CollectionView.EmptyView>
                 <Label  Text="No workouts found"
                         HorizontalOptions="Center"
@@ -81,5 +85,5 @@
                 </DataTemplate>
             </CollectionView.ItemTemplate>
         </CollectionView>
-    </ScrollView>
+    </Grid>
 </ContentPage>

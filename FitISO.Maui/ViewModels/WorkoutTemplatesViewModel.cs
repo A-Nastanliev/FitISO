@@ -1,5 +1,4 @@
 ﻿using CommunityToolkit.Maui.Alerts;
-using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using FitISO.Maui.Messages;
@@ -8,73 +7,30 @@ using FitISO.Maui.Views;
 using FitISO.Services;
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Text;
+using System.Threading.Tasks;
 
 namespace FitISO.Maui.ViewModels
 {
-    public partial class WorkoutTemplatesViewModel : ObservableObject, IRecipient<WorkoutTemplateCreatedMessage>, IRecipient<DbImportedMessage>, IRecipient<ExerciseUpdatedMessage>
+    public partial class WorkoutTemplatesViewModel : PagedCollectionViewModel<FitISO.Data.Models.Workout, Workout, int?>,
+          IRecipient<WorkoutTemplateCreatedMessage>, IRecipient<ExerciseUpdatedMessage>, IRecipient<DbImportedMessage>
     {
-        [ObservableProperty]
-        ObservableCollection<Workout> workoutTemplates = new();
-
-        [ObservableProperty]
-        bool loading;
-        const int batchSize = 20;
-        int? cursor;
-        bool canLoadMore = true;
-
         readonly WorkoutService workoutService;
         readonly WorkoutExerciseService workoutExerciseService;
 
-        public WorkoutTemplatesViewModel(WorkoutService workoutService, WorkoutExerciseService workoutExerciseService) 
+        public WorkoutTemplatesViewModel(WorkoutService workoutService, WorkoutExerciseService workoutExerciseService)
         {
             this.workoutService = workoutService;
             this.workoutExerciseService = workoutExerciseService;
-            WeakReferenceMessenger.Default.RegisterAll(this);
         }
 
-        private bool CanStartLoading()
-        => !Loading && canLoadMore;
+        protected override int BatchSize => 8;
 
-        private void BeginLoading()
-            => Loading = true;
+        protected override async Task<IReadOnlyList<FitISO.Data.Models.Workout>> FetchBatchAsync(int batchSize, int? cursor)
+            => await workoutService.GetTemplatesAsync(batchSize, cursor);
 
-        private void EndLoading(int itemsLoaded, int? cursor)
-        {
-            Loading = false;
+        protected override Workout Wrap(FitISO.Data.Models.Workout raw) => new Workout(raw);
 
-            if (itemsLoaded < batchSize)
-                canLoadMore = false;
-
-            this.cursor = cursor;
-
-        }
-
-        [RelayCommand]
-        public async Task Load()
-        {
-            if (!CanStartLoading()) return;
-
-            BeginLoading();
-
-            try
-            {
-                var workoutTemplates = await workoutService.GetTemplatesAsync(batchSize, cursor);
-                foreach (FitISO.Data.Models.Workout workout in workoutTemplates)
-                    WorkoutTemplates.Add(new Workout(workout));
-
-                if (WorkoutTemplates.Count > 0)
-                    cursor = WorkoutTemplates[^1].Id;
-
-                EndLoading(workoutTemplates.Count, cursor);
-            }
-            catch (Exception ex)
-            {
-                Loading = false;
-                await Shell.Current.DisplayAlertAsync(ex.Message, ex.InnerException.ToString(), "OK");
-            }
-        }
+        protected override int? GetCursor(Workout item) => item.Id;
 
         [RelayCommand]
         public async Task AddWorkoutTemplate()
@@ -84,8 +40,8 @@ namespace FitISO.Maui.ViewModels
 
         public void Receive(WorkoutTemplateCreatedMessage message)
         {
-            WorkoutTemplates.Add(message.Value);
-            cursor = WorkoutTemplates[^1].Id;
+            Items.Add(message.Value);
+            SyncCursorToTail();
         }
 
         [RelayCommand]
@@ -98,10 +54,9 @@ namespace FitISO.Maui.ViewModels
 
             await workoutService.DeleteAsync(workout.Id);
             _ = Toast.Make($"{workout.Name} deleted").Show();
-            WorkoutTemplates.Remove(workout);
-            cursor = WorkoutTemplates[^1].Id;
+            Items.Remove(workout);
+            SyncCursorToTail();
         }
-
 
         [RelayCommand]
         public async Task EditWorkoutTemplate(Workout workout)
@@ -115,7 +70,7 @@ namespace FitISO.Maui.ViewModels
         {
             if (ActiveWorkoutState.Instance.HasActiveWorkout) return;
 
-            Workout startWorkout =new Workout(await workoutService.StartFromTemplateAsync(workout.Id));
+            Workout startWorkout = new Workout(await workoutService.StartFromTemplateAsync(workout.Id));
             WeakReferenceMessenger.Default.Send(new WorkoutStartedMessage(startWorkout));
             ActiveWorkoutState.Instance.HasActiveWorkout = true;
             await Shell.Current.GoToAsync("//active");
@@ -123,16 +78,14 @@ namespace FitISO.Maui.ViewModels
 
         public async void Receive(DbImportedMessage message)
         {
-            WorkoutTemplates.Clear();
-            cursor = null;
-            canLoadMore = true;       
-            await Load();
+            ResetPaging();
+            await LoadFirst();
         }
 
         public void Receive(ExerciseUpdatedMessage message)
         {
             Exercise exercise = message.Value;
-            foreach (var w in WorkoutTemplates)
+            foreach (var w in Items)
             {
                 foreach (var we in w.WorkoutExercises)
                 {

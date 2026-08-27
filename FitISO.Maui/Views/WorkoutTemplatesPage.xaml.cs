@@ -17,6 +17,6 @@ public partial class WorkoutTemplatesPage : ContentPage
     {
         AppShellTabBar.Current?.RefreshSelectedButtonCommand();
         base.OnAppearing();
-        await viewModel.LoadCommand.ExecuteAsync(null);
+        await viewModel.LoadFirstCommand.ExecuteAsync(null);
     }
 }

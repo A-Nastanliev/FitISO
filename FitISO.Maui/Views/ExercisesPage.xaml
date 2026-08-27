@@ -15,27 +15,29 @@
         <Label Text="Exercises" FontSize="Medium" FontAttributes="Bold" VerticalTextAlignment="Center" HorizontalTextAlignment="Center"/>
     </Shell.TitleView>
 
-    <AbsoluteLayout>
-        <ScrollView VerticalScrollBarVisibility="Never" HorizontalOptions="Fill" AbsoluteLayout.LayoutBounds="0,0,1,1" AbsoluteLayout.LayoutFlags="All">
-            <CollectionView VerticalOptions="Fill" 
-                        ItemsSource="{Binding ExerciseCollection.Exercises}" Margin="6" SelectionMode="Single" SelectedItem="{Binding SelectedExercise, Mode=TwoWay}"
+    <Grid SafeAreaEdges="None" RowDefinitions="*">
+        <CollectionView VerticalOptions="Fill"
+                        ItemsSource="{Binding ExerciseCollection.Items}" Margin="6" SelectionMode="Single" SelectedItem="{Binding SelectedExercise, Mode=TwoWay}"
                         RemainingItemsThreshold="3" VerticalScrollBarVisibility="Never"
                         RemainingItemsThresholdReachedCommand="{Binding ExerciseCollection.LoadCommand}">
 
-                <CollectionView.EmptyView>
-                    <Label  Text="No exercises found"
-                         HorizontalOptions="Center"
-                         VerticalOptions="Center"/>
-                </CollectionView.EmptyView>
+            <CollectionView.Footer>
+                 <BoxView HeightRequest="100" Color="Transparent" BackgroundColor="Transparent" Background="Transparent"/>
+            </CollectionView.Footer>
 
-                <CollectionView.ItemTemplate>
-                    <DataTemplate>
-                        <views:ExerciseView
-                                x:DataType="views:ExerciseView" Margin="0,4" />
-                    </DataTemplate>
-                </CollectionView.ItemTemplate>
+            <CollectionView.EmptyView>
+                <Label  Text="No exercises found"
+                    HorizontalOptions="Center"
+                    VerticalOptions="Center"/>
+            </CollectionView.EmptyView>
 
-            </CollectionView>
-        </ScrollView>
-    </AbsoluteLayout>
+            <CollectionView.ItemTemplate>
+                <DataTemplate>
+                    <views:ExerciseView
+                        x:DataType="views:ExerciseView" Margin="0,4" />
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+
+        </CollectionView>
+    </Grid>
 </ContentPage>

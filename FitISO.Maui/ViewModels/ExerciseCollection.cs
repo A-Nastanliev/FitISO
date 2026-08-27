@@ -1,113 +1,75 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using FitISO.Maui.Messages;
 using FitISO.Maui.Models;
 using FitISO.Services;
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Runtime.CompilerServices;
-using System.Text;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace FitISO.Maui.ViewModels
 {
-    public partial class ExerciseCollection : ObservableObject, IRecipient<WorkoutFinishedMessage>, IRecipient<DbImportedMessage>
+    public partial class ExerciseCollection : PagedCollectionViewModel<FitISO.Data.Models.Exercise, Exercise, string>,
+        IRecipient<WorkoutFinishedMessage>, IRecipient<DbImportedMessage>
     {
-        [ObservableProperty]
-        ObservableCollection<Exercise> exercises = new();
-        [ObservableProperty]
-        bool loading;
-        const int batchSize = 20;
-        string cursor;
-        bool canLoadMore = true;
         readonly ExerciseService exerciseService;
 
         public ExerciseCollection(ExerciseService exerciseService)
         {
             this.exerciseService = exerciseService;
-            WeakReferenceMessenger.Default.RegisterAll(this);
         }
 
-        private bool CanStartLoading()
-            => !Loading && canLoadMore;
+        protected override int BatchSize => 20;
 
-        private void BeginLoading()
-            => Loading = true;
+        protected override async Task<IReadOnlyList<FitISO.Data.Models.Exercise>> FetchBatchAsync(int batchSize, string cursor)
+            => await exerciseService.GetNextAsync(batchSize, cursor);
 
-        private void EndLoading(int itemsLoaded, string cursor )
-        {
-            Loading = false;
+        protected override Exercise Wrap(FitISO.Data.Models.Exercise raw) => new Exercise(raw);
 
-            if (itemsLoaded < batchSize)
-                canLoadMore = false;
-
-            this.cursor = cursor;
-
-        }
-
-        [RelayCommand]
-        public async Task Load()
-        {
-            if (!CanStartLoading()) return;
-
-            BeginLoading();
-
-            try
-            {
-                var exercises = await exerciseService.GetNextAsync(batchSize, cursor);
-                foreach (var exercise in exercises)
-                    Exercises.Add(new Exercise(exercise));
-
-                if (exercises.Count > 0)
-                    cursor = Exercises[^1].Name;
-
-                EndLoading(exercises.Count, cursor);
-            }
-            catch (Exception ex)
-            {
-                Loading = false;
-                await Shell.Current.DisplayAlertAsync(ex.Message, ex.InnerException.ToString(), "OK");
-            }
-        }
+        protected override string GetCursor(Exercise item) => item.Name;
 
         public void Add(Exercise exercise)
         {
             var index = 0;
-            while (index < Exercises.Count &&
-                   string.Compare(Exercises[index].Name, exercise.Name, StringComparison.OrdinalIgnoreCase) < 0)
+            while (index < Items.Count &&
+                   string.Compare(Items[index].Name, exercise.Name, StringComparison.OrdinalIgnoreCase) < 0)
                 index++;
 
-            Exercises.Insert(index, exercise);
-            cursor = Exercises[^1].Name;
+            Items.Insert(index, exercise);
+            SyncCursorToTail();
         }
 
         public void Reposition(Exercise exercise)
         {
-            var currentIndex = Exercises.IndexOf(exercise);
+            var currentIndex = Items.IndexOf(exercise);
             if (currentIndex < 0) return;
 
             var index = 0;
-            for (var i = 0; i < Exercises.Count; i++)
+            for (var i = 0; i < Items.Count; i++)
             {
                 if (i == currentIndex) continue;
 
-                if (string.Compare(Exercises[i].Name, exercise.Name, StringComparison.OrdinalIgnoreCase) < 0)
+                if (string.Compare(Items[i].Name, exercise.Name, StringComparison.OrdinalIgnoreCase) < 0)
                     index++;
             }
 
             if (index != currentIndex)
-                Exercises.Move(currentIndex, index);
+                Items.Move(currentIndex, index);
         }
 
-        public void Remove(Exercise exercise) => Exercises.Remove(exercise);
+        public void Remove(Exercise exercise)
+        {
+            Items.Remove(exercise);
+            SyncCursorToTail();
+        }
 
         public void Receive(WorkoutFinishedMessage message)
         {
-            foreach(var workoutExercise in message.Value.WorkoutExercises)
+            foreach (var workoutExercise in message.Value.WorkoutExercises)
             {
-                var exercise = Exercises.FirstOrDefault(e => e.Id == workoutExercise.Exercise.Id);
-                if(exercise is not null)
+                var exercise = Items.FirstOrDefault(e => e.Id == workoutExercise.Exercise.Id);
+                if (exercise is not null)
                 {
                     exercise.LastSets = workoutExercise.Sets;
                     exercise.LastSetsDate = message.Value.StartTime;
@@ -115,9 +77,9 @@ namespace FitISO.Maui.ViewModels
                         exercise.BestSet = workoutExercise.Sets[0];
 
                     Set historyPoint = workoutExercise.Sets[0];
-                    for(int i=1; i<workoutExercise.Sets.Count; i++)
+                    for (int i = 1; i < workoutExercise.Sets.Count; i++)
                     {
-                        if(IsBetterSet(workoutExercise.Sets[i], historyPoint))
+                        if (IsBetterSet(workoutExercise.Sets[i], historyPoint))
                         {
                             historyPoint = workoutExercise.Sets[i];
                         }
@@ -149,10 +111,8 @@ namespace FitISO.Maui.ViewModels
 
         public async void Receive(DbImportedMessage message)
         {
-            Exercises.Clear();
-            cursor = null;
-            canLoadMore = true;
-            await Load();
+            ResetPaging();
+            await LoadFirst();
         }
     }
 }

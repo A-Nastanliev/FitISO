@@ -16,6 +16,6 @@ public partial class HistoryPage : ContentPage
     protected async override void OnAppearing()
     {
         base.OnAppearing();
-		await viewModel.Load();
+		await viewModel.LoadFirst();
     }
 }
