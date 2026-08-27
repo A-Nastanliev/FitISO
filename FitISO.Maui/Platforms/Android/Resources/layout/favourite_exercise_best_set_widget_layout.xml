@@ -1,0 +1,65 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/widget_background"
+    android:padding="10dp">
+
+	<ImageView
+        android:id="@+id/widget_trophy"
+        android:layout_width="70dp"
+        android:layout_height="70dp"
+        android:layout_centerInParent="true"
+        android:alpha="0.16"
+        android:scaleType="fitCenter"
+        android:src="@drawable/trophy_icon"
+        android:contentDescription="@null" />
+
+	<LinearLayout
+        android:id="@+id/widget_content"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:orientation="vertical"
+        android:gravity="center">
+
+		<TextView
+            android:id="@+id/widget_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="4dp"
+            android:textStyle="bold"
+            android:textSize="13sp"
+            android:textColor="#B3FFFFFF"
+            android:gravity="center"
+            android:maxLines="1"
+            android:ellipsize="end"
+            android:text="Favourite Exercise" />
+
+		<TextView
+            android:id="@+id/widget_best_set"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textStyle="bold"
+            android:textSize="22sp"
+            android:textColor="#CD5C5C"
+            android:gravity="center"
+            android:maxLines="1"
+            android:ellipsize="end"
+            android:text="100 kg × 5" />
+
+	</LinearLayout>
+
+	<TextView
+        android:id="@+id/widget_empty_state"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:textColor="#AAAAAA"
+        android:textSize="12sp"
+        android:padding="8dp"
+        android:visibility="gone"
+        android:text="Mark a favourite exercise in FitISO to see its best set here" />
+
+</RelativeLayout>

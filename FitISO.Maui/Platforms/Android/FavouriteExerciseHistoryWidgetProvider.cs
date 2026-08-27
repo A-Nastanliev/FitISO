@@ -9,12 +9,12 @@ using System.Text.Json;
 
 namespace FitISO.Maui.Platforms.Android
 {
-    [BroadcastReceiver(Label = "Favourite Exercise", Exported = false)]
+    [BroadcastReceiver(Label = "Favourite Exercise History", Exported = false)]
     [IntentFilter(new[] { AppWidgetManager.ActionAppwidgetUpdate })]
-    [MetaData(AppWidgetManager.MetaDataAppwidgetProvider, Resource = "@xml/favourite_exercise_widget_provider")]
-    public class FavouriteExerciseWidgetProvider : AppWidgetProvider
+    [MetaData(AppWidgetManager.MetaDataAppwidgetProvider, Resource = "@xml/favourite_exercise_history_widget_provider")]
+    public class FavouriteExerciseHistoryWidgetProvider : AppWidgetProvider
     {
-        public const string ActionRefresh = "com.fitiso.maui.widget.FAVOURITE_EXERCISE_REFRESH";
+        public const string ActionRefresh = "com.fitiso.maui.widget.FAVOURITE_EXERCISE_HISTORY_REFRESH";
         public const string PrefsName = "FitISO.FavouriteExerciseWidget";
         public const string SnapshotKey = "snapshot";
         public const string AccentColorKey = "accent_color";
@@ -36,7 +36,7 @@ namespace FitISO.Maui.Platforms.Android
                 return;
 
             var manager = AppWidgetManager.GetInstance(context);
-            var ids = manager.GetAppWidgetIds(new ComponentName(context, Java.Lang.Class.FromType(typeof(FavouriteExerciseWidgetProvider))));
+            var ids = manager.GetAppWidgetIds(new ComponentName(context, Java.Lang.Class.FromType(typeof(FavouriteExerciseHistoryWidgetProvider))));
             OnUpdate(context, manager, ids);
         }
 
@@ -52,7 +52,7 @@ namespace FitISO.Maui.Platforms.Android
 
             foreach (var widgetId in appWidgetIds)
             {
-                var views = new RemoteViews(context.PackageName, Resource.Layout.favourite_exercise_widget_layout);
+                var views = new RemoteViews(context.PackageName, Resource.Layout.favourite_exercise_history_widget_layout);
 
                 ApplyToViews(context, views, snapshot, widthPx, heightPx);
                 appWidgetManager.UpdateAppWidget(widgetId, views);

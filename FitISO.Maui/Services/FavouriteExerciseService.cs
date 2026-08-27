@@ -53,17 +53,17 @@ namespace FitISO.Maui.Services
         static void WriteWidgetSnapshot(Exercise? exercise)
         {
             var prefs = global::Android.App.Application.Context.GetSharedPreferences(
-                FavouriteExerciseWidgetProvider.PrefsName, FileCreationMode.Private);
+                FavouriteExerciseHistoryWidgetProvider.PrefsName, FileCreationMode.Private);
             using var editor = prefs!.Edit();
 
             if (exercise is null)
             {
-                editor!.Remove(FavouriteExerciseWidgetProvider.SnapshotKey);
+                editor!.Remove(FavouriteExerciseHistoryWidgetProvider.SnapshotKey);
             }
             else
             {
                 var snapshot = exercise;
-                editor!.PutString(FavouriteExerciseWidgetProvider.SnapshotKey, JsonSerializer.Serialize(snapshot));
+                editor!.PutString(FavouriteExerciseHistoryWidgetProvider.SnapshotKey, JsonSerializer.Serialize(snapshot));
             }
 
             editor!.Apply();
@@ -72,9 +72,14 @@ namespace FitISO.Maui.Services
         static void RefreshWidget()
         {
             var context = global::Android.App.Application.Context;
-            var intent = new Intent(context, typeof(FavouriteExerciseWidgetProvider));
-            intent.SetAction(FavouriteExerciseWidgetProvider.ActionRefresh);
-            context.SendBroadcast(intent);
+
+            var historyIntent = new Intent(context, typeof(FavouriteExerciseHistoryWidgetProvider));
+            historyIntent.SetAction(FavouriteExerciseHistoryWidgetProvider.ActionRefresh);
+            context.SendBroadcast(historyIntent);
+
+            var bestSetIntent = new Intent(context, typeof(FavouriteExerciseBestSetWidgetProvider));
+            bestSetIntent.SetAction(FavouriteExerciseBestSetWidgetProvider.ActionRefresh);
+            context.SendBroadcast(bestSetIntent);
         }
 #else
         static void WriteWidgetSnapshot(Exercise? exercise) { }

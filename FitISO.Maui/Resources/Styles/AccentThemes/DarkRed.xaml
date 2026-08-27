@@ -13,5 +13,5 @@
     <Color x:Key="Gray900">#2E1418</Color>
     <Color x:Key="Gray950">#1D0B0E</Color>
 
-    <Color x:Key="ChartAccentColor">#4FB8A3</Color>
+    <Color x:Key="ChartAccentColor">#E6C79C</Color>
 </ResourceDictionary>

@@ -45,20 +45,27 @@ namespace FitISO.Maui.ViewModels
             var context = global::Android.App.Application.Context;
 
             var prefs = context.GetSharedPreferences(
-                FitISO.Maui.Platforms.Android.FavouriteExerciseWidgetProvider.PrefsName,
+                FitISO.Maui.Platforms.Android.FavouriteExerciseHistoryWidgetProvider.PrefsName,
                 Android.Content.FileCreationMode.Private);
 
             var editor = prefs?.Edit();
-            editor?.PutInt(FitISO.Maui.Platforms.Android.FavouriteExerciseWidgetProvider.AccentColorKey, ToAndroidArgb(value.ChartAccentColor));
-            editor?.PutInt(FitISO.Maui.Platforms.Android.FavouriteExerciseWidgetProvider.GridColorKey, ToAndroidArgb(value.ChartGridColor));
-            editor?.PutInt(FitISO.Maui.Platforms.Android.FavouriteExerciseWidgetProvider.BackgroundColorKey, ToAndroidArgb(value.ChartBackgroundColor));
+            editor?.PutInt(FitISO.Maui.Platforms.Android.FavouriteExerciseHistoryWidgetProvider.AccentColorKey, ToAndroidArgb(value.ChartAccentColor));
+            editor?.PutInt(FitISO.Maui.Platforms.Android.FavouriteExerciseHistoryWidgetProvider.GridColorKey, ToAndroidArgb(value.ChartGridColor));
+            editor?.PutInt(FitISO.Maui.Platforms.Android.FavouriteExerciseHistoryWidgetProvider.BackgroundColorKey, ToAndroidArgb(value.ChartBackgroundColor));
             editor?.Commit();
 
-            var refreshIntent = new Android.Content.Intent(FitISO.Maui.Platforms.Android.FavouriteExerciseWidgetProvider.ActionRefresh);
+            var refreshIntent = new Android.Content.Intent(FitISO.Maui.Platforms.Android.FavouriteExerciseHistoryWidgetProvider.    ActionRefresh);
             refreshIntent.SetComponent(new Android.Content.ComponentName(
                 context,
-                Java.Lang.Class.FromType(typeof(FitISO.Maui.Platforms.Android.FavouriteExerciseWidgetProvider))));
+                Java.Lang.Class.FromType(typeof(FitISO.Maui.Platforms.Android.FavouriteExerciseHistoryWidgetProvider))));
             context.SendBroadcast(refreshIntent);
+
+
+            var bestSetRefreshIntent = new Android.Content.Intent(FitISO.Maui.Platforms.Android.FavouriteExerciseBestSetWidgetProvider.ActionRefresh);
+            bestSetRefreshIntent.SetComponent(new Android.Content.ComponentName(
+                context,
+                Java.Lang.Class.FromType(typeof(FitISO.Maui.Platforms.Android.FavouriteExerciseBestSetWidgetProvider))));
+            context.SendBroadcast(bestSetRefreshIntent);
 #endif
         }
 
