@@ -69,6 +69,17 @@ namespace FitISO.Maui.ViewModels
             }
         }
 
+        [RelayCommand]
+        public async Task StartWorkout(Workout workout)
+        {
+            if (ActiveWorkoutState.Instance.HasActiveWorkout) return;
+
+            Workout startWorkout = new Workout(await workoutService.StartFromWorkoutAsync(workout.Id));
+            WeakReferenceMessenger.Default.Send(new WorkoutStartedMessage(startWorkout));
+            ActiveWorkoutState.Instance.HasActiveWorkout = true;
+            await Shell.Current.GoToAsync("//active");
+        }
+
         public async void Receive(DbImportedMessage message)
         {
             ResetPaging();

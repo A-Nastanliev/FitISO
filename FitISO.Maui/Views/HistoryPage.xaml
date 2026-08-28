@@ -2,8 +2,10 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="FitISO.Maui.Views.HistoryPage"
+             xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
              xmlns:vm="clr-namespace:FitISO.Maui.ViewModels"
              x:DataType="vm:HistoryPageViewModel"
+             x:Name="Root"
              xmlns:models="clr-namespace:FitISO.Maui.Models">
 
     <Shell.TitleView>
@@ -33,12 +35,21 @@
                     <Grid Margin="8">
                         <Border StrokeThickness="0" StrokeShape="RoundRectangle 25" BackgroundColor="{DynamicResource Gray900}">
                             <Grid RowDefinitions="Auto, Auto, Auto" RowSpacing="4" Padding="0,4">
-                                <ImageButton Source="{FontImageSource FontFamily=MaterialRound, Glyph='&#xE415;'}"
-                                    HorizontalOptions="End" VerticalOptions="End" Margin="0,4,14,0"
-                                    Command="{Binding BindingContext.ExportWorkoutPdfCommand, Source={RelativeSource AncestorType={x:Type ContentPage}}}"
-                                    CommandParameter="{Binding .}"/>
-                                <Label FontSize="Medium" Text="{Binding Name}" HorizontalTextAlignment="Center" 
-                                   HorizontalOptions="Center" Grid.Row="0" VerticalOptions="End"/>
+     
+                                <Grid Grid.Row="0" ColumnDefinitions="*,8*,*" ColumnSpacing="12" Padding="12,4,12,0">
+                                    <ImageButton Source="{FontImageSource FontFamily=MaterialRound, Glyph='&#xE415;'}" Grid.Column="2"
+                                      Command="{Binding BindingContext.ExportWorkoutPdfCommand, Source={RelativeSource AncestorType={x:Type ContentPage}}}"
+                                      CommandParameter="{Binding .}"/>
+                                    <Border Grid.Column="0"  StrokeThickness="0" StrokeShape="RoundRectangle 18" Background="White"
+                                            HeightRequest="36" WidthRequest="36" Padding="0">
+                                        <ImageButton Source="{FontImageSource FontFamily=MaterialRound, Glyph='&#xe15a;', Size=20, Color={DynamicResource Gray700}}"
+                                          BackgroundColor="Transparent" Aspect="Center"
+                                          Command="{Binding BindingContext.StartWorkoutCommand, Source={x:Reference Root}}"
+                                          CommandParameter="{Binding .}"/>
+                                    </Border>
+                                    <Label FontSize="Medium" Text="{Binding Name}" HorizontalTextAlignment="Center" 
+                                        HorizontalOptions="Center" Grid.Row="0" VerticalOptions="Center" Grid.Column="1"/>
+                                </Grid>
                                 <Grid Grid.Row="1" ColumnDefinitions="Auto, Auto" HorizontalOptions="Center" ColumnSpacing="16" Margin="0,0,0,4">
                                     <Border Grid.Column="0" Padding="10,1"
                                     StrokeThickness="0" StrokeShape="RoundRectangle 25" Background="{DynamicResource Gray700}">

@@ -38,7 +38,7 @@ namespace FitISO.Services
             return savedWorkout!;
         }
 
-        public async Task<Workout> StartFromTemplateAsync(int templateId)
+        private async Task<Workout> StartFromExistingWorkoutAsync(int sourceId, bool requireTemplate)
         {
             using var _context = _contextFactory.CreateDbContext();
 
@@ -50,32 +50,28 @@ namespace FitISO.Services
             if (activeWorkout != null)
                 throw new InvalidOperationException($"Workout {activeWorkout.Name} is already active. Finish it before starting another.");
 
-            var template = await _context.Workouts
+            var source = await _context.Workouts
                 .Include(w => w.WorkoutExercises)
                     .ThenInclude(we => we.Sets)
                 .AsNoTracking()
                 .AsSplitQuery()
-                .FirstOrDefaultAsync(w => w.Id == templateId);
+                .FirstOrDefaultAsync(w => w.Id == sourceId);
 
-            if (template == null)
-                throw new KeyNotFoundException($"Workout {templateId} was not found.");
+            if (source == null)
+                throw new KeyNotFoundException($"Workout {sourceId} was not found.");
 
-            if (template.StartTime != null)
-                throw new InvalidOperationException($"Workout {templateId} is not a template.");
+            if (requireTemplate && source.StartTime != null)
+                throw new InvalidOperationException($"Workout {sourceId} is not a template.");
 
             var newWorkout = new Workout
             {
-                Name = template.Name,
+                Name = source.Name,
                 StartTime = DateTime.UtcNow,
                 EndTime = null,
-                WorkoutExercises = template.WorkoutExercises.Select(we => new WorkoutExercise
+                WorkoutExercises = source.WorkoutExercises.Select(we => new WorkoutExercise
                 {
                     ExerciseId = we.ExerciseId,
-                    Sets = we.Sets.Select(s => new Set
-                    {
-                        Weight = s.Weight,
-                        Reps = s.Reps
-                    }).ToList()
+                    Sets = we.Sets.Select(s => new Set { Weight = null, Reps = null }).ToList()
                 }).ToList()
             };
 
@@ -83,10 +79,8 @@ namespace FitISO.Services
             await _context.SaveChangesAsync();
 
             var savedWorkout = await _context.Workouts
-                .Include(w => w.WorkoutExercises)
-                    .ThenInclude(we => we.Exercise)
-                .Include(w => w.WorkoutExercises)
-                    .ThenInclude(we => we.Sets)
+                .Include(w => w.WorkoutExercises).ThenInclude(we => we.Exercise)
+                .Include(w => w.WorkoutExercises).ThenInclude(we => we.Sets)
                 .AsSplitQuery()
                 .FirstOrDefaultAsync(w => w.Id == newWorkout.Id);
 
@@ -95,6 +89,12 @@ namespace FitISO.Services
 
             return savedWorkout!;
         }
+
+        public Task<Workout> StartFromTemplateAsync(int templateId) =>
+            StartFromExistingWorkoutAsync(templateId, requireTemplate: true);
+
+        public Task<Workout> StartFromWorkoutAsync(int workoutId) =>
+            StartFromExistingWorkoutAsync(workoutId, requireTemplate: false);
 
         public async Task<Workout> GetActiveWorkoutAsync()
         {

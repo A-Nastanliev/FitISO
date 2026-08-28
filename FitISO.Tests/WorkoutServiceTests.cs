@@ -44,7 +44,7 @@ namespace FitISO.Tests.Services
         }
 
         [Test]
-        public async Task CreateAsync_PersistsWorkoutWithNullStartAndEndTime()
+        public async Task CreateAsync_WithNullWorkoutExercises_PersistsTemplateWithEmptyExerciseList()
         {
             var result = await _service.CreateAsync("Push Template", workoutExercises: null);
 
@@ -52,17 +52,10 @@ namespace FitISO.Tests.Services
             Assert.That(result.Name, Is.EqualTo("Push Template"));
             Assert.That(result.StartTime, Is.Null);
             Assert.That(result.EndTime, Is.Null);
+            Assert.That(result.WorkoutExercises, Is.Empty);
 
             var stored = await _context.Workouts.FindAsync(result.Id);
             Assert.That(stored, Is.Not.Null);
-        }
-
-        [Test]
-        public async Task CreateAsync_WithNullWorkoutExercises_ReturnsEmptyExerciseList()
-        {
-            var result = await _service.CreateAsync("Push Template", workoutExercises: null);
-
-            Assert.That(result.WorkoutExercises, Is.Empty);
         }
 
         [Test]
@@ -93,7 +86,7 @@ namespace FitISO.Tests.Services
         }
 
         [Test]
-        public async Task StartFromTemplateAsync_WithValidTemplate_SetsStartTimeAndCopiesExercisesAndSets()
+        public async Task StartFromTemplateAsync_WithValidTemplate_CopiesExercisesWithFreshEmptySets()
         {
             var exercise = new Exercise { Name = "Bench Press" };
             _context.Exercises.Add(exercise);
@@ -108,6 +101,9 @@ namespace FitISO.Tests.Services
                 }
             });
 
+            var templateWorkoutExerciseId = template.WorkoutExercises.Single().Id;
+            var templateSetId = template.WorkoutExercises.Single().Sets.Single().Id;
+
             var started = await _service.StartFromTemplateAsync(template.Id);
 
             Assert.That(started.Id, Is.Not.EqualTo(template.Id));
@@ -116,32 +112,13 @@ namespace FitISO.Tests.Services
             Assert.That(started.EndTime, Is.Null);
 
             var copiedExercise = started.WorkoutExercises.Single();
+            Assert.That(copiedExercise.Id, Is.Not.EqualTo(templateWorkoutExerciseId));
             Assert.That(copiedExercise.ExerciseId, Is.EqualTo(exercise.Id));
+
             var copiedSet = copiedExercise.Sets.Single();
-            Assert.That(copiedSet.Weight, Is.EqualTo(100));
-            Assert.That(copiedSet.Reps, Is.EqualTo(5));
-        }
-
-        [Test]
-        public async Task StartFromTemplateAsync_CopiesNewWorkoutExercisesAndSetsWithFreshIds()
-        {
-            var exercise = new Exercise { Name = "Bench Press" };
-            _context.Exercises.Add(exercise);
-            await _context.SaveChangesAsync();
-
-            var template = await _service.CreateAsync("Push Template", new List<WorkoutExercise>
-            {
-                new WorkoutExercise { ExerciseId = exercise.Id, Sets = new List<Set> { new Set { Weight = 100, Reps = 5 } } }
-            });
-
-            var started = await _service.StartFromTemplateAsync(template.Id);
-
-            var templateWorkoutExerciseId = template.WorkoutExercises.Single().Id;
-            var templateSetId = template.WorkoutExercises.Single().Sets.Single().Id;
-
-            var startedWorkoutExercise = started.WorkoutExercises.Single();
-            Assert.That(startedWorkoutExercise.Id, Is.Not.EqualTo(templateWorkoutExerciseId));
-            Assert.That(startedWorkoutExercise.Sets.Single().Id, Is.Not.EqualTo(templateSetId));
+            Assert.That(copiedSet.Id, Is.Not.EqualTo(templateSetId));
+            Assert.That(copiedSet.Weight, Is.Null);
+            Assert.That(copiedSet.Reps, Is.Null);
 
             var storedTemplate = await _context.Workouts
                 .Include(w => w.WorkoutExercises).ThenInclude(we => we.Sets)
@@ -556,7 +533,7 @@ namespace FitISO.Tests.Services
         }
 
         [Test]
-        public async Task UpdateAsync_ChangesExerciseIdAndNoteOnExistingWorkoutExercise()
+        public async Task UpdateAsync_ChangesExerciseIdOnExistingWorkoutExercise()
         {
             var exercise = new Exercise { Name = "Bench Press" };
             var newExercise = new Exercise { Name = "Deadlift" };
