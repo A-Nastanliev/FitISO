@@ -34,22 +34,9 @@
                 <DataTemplate x:DataType="models:Workout">
                     <Grid Margin="8">
                         <Border StrokeThickness="0" StrokeShape="RoundRectangle 25" BackgroundColor="{DynamicResource Gray900}">
-                            <Grid RowDefinitions="Auto, Auto, Auto" RowSpacing="4" Padding="0,4">
-     
-                                <Grid Grid.Row="0" ColumnDefinitions="*,8*,*" ColumnSpacing="12" Padding="12,4,12,0">
-                                    <ImageButton Source="{FontImageSource FontFamily=MaterialRound, Glyph='&#xE415;'}" Grid.Column="2"
-                                      Command="{Binding BindingContext.ExportWorkoutPdfCommand, Source={RelativeSource AncestorType={x:Type ContentPage}}}"
-                                      CommandParameter="{Binding .}"/>
-                                    <Border Grid.Column="0"  StrokeThickness="0" StrokeShape="RoundRectangle 18" Background="White"
-                                            HeightRequest="36" WidthRequest="36" Padding="0">
-                                        <ImageButton Source="{FontImageSource FontFamily=MaterialRound, Glyph='&#xe15a;', Size=20, Color={DynamicResource Gray700}}"
-                                          BackgroundColor="Transparent" Aspect="Center"
-                                          Command="{Binding BindingContext.StartWorkoutCommand, Source={x:Reference Root}}"
-                                          CommandParameter="{Binding .}"/>
-                                    </Border>
-                                    <Label FontSize="Medium" Text="{Binding Name}" HorizontalTextAlignment="Center" 
-                                        HorizontalOptions="Center" Grid.Row="0" VerticalOptions="Center" Grid.Column="1"/>
-                                </Grid>
+                            <Grid RowDefinitions="Auto, Auto, Auto, Auto" RowSpacing="4" Padding="0,4">
+                                <Label Grid.Row="0" FontSize="Medium" Text="{Binding Name}" HorizontalTextAlignment="Center"
+                                    HorizontalOptions="Center" Padding="12,4,12,0"/>
                                 <Grid Grid.Row="1" ColumnDefinitions="Auto, Auto" HorizontalOptions="Center" ColumnSpacing="16" Margin="0,0,0,4">
                                     <Border Grid.Column="0" Padding="10,1"
                                     StrokeThickness="0" StrokeShape="RoundRectangle 25" Background="{DynamicResource Gray700}">
@@ -66,7 +53,21 @@
                                         </Grid>
                                     </Border>
                                 </Grid>
-                                <CollectionView Grid.Row="2" ItemsSource="{Binding WorkoutExercises}" VerticalScrollBarVisibility="Never"
+                                <Grid Grid.Row="2" ColumnDefinitions="*,*,*" Margin="0,8" Padding="24,0">
+                                    <ImageButton Source="{FontImageSource FontFamily=MaterialRound, Glyph='&#xe15a;', Size=20, Color={DynamicResource Gray400}}"
+                                        BackgroundColor="Transparent" Aspect="Center" HorizontalOptions="Center"
+                                        Command="{Binding BindingContext.StartWorkoutCommand, Source={x:Reference Root}}"
+                                        CommandParameter="{Binding .}"/>
+                                    <ImageButton Source="{FontImageSource FontFamily=MaterialRound, Glyph='&#xe866;', Size=20, Color={DynamicResource Gray400}}"
+                                        Aspect="Center" Grid.Column="1" HorizontalOptions="Center"
+                                        Command="{Binding BindingContext.SaveAsTemplateCommand, Source={x:Reference Root}}"
+                                        CommandParameter="{Binding .}"/>
+                                    <ImageButton Source="{FontImageSource FontFamily=MaterialRound, Glyph='&#xE415;', Size=20, Color={DynamicResource Gray400}}"
+                                        Aspect="Center" Grid.Column="2" HorizontalOptions="Center"
+                                        Command="{Binding BindingContext.ExportWorkoutPdfCommand, Source={RelativeSource AncestorType={x:Type ContentPage}}}"
+                                        CommandParameter="{Binding .}"/>
+                                </Grid>
+                                <CollectionView Grid.Row="3" ItemsSource="{Binding WorkoutExercises}" VerticalScrollBarVisibility="Never"
                                 VerticalOptions="Fill">
                                     <CollectionView.ItemTemplate>
                                         <DataTemplate x:DataType="models:WorkoutExercise">

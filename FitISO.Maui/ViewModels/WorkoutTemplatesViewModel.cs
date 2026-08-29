@@ -70,10 +70,17 @@ namespace FitISO.Maui.ViewModels
         {
             if (ActiveWorkoutState.Instance.HasActiveWorkout) return;
 
-            Workout startWorkout = new Workout(await workoutService.StartFromTemplateAsync(workout.Id));
-            WeakReferenceMessenger.Default.Send(new WorkoutStartedMessage(startWorkout));
-            ActiveWorkoutState.Instance.HasActiveWorkout = true;
-            await Shell.Current.GoToAsync("//active");
+            try
+            {
+                Workout startWorkout = new Workout(await workoutService.StartFromTemplateAsync(workout.Id));
+                WeakReferenceMessenger.Default.Send(new WorkoutStartedMessage(startWorkout));
+                ActiveWorkoutState.Instance.HasActiveWorkout = true;
+                await Shell.Current.GoToAsync("//active");
+            }
+            catch (Exception ex)
+            {
+                await Shell.Current.DisplayAlertAsync("Error", ex.Message, "OK");
+            }
         }
 
         public async void Receive(DbImportedMessage message)

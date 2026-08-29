@@ -38,17 +38,20 @@ namespace FitISO.Services
             return savedWorkout!;
         }
 
-        private async Task<Workout> StartFromExistingWorkoutAsync(int sourceId, bool requireTemplate)
+        private async Task<Workout> CreateFromExistingWorkoutAsync(int sourceId, bool requireTemplate, bool asTemplate)
         {
             using var _context = _contextFactory.CreateDbContext();
 
-            var activeWorkout = await _context.Workouts
-                .Where(w => w.StartTime != null && w.EndTime == null)
-                .Select(w => new { w.Name })
-                .FirstOrDefaultAsync();
+            if (!asTemplate)
+            {
+                var activeWorkout = await _context.Workouts
+                    .Where(w => w.StartTime != null && w.EndTime == null)
+                    .Select(w => new { w.Name })
+                    .FirstOrDefaultAsync();
 
-            if (activeWorkout != null)
-                throw new InvalidOperationException($"Workout {activeWorkout.Name} is already active. Finish it before starting another.");
+                if (activeWorkout != null)
+                    throw new InvalidOperationException($"Workout {activeWorkout.Name} is already active. Finish it before starting another.");
+            }
 
             var source = await _context.Workouts
                 .Include(w => w.WorkoutExercises)
@@ -66,7 +69,7 @@ namespace FitISO.Services
             var newWorkout = new Workout
             {
                 Name = source.Name,
-                StartTime = DateTime.UtcNow,
+                StartTime = asTemplate ? null : DateTime.UtcNow,
                 EndTime = null,
                 WorkoutExercises = source.WorkoutExercises.Select(we => new WorkoutExercise
                 {
@@ -84,17 +87,23 @@ namespace FitISO.Services
                 .AsSplitQuery()
                 .FirstOrDefaultAsync(w => w.Id == newWorkout.Id);
 
-            var exercises = savedWorkout!.WorkoutExercises.Select(we => we.Exercise).ToList();
-            await PopulateExerciseHistoryAsync(_context, exercises, excludeWorkoutId: newWorkout.Id);
+            if (!asTemplate)
+            {
+                var exercises = savedWorkout!.WorkoutExercises.Select(we => we.Exercise).ToList();
+                await PopulateExerciseHistoryAsync(_context, exercises, excludeWorkoutId: newWorkout.Id);
+            }
 
             return savedWorkout!;
         }
 
         public Task<Workout> StartFromTemplateAsync(int templateId) =>
-            StartFromExistingWorkoutAsync(templateId, requireTemplate: true);
+            CreateFromExistingWorkoutAsync(templateId, requireTemplate: true, asTemplate: false);
 
         public Task<Workout> StartFromWorkoutAsync(int workoutId) =>
-            StartFromExistingWorkoutAsync(workoutId, requireTemplate: false);
+            CreateFromExistingWorkoutAsync(workoutId, requireTemplate: false, asTemplate: false);
+
+        public Task<Workout> TemplateFromWorkoutAsync(int workoutId) =>
+            CreateFromExistingWorkoutAsync(workoutId, requireTemplate: false, asTemplate: true);
 
         public async Task<Workout> GetActiveWorkoutAsync()
         {

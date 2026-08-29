@@ -74,10 +74,33 @@ namespace FitISO.Maui.ViewModels
         {
             if (ActiveWorkoutState.Instance.HasActiveWorkout) return;
 
-            Workout startWorkout = new Workout(await workoutService.StartFromWorkoutAsync(workout.Id));
-            WeakReferenceMessenger.Default.Send(new WorkoutStartedMessage(startWorkout));
-            ActiveWorkoutState.Instance.HasActiveWorkout = true;
-            await Shell.Current.GoToAsync("//active");
+            try
+            {
+                Workout startWorkout = new Workout(await workoutService.StartFromWorkoutAsync(workout.Id));
+                WeakReferenceMessenger.Default.Send(new WorkoutStartedMessage(startWorkout));
+                ActiveWorkoutState.Instance.HasActiveWorkout = true;
+                await Shell.Current.GoToAsync("//active");
+            }
+            catch(Exception ex)
+            {
+                await Shell.Current.DisplayAlertAsync("Error", ex.Message, "OK");
+            }
+        }
+
+        [RelayCommand]
+        private async Task SaveAsTemplateAsync(Workout workout)
+        {
+            try
+            {
+                var newTemplate = new Workout(await workoutService.TemplateFromWorkoutAsync(workout.Id));
+                WeakReferenceMessenger.Default.Send(new WorkoutTemplateCreatedMessage(newTemplate));
+                _ = Toast.Make($"{workout.Name} saved as template").Show();
+                await Shell.Current.GoToAsync("//workouts");
+            }
+            catch (Exception ex)
+            {
+                await Shell.Current.DisplayAlertAsync("Save failed", ex.Message, "OK");
+            }
         }
 
         public async void Receive(DbImportedMessage message)
