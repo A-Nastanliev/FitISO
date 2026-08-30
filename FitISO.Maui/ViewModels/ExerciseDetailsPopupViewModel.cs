@@ -255,7 +255,7 @@ namespace FitISO.Maui.ViewModels
                 await exerciseService.UpdateNameAsync(Exercise.Id, Exercise.Name.Trim());
                 WasRenamed = true;
                 IsEditingName = false;
-                WeakReferenceMessenger.Default.Send(Exercise);
+                WeakReferenceMessenger.Default.Send(new ExerciseUpdatedMessage(Exercise));
             }
             catch (Exception ex)
             {

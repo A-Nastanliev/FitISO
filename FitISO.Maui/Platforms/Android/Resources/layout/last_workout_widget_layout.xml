@@ -1,0 +1,44 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/widget_background"
+    android:padding="10dp">
+
+	<LinearLayout
+        android:id="@+id/widget_content"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:orientation="vertical"
+        android:gravity="center">
+
+		<TextView
+            android:id="@+id/widget_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="4dp"
+            android:textStyle="bold"
+            android:textSize="13sp"
+            android:textColor="#B3FFFFFF"
+            android:gravity="center"
+            android:maxLines="1"
+            android:ellipsize="end"
+            android:text="Last Workout" />
+
+		<TextView
+            android:id="@+id/widget_days_since"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textStyle="bold"
+            android:textSize="22sp"
+            android:textColor="#CD5C5C"
+            android:gravity="center"
+            android:maxLines="1"
+            android:ellipsize="end"
+            android:text="Today" />
+
+	</LinearLayout>
+
+</RelativeLayout>

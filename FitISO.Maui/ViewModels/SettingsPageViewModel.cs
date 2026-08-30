@@ -66,6 +66,12 @@ namespace FitISO.Maui.ViewModels
                 context,
                 Java.Lang.Class.FromType(typeof(FitISO.Maui.Platforms.Android.FavouriteExerciseBestSetWidgetProvider))));
             context.SendBroadcast(bestSetRefreshIntent);
+
+            var daysSinceRefreshIntent = new Android.Content.Intent(FitISO.Maui.Platforms.Android.LastWorkoutWidgetProvider.ActionRefresh);
+            daysSinceRefreshIntent.SetComponent(new Android.Content.ComponentName(
+                context,
+                Java.Lang.Class.FromType(typeof(FitISO.Maui.Platforms.Android.LastWorkoutWidgetProvider))));
+            context.SendBroadcast(daysSinceRefreshIntent);
 #endif
         }
 

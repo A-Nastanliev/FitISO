@@ -65,6 +65,8 @@ namespace FitISO.Maui
             builder.Services.AddSingleton<HistoryPageViewModel>();
 
             builder.Services.AddSingleton<FavoriteExerciseService>();
+            builder.Services.AddSingleton<LastWorkoutService>();
+
 #if DEBUG
             builder.Logging.AddDebug();
 #endif
@@ -93,6 +95,7 @@ namespace FitISO.Maui
             });
 #endif
             app.Services.GetRequiredService<ActiveWorkoutViewModel>();
+            app.Services.GetRequiredService<LastWorkoutService>();
 
             return app;
         }
