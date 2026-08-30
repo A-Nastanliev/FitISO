@@ -53,7 +53,7 @@
                                         </Grid>
                                     </Border>
                                 </Grid>
-                                <Grid Grid.Row="2" ColumnDefinitions="*,*,*" Margin="0,8" Padding="24,0">
+                                <Grid Grid.Row="2" ColumnDefinitions="*,*,*,*" Margin="0,8" Padding="24,0">
                                     <ImageButton Source="{FontImageSource FontFamily=MaterialRound, Glyph='&#xe15a;', Size=20, Color={DynamicResource Gray400}}"
                                         BackgroundColor="Transparent" Aspect="Center" HorizontalOptions="Center"
                                         Command="{Binding BindingContext.StartWorkoutCommand, Source={x:Reference Root}}"
@@ -62,8 +62,12 @@
                                         Aspect="Center" Grid.Column="1" HorizontalOptions="Center"
                                         Command="{Binding BindingContext.SaveAsTemplateCommand, Source={x:Reference Root}}"
                                         CommandParameter="{Binding .}"/>
+                                    <ImageButton Source="{FontImageSource FontFamily=MaterialRound, Glyph='&#xE3F4;', Size=20, Color={DynamicResource Gray400}}"
+                                       Aspect="Center" Grid.Column="2" HorizontalOptions="Center"
+                                       Command="{Binding BindingContext.ExportWorkoutImageCommand, Source={RelativeSource AncestorType={x:Type ContentPage}}}"
+                                       CommandParameter="{Binding .}"/>
                                     <ImageButton Source="{FontImageSource FontFamily=MaterialRound, Glyph='&#xE415;', Size=20, Color={DynamicResource Gray400}}"
-                                        Aspect="Center" Grid.Column="2" HorizontalOptions="Center"
+                                        Aspect="Center" Grid.Column="3" HorizontalOptions="Center"
                                         Command="{Binding BindingContext.ExportWorkoutPdfCommand, Source={RelativeSource AncestorType={x:Type ContentPage}}}"
                                         CommandParameter="{Binding .}"/>
                                 </Grid>

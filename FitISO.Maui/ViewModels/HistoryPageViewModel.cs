@@ -34,6 +34,42 @@ namespace FitISO.Maui.ViewModels
         protected override int? GetCursor(Workout item) => item.Id;
 
         [RelayCommand]
+        private async Task ExportWorkoutImageAsync(Workout workout)
+        {
+            if (workout is null)
+                return;
+
+            try
+            {
+                using var stream = new MemoryStream();
+                WorkoutImageBuilder.Build(workout, stream);
+                stream.Position = 0;
+
+                var invalidChars = Path.GetInvalidFileNameChars();
+                var safeWorkoutName = string.Concat(workout.Name.Split(invalidChars));
+                var fileName = $"FitISO_{safeWorkoutName}_{workout.StartTime:yyyy_MM_dd}.png";
+
+                var result = await FileSaver.Default.SaveAsync(fileName, stream, CancellationToken.None);
+
+                if (result.IsSuccessful)
+                {
+                    _ = Toast.Make("Image saved").Show();
+                }
+                else if (result.Exception is not null && result.Exception is not OperationCanceledException)
+                {
+                    await Shell.Current.DisplayAlertAsync("Export failed", result.Exception.Message, "OK");
+                }
+            }
+            catch (OperationCanceledException)
+            {
+            }
+            catch (Exception ex)
+            {
+                await Shell.Current.DisplayAlertAsync("Export failed", ex.Message, "OK");
+            }
+        }
+
+        [RelayCommand]
         private async Task ExportWorkoutPdfAsync(Workout workout)
         {
             if (workout is null)

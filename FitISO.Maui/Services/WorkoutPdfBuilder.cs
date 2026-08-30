@@ -5,9 +5,18 @@ namespace FitISO.Maui.Services
 {
     public static class WorkoutPdfBuilder
     {
-        const float PageWidth = 595f; 
+        const float PageWidth = 595f;
         const float PageHeight = 842f;
         const float Margin = 40f;
+
+        static DateTime ToLocal(DateTime? dt)
+        {
+            var value = dt.GetValueOrDefault();
+            if (value.Kind != DateTimeKind.Utc)
+                value = DateTime.SpecifyKind(value, DateTimeKind.Utc);
+
+            return value.ToLocalTime();
+        }
 
         public static void Build(Workout workout, Stream output)
         {
@@ -46,13 +55,14 @@ namespace FitISO.Maui.Services
             canvas.DrawText(workout.Name, Margin, y + 20, SKTextAlign.Left, titleFont, blackPaint);
             y += 44;
 
+            var startLocal = ToLocal(workout.StartTime);
             var endTime = workout.EndTime ?? workout.StartTime;
             var durationMinutes = (int)(endTime - workout.StartTime).Value.TotalMinutes;
-            var endTimeText = workout.EndTime is null ? "--:--" : endTime.Value.ToString("HH:mm");
+            var endTimeText = workout.EndTime is null ? "--:--" : ToLocal(endTime).ToString("HH:mm");
 
-            canvas.DrawText($"{workout.StartTime:dddd, MMMM d, yyyy}", Margin, y, SKTextAlign.Left, subFont, grayPaint);
+            canvas.DrawText($"{startLocal:dddd, MMMM d, yyyy}", Margin, y, SKTextAlign.Left, subFont, grayPaint);
             y += 18;
-            canvas.DrawText($"{workout.StartTime:HH:mm} - {endTimeText}  ({durationMinutes} min)", Margin, y, SKTextAlign.Left, subFont, grayPaint);
+            canvas.DrawText($"{startLocal:HH:mm} - {endTimeText}  ({durationMinutes} min)", Margin, y, SKTextAlign.Left, subFont, grayPaint);
             y += 24;
 
             canvas.DrawLine(Margin, y, PageWidth - Margin, y, linePaint);
