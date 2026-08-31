@@ -3,10 +3,12 @@ using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using FitISO.Maui.Messages;
 using FitISO.Maui.Models;
+using FitISO.Maui.Services;
 using FitISO.Maui.Views;
 using FitISO.Services;
 using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Threading.Tasks;
 
 namespace FitISO.Maui.ViewModels
@@ -16,11 +18,24 @@ namespace FitISO.Maui.ViewModels
     {
         readonly WorkoutService workoutService;
         readonly WorkoutExerciseService workoutExerciseService;
+        readonly FavouriteWorkoutTemplateService favoriteWorkoutTemplateService;
 
-        public WorkoutTemplatesViewModel(WorkoutService workoutService, WorkoutExerciseService workoutExerciseService)
+        public WorkoutTemplatesViewModel(WorkoutService workoutService, WorkoutExerciseService workoutExerciseService,
+            FavouriteWorkoutTemplateService favoriteWorkoutTemplateService)
         {
             this.workoutService = workoutService;
             this.workoutExerciseService = workoutExerciseService;
+            this.favoriteWorkoutTemplateService = favoriteWorkoutTemplateService;
+            Items.CollectionChanged += Items_CollectionChanged;
+        }
+
+        async void Items_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+        {
+            if (e.NewItems is null) return;
+
+            var favoriteId = await favoriteWorkoutTemplateService.GetFavoriteTemplateIdAsync();
+            foreach (Workout workout in e.NewItems)
+                workout.IsFavorite = favoriteId is not null && workout.Id == favoriteId.Value;
         }
 
         protected override int BatchSize => 8;
@@ -53,9 +68,28 @@ namespace FitISO.Maui.ViewModels
                 return;
 
             await workoutService.DeleteAsync(workout.Id);
+            await favoriteWorkoutTemplateService.ClearIfFavoriteAsync(workout.Id);
             _ = Toast.Make($"{workout.Name} deleted").Show();
             Items.Remove(workout);
             SyncCursorToTail();
+        }
+
+        [RelayCommand]
+        public async Task ToggleFavorite(Workout workout)
+        {
+            if (workout.IsFavorite)
+            {
+                favoriteWorkoutTemplateService.ClearFavorite();
+                workout.IsFavorite = false;
+                _ = Toast.Make($"{workout.Name} removed as favourite").Show();
+            }
+            else
+            {
+                await favoriteWorkoutTemplateService.SetFavoriteAsync(workout);
+                foreach (var w in Items)
+                    w.IsFavorite = w.Id == workout.Id;
+                _ = Toast.Make($"{workout.Name} set as favourite").Show();
+            }
         }
 
         [RelayCommand]

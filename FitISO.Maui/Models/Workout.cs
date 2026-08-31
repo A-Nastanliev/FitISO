@@ -19,6 +19,8 @@ namespace FitISO.Maui.Models
         DateTime? endTime;
         [ObservableProperty]
         ObservableCollection<WorkoutExercise> workoutExercises = new();
+        [ObservableProperty]
+        bool isFavorite;
 
         public Workout() { }
         

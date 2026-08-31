@@ -56,6 +56,19 @@
                                     </CollectionView>
                                 </Border>
                                 <HorizontalStackLayout Grid.Row="2" HorizontalOptions="Center" Spacing="16">
+                                    <ImageButton  Source="{FontImageSource FontFamily=MaterialRound, Glyph='&#xE83A;'}" Padding="7"
+                                            HeightRequest="46" CornerRadius="23" WidthRequest="46" BackgroundColor="{StaticResource Gray300}"
+                                             Command="{Binding BindingContext.ToggleFavoriteCommand, Source={x:Reference Root}}"
+                                            CommandParameter="{Binding .}">
+                                        <ImageButton.Triggers>
+                                            <DataTrigger TargetType="ImageButton" Binding="{Binding IsFavorite}" Value="True">
+                                                <Setter Property="Source" Value="{FontImageSource FontFamily=MaterialRound, Glyph='&#xE838;', Color=White}"/>
+                                            </DataTrigger>
+                                            <DataTrigger TargetType="ImageButton" Binding="{Binding IsFavorite}" Value="False">
+                                                <Setter Property="Source" Value="{FontImageSource FontFamily=MaterialRound, Glyph='&#xE83A;'}"/>
+                                            </DataTrigger>
+                                        </ImageButton.Triggers>
+                                    </ImageButton>
                                     <ImageButton  Source="{FontImageSource FontFamily=MaterialRound, Glyph='&#xE872;'}" Padding="4"
                                             HeightRequest="46" CornerRadius="23" WidthRequest="46" BackgroundColor="IndianRed"
                                              Command="{Binding BindingContext.DeleteWorkoutTemplateCommand, Source={x:Reference Root}}"

@@ -82,6 +82,7 @@ namespace FitISO.Maui.ViewModels
                     NavigationWorkout.Name = Workout.Name;
                     Workout updatedWorkout = new Workout(updated);
                     NavigationWorkout.WorkoutExercises = updatedWorkout.WorkoutExercises;
+                    WeakReferenceMessenger.Default.Send(new WorkoutTemplateUpdatedMessage(NavigationWorkout));
                     _ = Toast.Make($"{updated.Name} updated").Show();
                     await NavigateBack();
                 }

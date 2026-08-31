@@ -10,11 +10,11 @@ using System.Text.Json;
 
 namespace FitISO.Maui.Services
 {
-    public class FavoriteExerciseService : IRecipient<DbImportedMessage>, IRecipient<WorkoutFinishedMessage>, IRecipient<ExerciseUpdatedMessage>
+    public class FavouriteExerciseService : IRecipient<DbImportedMessage>, IRecipient<WorkoutFinishedMessage>, IRecipient<ExerciseUpdatedMessage>
     {
         const string FavoriteExerciseIdKey = "FavoriteExerciseId";
 
-        public FavoriteExerciseService()
+        public FavouriteExerciseService()
         {
             WeakReferenceMessenger.Default.RegisterAll(this);
         }

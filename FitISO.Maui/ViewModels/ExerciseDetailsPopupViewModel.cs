@@ -78,14 +78,14 @@ namespace FitISO.Maui.ViewModels
         readonly TaskCompletionSource closedSource = new();
         readonly ExerciseService exerciseService;
         readonly SetService setService;
-        readonly FavoriteExerciseService favoriteExerciseService;
+        readonly FavouriteExerciseService favoriteExerciseService;
 
         public Task Closed => closedSource.Task;
 
         const double RepsInfluence = 0.01;
         const double MaxRepsOffset = 0.5;
 
-        public ExerciseDetailsPopupViewModel(ExerciseService exerciseService, SetService setService, FavoriteExerciseService favoriteExerciseService)
+        public ExerciseDetailsPopupViewModel(ExerciseService exerciseService, SetService setService, FavouriteExerciseService favoriteExerciseService)
         {
             this.exerciseService = exerciseService;
             this.setService = setService;

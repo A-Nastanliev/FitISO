@@ -72,6 +72,12 @@ namespace FitISO.Maui.ViewModels
                 context,
                 Java.Lang.Class.FromType(typeof(FitISO.Maui.Platforms.Android.LastWorkoutWidgetProvider))));
             context.SendBroadcast(daysSinceRefreshIntent);
+
+            var favouriteWorkoutRefreshIntent = new Android.Content.Intent(FitISO.Maui.Platforms.Android.FavouriteWorkoutStartWidgetProvider.ActionRefresh);
+            favouriteWorkoutRefreshIntent.SetComponent(new Android.Content.ComponentName(
+                context,
+                Java.Lang.Class.FromType(typeof(FitISO.Maui.Platforms.Android.FavouriteWorkoutStartWidgetProvider))));
+            context.SendBroadcast(favouriteWorkoutRefreshIntent);
 #endif
         }
 
