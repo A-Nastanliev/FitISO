@@ -23,15 +23,32 @@ namespace FitISO.Maui.ViewModels
         [ObservableProperty]
         AccentTheme selectedAccentTheme;
 
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(HasLastBackup))]
+        DateTime? lastBackupUtc;
+
+        public bool HasLastBackup => LastBackupUtc is not null;
+
+        const string LastBackupPrefKey = "last_export_utc";
+
         public SettingsPageViewModel()
         {
             AccentThemes.Add(new AccentTheme(nameof(Default), new Default()));
             AccentThemes.Add(new AccentTheme(nameof(DarkBlue), new DarkBlue()));
             AccentThemes.Add(new AccentTheme(nameof(DarkRed), new DarkRed()));
             AccentThemes.Add(new AccentTheme(nameof(Olive), new Olive()));
+            AccentThemes.Add(new AccentTheme(nameof(DeepTeal), new DeepTeal()));
+            AccentThemes.Add(new AccentTheme(nameof(Slate), new Slate()));
+            AccentThemes.Add(new AccentTheme(nameof(Espresso), new Espresso()));
+            AccentThemes.Add(new AccentTheme(nameof(Rust), new Rust()));
+            AccentThemes.Add(new AccentTheme(nameof(Plum), new Plum()));
 
             var savedTheme = Preferences.Get("accent_theme", nameof(Default));
             selectedAccentTheme = AccentThemes.FirstOrDefault(t => t.Name == savedTheme) ?? AccentThemes[0];
+
+            var savedBackup = Preferences.Get(LastBackupPrefKey, string.Empty);
+            lastBackupUtc = string.IsNullOrEmpty(savedBackup) ? null
+                : DateTime.Parse(savedBackup, null, System.Globalization.DateTimeStyles.RoundtripKind);
         }
 
         partial void OnSelectedAccentThemeChanged(AccentTheme value)
@@ -115,6 +132,9 @@ namespace FitISO.Maui.ViewModels
 
                 if (result.IsSuccessful)
                 {
+                    LastBackupUtc = DateTime.UtcNow;
+                    Preferences.Set(LastBackupPrefKey, LastBackupUtc.Value.ToString("O"));
+
                     _ = Toast.Make("Database exported").Show();
                 }
                 else if (result.Exception is not null)
@@ -181,6 +201,9 @@ namespace FitISO.Maui.ViewModels
                 {
                     await sourceStream.CopyToAsync(destinationStream);
                 }
+
+                LastBackupUtc = null;
+                Preferences.Remove(LastBackupPrefKey);
 
                 _ = Toast.Make($"Database imported").Show();
                 WeakReferenceMessenger.Default.Send(new DbImportedMessage());

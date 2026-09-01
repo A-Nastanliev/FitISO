@@ -1,0 +1,18 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ResourceDictionary xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="FitISO.Maui.Resources.Styles.AccentThemes.Slate">
+    <Color x:Key="Gray100">#E1E3E3</Color>
+    <Color x:Key="Gray200">#C7CACA</Color>
+    <Color x:Key="Gray300">#A9AEAE</Color>
+    <Color x:Key="Gray400">#8A9292</Color>
+    <Color x:Key="Gray500">#697373</Color>
+    <Color x:Key="Gray600">#4A5555</Color>
+    <Color x:Key="Gray700">#374141</Color>
+    <Color x:Key="Gray800">#293131</Color>
+    <Color x:Key="Gray900">#1D2424</Color>
+    <Color x:Key="Gray950">#111717</Color>
+
+    <Color x:Key="ChartAccentColor">#E8A33D</Color>
+    <Color x:Key="DeleteColor">IndianRed</Color>
+</ResourceDictionary>

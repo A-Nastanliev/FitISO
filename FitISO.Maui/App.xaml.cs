@@ -1,7 +1,8 @@
 ﻿using CommunityToolkit.Mvvm.Messaging;
 using FitISO.Maui.Messages;
-using FitISO.Services;
+using FitISO.Maui.Models;
 using FitISO.Maui.Resources.Styles.AccentThemes;
+using FitISO.Services;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace FitISO.Maui
@@ -30,7 +31,12 @@ namespace FitISO.Maui
             {
                 nameof(DarkBlue) => new DarkBlue(),
                 nameof(DarkRed) => new DarkRed(),
-                nameof(Olive)=> new Olive(),
+                nameof(Olive) => new Olive(),
+                nameof(DeepTeal) => new DeepTeal(),
+                nameof(Slate) => new Slate(),
+                nameof(Espresso) => new Espresso(),
+                nameof(Rust) => new Rust(),
+                nameof(Plum) => new Plum(),
                 _ => new Default()
             };
 

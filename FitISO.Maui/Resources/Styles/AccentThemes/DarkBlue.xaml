@@ -2,16 +2,17 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="FitISO.Maui.Resources.Styles.AccentThemes.DarkBlue">
-    <Color x:Key="Gray100">#DEE1E4</Color>
-    <Color x:Key="Gray200">#C2C7CE</Color>
-    <Color x:Key="Gray300">#A2ABB6</Color>
-    <Color x:Key="Gray400">#828FA0</Color>
-    <Color x:Key="Gray500">#5B6C81</Color>
-    <Color x:Key="Gray600">#2E3E52</Color>
-    <Color x:Key="Gray700">#253447</Color>
-    <Color x:Key="Gray800">#1C293A</Color>
-    <Color x:Key="Gray900">#14202E</Color>
-    <Color x:Key="Gray950">#0B131D</Color>
+    <Color x:Key="Gray100">#DEE1E8</Color>
+    <Color x:Key="Gray200">#C2C7D2</Color>
+    <Color x:Key="Gray300">#A2A9B8</Color>
+    <Color x:Key="Gray400">#828DA1</Color>
+    <Color x:Key="Gray500">#5B6880</Color>
+    <Color x:Key="Gray600">#303E55</Color>
+    <Color x:Key="Gray700">#263349</Color>
+    <Color x:Key="Gray800">#1D293C</Color>
+    <Color x:Key="Gray900">#141F31</Color>
+    <Color x:Key="Gray950">#0B1422</Color>
 
     <Color x:Key="ChartAccentColor">#E8A33D</Color>
+    <Color x:Key="DeleteColor">IndianRed</Color>
 </ResourceDictionary>

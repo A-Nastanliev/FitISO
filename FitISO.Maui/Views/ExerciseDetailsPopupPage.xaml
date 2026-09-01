@@ -39,10 +39,10 @@
                      IsEnabled="{Binding CanFavourite}">
                     <ImageButton.Triggers>
                         <DataTrigger TargetType="ImageButton" Binding="{Binding IsFavourite}" Value="True">
-                            <Setter Property="Source" Value="{FontImageSource FontFamily=MaterialRound, Glyph='&#xE838;', Color=White   }" />
+                            <Setter Property="Source" Value="{FontImageSource FontFamily=MaterialRound, Glyph='&#xE838;', Color={DynamicResource ChartAccentColor}   }" />
                         </DataTrigger>
                         <DataTrigger TargetType="ImageButton" Binding="{Binding IsFavourite}" Value="False">
-                            <Setter Property="Source" Value="{FontImageSource FontFamily=MaterialRound, Glyph='&#xE83A;'}" />
+                            <Setter Property="Source" Value="{FontImageSource FontFamily=MaterialRound, Glyph='&#xE83A;' }" />
                         </DataTrigger>
                     </ImageButton.Triggers>
                 </ImageButton>
@@ -59,7 +59,7 @@
                      Command="{Binding CancelRenameCommand}" IsEnabled="{Binding IsNotBusy}" />
 
                 <ImageButton Grid.Row="0" Grid.Column="3" HeightRequest="50" WidthRequest="50"
-                     Source="{FontImageSource FontFamily=MaterialRound, Glyph='&#xE872;'}" BackgroundColor="IndianRed"
+                     Source="{FontImageSource FontFamily=MaterialRound, Glyph='&#xE872;'}" BackgroundColor="{DynamicResource DeleteColor}"
                      CornerRadius="24" Padding="8"
                      IsVisible="{Binding ShowDeleteButton}"
                      Command="{Binding DeleteCommand}" IsEnabled="{Binding IsNotBusy}" />

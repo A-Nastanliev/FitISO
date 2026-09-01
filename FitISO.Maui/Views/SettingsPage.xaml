@@ -21,9 +21,9 @@
          TextColor="{DynamicResource Gray500}" />
 
         <CollectionView ItemsSource="{Binding AccentThemes}" SelectedItem="{Binding SelectedAccentTheme, Mode=TwoWay}"
-         SelectionMode="Single" HeightRequest="56" HorizontalOptions="Start">
+         SelectionMode="Single" HorizontalOptions="Fill" VerticalScrollBarVisibility="Never" HorizontalScrollBarVisibility="Never">
             <CollectionView.ItemsLayout>
-                <LinearItemsLayout Orientation="Horizontal" ItemSpacing="12"/>
+                <GridItemsLayout Orientation="Vertical" Span="6" HorizontalItemSpacing="12" VerticalItemSpacing="12"/>
             </CollectionView.ItemsLayout>
             <CollectionView.ItemTemplate>
                 <DataTemplate x:DataType="models:AccentTheme">
@@ -71,16 +71,67 @@
 
         <Grid ColumnDefinitions="*,*" ColumnSpacing="16">
             <Button
-                Text="Export Database" CornerRadius="24" BackgroundColor="{DynamicResource Gray500}" 
-                Command="{Binding ExportDatabaseCommand}" 
-                IsEnabled="{Binding IsNotBusy}" FontSize="Small" />
+                Text="Export Database" CornerRadius="24"
+                Command="{Binding ExportDatabaseCommand}"
+                IsEnabled="{Binding IsNotBusy}" FontSize="Small">
+                <VisualStateManager.VisualStateGroups>
+                    <VisualStateGroupList>
+                        <VisualStateGroup x:Name="CommonStates">
+                            <VisualState x:Name="Normal">
+                                <VisualState.Setters>
+                                    <Setter Property="BackgroundColor" Value="{DynamicResource Gray500}" />
+                                    <Setter Property="Opacity" Value="1" />
+                                </VisualState.Setters>
+                            </VisualState>
+                            <VisualState x:Name="Disabled">
+                                <VisualState.Setters>
+                                    <Setter Property="BackgroundColor" Value="{DynamicResource Gray500}" />
+                                    <Setter Property="Opacity" Value="0.5" />
+                                </VisualState.Setters>
+                            </VisualState>
+                        </VisualStateGroup>
+                    </VisualStateGroupList>
+                </VisualStateManager.VisualStateGroups>
+            </Button>
 
             <Button
                 Text="Import Database" CornerRadius="24" Grid.Column="1"
                 Command="{Binding ImportDatabaseCommand}"
-                BackgroundColor="IndianRed" FontSize="Small"
-                IsEnabled="{Binding IsNotBusy}" />
+                IsEnabled="{Binding IsNotBusy}" FontSize="Small">
+                <VisualStateManager.VisualStateGroups>
+                    <VisualStateGroupList>
+                        <VisualStateGroup x:Name="CommonStates">
+                            <VisualState x:Name="Normal">
+                                <VisualState.Setters>
+                                    <Setter Property="BackgroundColor" Value="{DynamicResource DeleteColor}" />
+                                    <Setter Property="Opacity" Value="1" />
+                                </VisualState.Setters>
+                            </VisualState>
+                            <VisualState x:Name="Disabled">
+                                <VisualState.Setters>
+                                    <Setter Property="BackgroundColor" Value="{DynamicResource DeleteColor}" />
+                                    <Setter Property="Opacity" Value="0.5" />
+                                </VisualState.Setters>
+                            </VisualState>
+                        </VisualStateGroup>
+                    </VisualStateGroupList>
+                </VisualStateManager.VisualStateGroups>
+            </Button>
         </Grid>
+
+        <Label
+            FontSize="Small"
+            HorizontalOptions="Center"
+            TextColor="{DynamicResource Gray500}">
+            <Label.Triggers>
+                <DataTrigger TargetType="Label" Binding="{Binding HasLastBackup}" Value="True">
+                    <Setter Property="Text" Value="{Binding LastBackupUtc, Converter={StaticResource DateConverter}, StringFormat='Last backup: {0}'}" />
+                </DataTrigger>
+                <DataTrigger TargetType="Label" Binding="{Binding HasLastBackup}" Value="False">
+                    <Setter Property="Text" Value="No backup yet" />
+                </DataTrigger>
+            </Label.Triggers>
+        </Label>
 
     </VerticalStackLayout>
 </ContentPage>
