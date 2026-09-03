@@ -26,7 +26,7 @@ Congrats, you just read a whole paragraph about a bird. Anyway, here's what the 
 - **Custom tab bar** - a shaped bottom navigation bar (via `Nalu.Maui`) with a context-sensitive action button (e.g. "add exercise" while a workout is active).
 - **Accent themes** - switch the app's accent palette from Settings.
 - **Backup & restore** - export the SQLite database to a `.db3` file from Settings, and import a backup back in later.
-- **Home screen widgets (Android)** - a 2x1 best set widget and a 3x2 history chart widget for your favourite exercise, matching your app theme.
+- **Home screen widgets (Android)** - favourite exercise best set, favourite exercise history chart, favourite workout quick-start, days since last workout and last workout summary.
 
 ## Tech stack
  

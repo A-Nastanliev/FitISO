@@ -8,7 +8,7 @@ namespace FitISO.Maui.Platforms.Android
 {
     [BroadcastReceiver(Label = "Days Since Last Workout", Exported = false)]
     [IntentFilter(new[] { AppWidgetManager.ActionAppwidgetUpdate })]
-    [MetaData(AppWidgetManager.MetaDataAppwidgetProvider, Resource = "@xml/last_workout_widget_provider")]
+    [MetaData(AppWidgetManager.MetaDataAppwidgetProvider, Resource = "@xml/last_workout_date_widget_provider")]
     public class LastWorkoutWidgetProvider : AppWidgetProvider
     {
         public const string ActionRefresh = "com.fitiso.maui.widget.DAYS_SINCE_LAST_WORKOUT_REFRESH";
@@ -38,7 +38,7 @@ namespace FitISO.Maui.Platforms.Android
 
             foreach (var widgetId in appWidgetIds)
             {
-                var views = new RemoteViews(context.PackageName, Resource.Layout.last_workout_widget_layout);
+                var views = new RemoteViews(context.PackageName, Resource.Layout.last_workout_date_widget_layout);
                 ApplyToViews(context, views, lastWorkoutUtc);
                 appWidgetManager.UpdateAppWidget(widgetId, views);
             }

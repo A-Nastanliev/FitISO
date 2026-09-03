@@ -25,7 +25,7 @@ namespace FitISO.Maui.ViewModels
         [RelayCommand]
         async Task Add()
         {
-            if (string.IsNullOrWhiteSpace(Name) || Busy)
+            if (string.IsNullOrWhiteSpace(Name) || Name?.Length < 4 || Busy)
                 return;
 
             Busy = true;

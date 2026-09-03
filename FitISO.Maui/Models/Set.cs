@@ -16,6 +16,7 @@ namespace FitISO.Maui.Models
         [ObservableProperty]
         double? reps;
 
+        [System.Text.Json.Serialization.JsonIgnore]
         public Func<Set, Task>? SaveAction { get; set; }
 
         static readonly TimeSpan DebounceDelay = TimeSpan.FromSeconds(1.2);
