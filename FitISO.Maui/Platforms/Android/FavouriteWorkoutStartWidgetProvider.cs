@@ -1,8 +1,10 @@
 ﻿using Android.App;
 using Android.Appwidget;
 using Android.Content;
+using Android.OS;
 using Android.Views;
 using Android.Widget;
+using System.Text.Json;
 
 namespace FitISO.Maui.Platforms.Android
 {
@@ -14,11 +16,15 @@ namespace FitISO.Maui.Platforms.Android
         public const string ActionRefresh = "com.fitiso.maui.widget.FAVOURITE_WORKOUT_START_REFRESH";
         public const string ActionStartWorkout = "com.fitiso.maui.widget.START_FAVOURITE_WORKOUT";
         public const string PrefsName = "FitISO.FavouriteWorkoutWidget";
-        public const string TemplateNameKey = "template_name";
+        public const string SnapshotKey = "favourite_workout_snapshot_json";
+        const int DetailedModeMinHeightDp = 110;
 
         const int PlayIconArgb = unchecked((int)0xFF212121);
         const int DefaultBackgroundArgb = unchecked((int)0xFF1E1E1E);
         const int DefaultAccentArgb = unchecked((int)0xFFCD5C5C);
+
+        public record FavouriteWorkoutExerciseSnapshot(string ExerciseName, int SetCount);
+        public record FavouriteWorkoutSnapshot(string TemplateName, List<FavouriteWorkoutExerciseSnapshot> Exercises);
 
         public override void OnReceive(Context? context, Intent? intent)
         {
@@ -37,23 +43,72 @@ namespace FitISO.Maui.Platforms.Android
             if (context is null || appWidgetManager is null || appWidgetIds is null || appWidgetIds.Length == 0)
                 return;
 
-            var name = ReadFavoriteName(context);
-
             foreach (var widgetId in appWidgetIds)
+                UpdateWidget(context, appWidgetManager, widgetId);
+        }
+
+        public override void OnAppWidgetOptionsChanged(Context? context, AppWidgetManager? appWidgetManager, int appWidgetId, Bundle? newOptions)
+        {
+            base.OnAppWidgetOptionsChanged(context, appWidgetManager, appWidgetId, newOptions);
+
+            if (context is null || appWidgetManager is null)
+                return;
+
+            UpdateWidget(context, appWidgetManager, appWidgetId);
+        }
+
+        static void UpdateWidget(Context context, AppWidgetManager appWidgetManager, int widgetId)
+        {
+            var snapshot = ReadSnapshot(context);
+            var detailed = ShouldShowDetailed(context, appWidgetManager.GetAppWidgetOptions(widgetId));
+
+            var layoutId = detailed ? Resource.Layout.favourite_workout_start_widget_layout_detailed
+                                     : Resource.Layout.favourite_workout_start_widget_layout;
+
+            var views = new RemoteViews(context.PackageName, layoutId);
+            ApplyToViews(context, views, snapshot, widgetId, detailed);
+            appWidgetManager.UpdateAppWidget(widgetId, views);
+
+            if (detailed)
             {
-                var views = new RemoteViews(context.PackageName, Resource.Layout.favourite_workout_start_widget_layout);
-                ApplyToViews(context, views, name, widgetId);
-                appWidgetManager.UpdateAppWidget(widgetId, views);
+#pragma warning disable CA1422
+                appWidgetManager.NotifyAppWidgetViewDataChanged(new[] { widgetId }, Resource.Id.widget_exercise_list);
+#pragma warning restore CA1422
             }
         }
 
-        static string? ReadFavoriteName(Context context)
+        static bool ShouldShowDetailed(Context context, Bundle? options)
         {
-            var prefs = context.GetSharedPreferences(PrefsName, FileCreationMode.Private);
-            return prefs?.GetString(TemplateNameKey, null);
+            if (options is null)
+                return false;
+
+            var isPortrait = context.Resources?.Configuration?.Orientation == global::Android.Content.Res.Orientation.Portrait;
+
+            var heightDp = isPortrait
+                ? options.GetInt(AppWidgetManager.OptionAppwidgetMinHeight, 0)
+                : options.GetInt(AppWidgetManager.OptionAppwidgetMaxHeight, 0);
+
+            return heightDp >= DetailedModeMinHeightDp;
         }
 
-        static void ApplyToViews(Context context, RemoteViews views, string? name, int widgetId)
+        static FavouriteWorkoutSnapshot? ReadSnapshot(Context context)
+        {
+            var prefs = context.GetSharedPreferences(PrefsName, FileCreationMode.Private);
+            var json = prefs?.GetString(SnapshotKey, null);
+            if (string.IsNullOrEmpty(json))
+                return null;
+
+            try
+            {
+                return JsonSerializer.Deserialize<FavouriteWorkoutSnapshot>(json);
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        static void ApplyToViews(Context context, RemoteViews views, FavouriteWorkoutSnapshot? snapshot, int widgetId, bool detailed)
         {
             var themePrefs = context.GetSharedPreferences(FavouriteExerciseHistoryWidgetProvider.PrefsName, FileCreationMode.Private);
             var backgroundArgb = themePrefs?.GetInt(FavouriteExerciseHistoryWidgetProvider.BackgroundColorKey, DefaultBackgroundArgb) ?? DefaultBackgroundArgb;
@@ -61,10 +116,14 @@ namespace FitISO.Maui.Platforms.Android
 
             ApplyTint(views, Resource.Id.widget_root, backgroundArgb);
 
+            var name = snapshot?.TemplateName;
+
             if (string.IsNullOrEmpty(name))
             {
                 views.SetViewVisibility(Resource.Id.widget_title, ViewStates.Gone);
                 views.SetViewVisibility(Resource.Id.widget_start_button, ViewStates.Gone);
+                if (detailed)
+                    views.SetViewVisibility(Resource.Id.widget_exercise_list, ViewStates.Gone);
                 views.SetViewVisibility(Resource.Id.widget_empty_state, ViewStates.Visible);
                 return;
             }
@@ -88,6 +147,19 @@ namespace FitISO.Maui.Platforms.Android
                 PendingIntentFlags.UpdateCurrent | PendingIntentFlags.Immutable);
 
             views.SetOnClickPendingIntent(Resource.Id.widget_start_button, pendingIntent);
+
+            if (!detailed)
+                return;
+
+            views.SetViewVisibility(Resource.Id.widget_exercise_list, ViewStates.Visible);
+
+            var adapterIntent = new Intent(context, typeof(FavouriteWorkoutExercisesRemoteViewsService));
+            adapterIntent.PutExtra(AppWidgetManager.ExtraAppwidgetId, widgetId);
+            adapterIntent.SetData(global::Android.Net.Uri.Parse($"widget://favourite-workout-exercises/{widgetId}"));
+
+#pragma warning disable CA1422
+            views.SetRemoteAdapter(Resource.Id.widget_exercise_list, adapterIntent);
+#pragma warning restore CA1422
         }
 
         static void ApplyTint(RemoteViews views, int viewId, int argb)

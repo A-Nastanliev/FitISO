@@ -5,6 +5,7 @@ using FitISO.Services;
 #if ANDROID
 using Android.Content;
 using FitISO.Maui.Platforms.Android;
+using System.Text.Json;
 #endif
 
 namespace FitISO.Maui.Services
@@ -36,7 +37,7 @@ namespace FitISO.Maui.Services
         public async Task SetFavoriteAsync(Workout template)
         {
             await SecureStorage.Default.SetAsync(FavoriteTemplateIdKey, template.Id.ToString());
-            WriteWidgetSnapshot(template.Name);
+            WriteWidgetSnapshot(template);
             RefreshWidget();
         }
 
@@ -102,22 +103,36 @@ namespace FitISO.Maui.Services
         {
             if (await IsFavoriteAsync(message.Value.Id))
             {
-                WriteWidgetSnapshot(message.Value.Name);
+                WriteWidgetSnapshot(message.Value);
                 RefreshWidget();
             }
         }
 
 #if ANDROID
-        static void WriteWidgetSnapshot(string? templateName)
+        static void WriteWidgetSnapshot(Workout? template)
         {
             var prefs = global::Android.App.Application.Context.GetSharedPreferences(
                 FavouriteWorkoutStartWidgetProvider.PrefsName, FileCreationMode.Private);
             using var editor = prefs!.Edit();
 
-            if (string.IsNullOrEmpty(templateName))
-                editor!.Remove(FavouriteWorkoutStartWidgetProvider.TemplateNameKey);
+            if (template is null || string.IsNullOrEmpty(template.Name))
+            {
+                editor!.Remove(FavouriteWorkoutStartWidgetProvider.SnapshotKey);
+            }
             else
-                editor!.PutString(FavouriteWorkoutStartWidgetProvider.TemplateNameKey, templateName);
+            {
+                var exercises = new List<FavouriteWorkoutStartWidgetProvider.FavouriteWorkoutExerciseSnapshot>();
+                foreach (var we in template.WorkoutExercises)
+                {
+                    var exerciseName = we.Exercise?.Name ?? "Exercise";
+                    var setCount = we.Sets?.Count ?? we.SetCount;
+                    exercises.Add(new FavouriteWorkoutStartWidgetProvider.FavouriteWorkoutExerciseSnapshot(exerciseName, setCount));
+                }
+
+                var snapshot = new FavouriteWorkoutStartWidgetProvider.FavouriteWorkoutSnapshot(template.Name, exercises);
+                var json = JsonSerializer.Serialize(snapshot);
+                editor!.PutString(FavouriteWorkoutStartWidgetProvider.SnapshotKey, json);
+            }
 
             editor!.Apply();
         }
@@ -130,7 +145,7 @@ namespace FitISO.Maui.Services
             context.SendBroadcast(intent);
         }
 #else
-        static void WriteWidgetSnapshot(string? templateName) { }
+        static void WriteWidgetSnapshot(Workout? template) { }
         static void RefreshWidget() { }
 #endif
     }
