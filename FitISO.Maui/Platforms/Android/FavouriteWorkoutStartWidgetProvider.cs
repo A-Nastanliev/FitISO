@@ -4,6 +4,7 @@ using Android.Content;
 using Android.OS;
 using Android.Views;
 using Android.Widget;
+using FitISO.Maui.Models;
 using System.Text.Json;
 
 namespace FitISO.Maui.Platforms.Android
@@ -22,9 +23,6 @@ namespace FitISO.Maui.Platforms.Android
         const int PlayIconArgb = unchecked((int)0xFF212121);
         const int DefaultBackgroundArgb = unchecked((int)0xFF1E1E1E);
         const int DefaultAccentArgb = unchecked((int)0xFFCD5C5C);
-
-        public record FavouriteWorkoutExerciseSnapshot(string ExerciseName, int SetCount);
-        public record FavouriteWorkoutSnapshot(string TemplateName, List<FavouriteWorkoutExerciseSnapshot> Exercises);
 
         public override void OnReceive(Context? context, Intent? intent)
         {
@@ -91,7 +89,7 @@ namespace FitISO.Maui.Platforms.Android
             return heightDp >= DetailedModeMinHeightDp;
         }
 
-        static FavouriteWorkoutSnapshot? ReadSnapshot(Context context)
+        static Workout? ReadSnapshot(Context context)
         {
             var prefs = context.GetSharedPreferences(PrefsName, FileCreationMode.Private);
             var json = prefs?.GetString(SnapshotKey, null);
@@ -100,7 +98,7 @@ namespace FitISO.Maui.Platforms.Android
 
             try
             {
-                return JsonSerializer.Deserialize<FavouriteWorkoutSnapshot>(json);
+                return JsonSerializer.Deserialize<Workout>(json);
             }
             catch
             {
@@ -108,7 +106,7 @@ namespace FitISO.Maui.Platforms.Android
             }
         }
 
-        static void ApplyToViews(Context context, RemoteViews views, FavouriteWorkoutSnapshot? snapshot, int widgetId, bool detailed)
+        static void ApplyToViews(Context context, RemoteViews views, Workout? snapshot, int widgetId, bool detailed)
         {
             var themePrefs = context.GetSharedPreferences(FavouriteExerciseHistoryWidgetProvider.PrefsName, FileCreationMode.Private);
             var backgroundArgb = themePrefs?.GetInt(FavouriteExerciseHistoryWidgetProvider.BackgroundColorKey, DefaultBackgroundArgb) ?? DefaultBackgroundArgb;
@@ -116,7 +114,7 @@ namespace FitISO.Maui.Platforms.Android
 
             ApplyTint(views, Resource.Id.widget_root, backgroundArgb);
 
-            var name = snapshot?.TemplateName;
+            var name = snapshot?.Name;
 
             if (string.IsNullOrEmpty(name))
             {

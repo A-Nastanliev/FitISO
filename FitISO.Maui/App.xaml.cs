@@ -37,6 +37,8 @@ namespace FitISO.Maui
                 nameof(Espresso) => new Espresso(),
                 nameof(Rust) => new Rust(),
                 nameof(Plum) => new Plum(),
+                nameof(Forest) => new Forest(),
+                nameof(Midnight) => new Midnight(),
                 _ => new Default()
             };
 

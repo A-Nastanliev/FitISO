@@ -42,6 +42,8 @@ namespace FitISO.Maui.ViewModels
             AccentThemes.Add(new AccentTheme(nameof(Espresso), new Espresso()));
             AccentThemes.Add(new AccentTheme(nameof(Rust), new Rust()));
             AccentThemes.Add(new AccentTheme(nameof(Plum), new Plum()));
+            AccentThemes.Add(new AccentTheme(nameof(Forest), new Forest()));
+            AccentThemes.Add(new AccentTheme(nameof(Midnight), new Midnight()));
 
             var savedTheme = Preferences.Get("accent_theme", nameof(Default));
             selectedAccentTheme = AccentThemes.FirstOrDefault(t => t.Name == savedTheme) ?? AccentThemes[0];

@@ -9,7 +9,7 @@ using FitISO.Maui.Platforms.Android;
 
 namespace FitISO.Maui.Services
 {
-    public class LastWorkoutService : IRecipient<WorkoutFinishedMessage>, IRecipient<DbImportedMessage>
+    public class LastWorkoutService : IRecipient<WorkoutFinishedMessage>, IRecipient<DbImportedMessage>, IRecipient<ExerciseUpdatedMessage>
     {
         readonly WorkoutService workoutService;
 
@@ -23,7 +23,7 @@ namespace FitISO.Maui.Services
         {
             var date = message.Value.EndTime ?? DateTime.UtcNow;
             WriteLastWorkoutDate(date);
-            WriteLastWorkoutSnapshot(message.Value); 
+            WriteLastWorkoutSnapshot(message.Value);
             RefreshWidget();
         }
 
@@ -44,6 +44,31 @@ namespace FitISO.Maui.Services
             }
 
             RefreshWidget();
+        }
+
+        public void Receive(ExerciseUpdatedMessage message)
+        {
+            var workout = ReadLastWorkoutSnapshot();
+            if (workout is null)
+                return;
+
+            var updated = false;
+            foreach (var we in workout.WorkoutExercises)
+            {
+                if (we.Exercise is not null
+                    && we.Exercise.Id == message.Value.Id
+                    && we.Exercise.Name != message.Value.Name)
+                {
+                    we.Exercise.Name = message.Value.Name;
+                    updated = true;
+                }
+            }
+
+            if (updated)
+            {
+                WriteLastWorkoutSnapshot(workout);
+                RefreshWidget();
+            }
         }
 
 #if ANDROID
@@ -84,6 +109,16 @@ namespace FitISO.Maui.Services
             editor!.Apply();
         }
 
+        static FitISO.Maui.Models.Workout? ReadLastWorkoutSnapshot()
+        {
+            var prefs = global::Android.App.Application.Context.GetSharedPreferences(
+                FavouriteExerciseHistoryWidgetProvider.PrefsName, FileCreationMode.Private);
+            var json = prefs!.GetString(LastWorkoutSummaryWidgetProvider.SnapshotKey, null);
+            return string.IsNullOrEmpty(json)
+                ? null
+                : JsonSerializer.Deserialize<FitISO.Maui.Models.Workout>(json);
+        }
+
         static void RefreshWidget()
         {
             var context = global::Android.App.Application.Context;
@@ -101,6 +136,7 @@ namespace FitISO.Maui.Services
         static void ClearLastWorkoutDate() { }
         static void WriteLastWorkoutSnapshot(FitISO.Maui.Models.Workout workout) { }
         static void ClearLastWorkoutSnapshot() { }
+        static FitISO.Maui.Models.Workout? ReadLastWorkoutSnapshot() => null;
         static void RefreshWidget() { }
 #endif
     }

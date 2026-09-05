@@ -1,6 +1,7 @@
 ﻿using Android.App;
 using Android.Content;
 using Android.Widget;
+using FitISO.Maui.Models;
 using System.Text.Json;
 
 namespace FitISO.Maui.Platforms.Android
@@ -17,7 +18,7 @@ namespace FitISO.Maui.Platforms.Android
             const int DefaultGridArgb = unchecked((int)0xFFDDDDDD);
 
             readonly Context context;
-            List<FavouriteWorkoutStartWidgetProvider.FavouriteWorkoutExerciseSnapshot> exercises = new();
+            List<WorkoutExercise> exercises = new();
             int accentArgb = DefaultAccentArgb;
             int gridArgb = DefaultGridArgb;
 
@@ -36,15 +37,15 @@ namespace FitISO.Maui.Platforms.Android
                 accentArgb = themePrefs?.GetInt(FavouriteExerciseHistoryWidgetProvider.AccentColorKey, DefaultAccentArgb) ?? DefaultAccentArgb;
                 gridArgb = themePrefs?.GetInt(FavouriteExerciseHistoryWidgetProvider.GridColorKey, DefaultGridArgb) ?? DefaultGridArgb;
 
-                var newExercises = new List<FavouriteWorkoutStartWidgetProvider.FavouriteWorkoutExerciseSnapshot>();
+                var newExercises = new List<WorkoutExercise>();
 
                 if (!string.IsNullOrEmpty(json))
                 {
                     try
                     {
-                        var snapshot = JsonSerializer.Deserialize<FavouriteWorkoutStartWidgetProvider.FavouriteWorkoutSnapshot>(json);
-                        if (snapshot?.Exercises is not null)
-                            newExercises.AddRange(snapshot.Exercises);
+                        var workout = JsonSerializer.Deserialize<Workout>(json);
+                        if (workout?.WorkoutExercises is not null)
+                            newExercises.AddRange(workout.WorkoutExercises);
                     }
                     catch
                     {
@@ -66,11 +67,12 @@ namespace FitISO.Maui.Platforms.Android
             public RemoteViews GetViewAt(int position)
             {
                 var exercise = exercises[position];
+                var setCount = exercise.Sets?.Count ?? exercise.SetCount;
 
                 var views = new RemoteViews(context.PackageName, Resource.Layout.favourite_workout_start_widget_exercise_item);
-                views.SetTextViewText(Resource.Id.row_exercise_name, exercise.ExerciseName);
+                views.SetTextViewText(Resource.Id.row_exercise_name, exercise.Exercise?.Name ?? string.Empty);
                 views.SetTextColor(Resource.Id.row_exercise_name, new global::Android.Graphics.Color(accentArgb));
-                views.SetTextViewText(Resource.Id.row_set_count, FormatSetCount(exercise.SetCount));
+                views.SetTextViewText(Resource.Id.row_set_count, FormatSetCount(setCount));
                 views.SetTextColor(Resource.Id.row_set_count, new global::Android.Graphics.Color(gridArgb));
                 return views;
             }

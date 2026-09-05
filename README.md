@@ -27,6 +27,7 @@ Congrats, you just read a whole paragraph about a bird. Anyway, here's what the 
 - **Accent themes** - switch the app's accent palette from Settings.
 - **Backup & restore** - export the SQLite database to a `.db3` file from Settings, and import a backup back in later.
 - **Home screen widgets (Android)** - favourite exercise best set, favourite exercise history chart, favourite workout quick-start, days since last workout and last workout summary.
+- **App shortcuts (Android)** - long-press the app icon to jump straight into your favourite workout without opening the app first.
 
 ## Tech stack
  

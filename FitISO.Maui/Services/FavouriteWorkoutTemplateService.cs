@@ -10,7 +10,7 @@ using System.Text.Json;
 
 namespace FitISO.Maui.Services
 {
-    public class FavouriteWorkoutTemplateService : IRecipient<DbImportedMessage>, IRecipient<WorkoutTemplateUpdatedMessage>
+    public class FavouriteWorkoutTemplateService : IRecipient<DbImportedMessage>, IRecipient<WorkoutTemplateUpdatedMessage>, IRecipient<ExerciseUpdatedMessage>
     {
         const string FavoriteTemplateIdKey = "FavouriteWorkoutTemplateId";
 
@@ -20,6 +20,9 @@ namespace FitISO.Maui.Services
         {
             this.workoutService = workoutService;
             WeakReferenceMessenger.Default.RegisterAll(this);
+#if ANDROID
+            FavouriteWorkoutShortcutHelper.Update(ReadWidgetSnapshot());
+#endif
         }
 
         public async Task<int?> GetFavoriteTemplateIdAsync()
@@ -108,7 +111,42 @@ namespace FitISO.Maui.Services
             }
         }
 
+        public void Receive(ExerciseUpdatedMessage message)
+        {
+            var template = ReadWidgetSnapshot();
+            if (template is null)
+                return;
+
+            var updated = false;
+            foreach (var we in template.WorkoutExercises)
+            {
+                if (we.Exercise is not null
+                    && we.Exercise.Id == message.Value.Id
+                    && we.Exercise.Name != message.Value.Name)
+                {
+                    we.Exercise.Name = message.Value.Name;
+                    updated = true;
+                }
+            }
+
+            if (updated)
+            {
+                WriteWidgetSnapshot(template);
+                RefreshWidget();
+            }
+        }
+
 #if ANDROID
+        static Workout? ReadWidgetSnapshot()
+        {
+            var prefs = global::Android.App.Application.Context.GetSharedPreferences(
+                FavouriteWorkoutStartWidgetProvider.PrefsName, FileCreationMode.Private);
+            var json = prefs?.GetString(FavouriteWorkoutStartWidgetProvider.SnapshotKey, null);
+            return string.IsNullOrEmpty(json)
+                ? null
+                : JsonSerializer.Deserialize<Workout>(json);
+        }
+
         static void WriteWidgetSnapshot(Workout? template)
         {
             var prefs = global::Android.App.Application.Context.GetSharedPreferences(
@@ -121,20 +159,13 @@ namespace FitISO.Maui.Services
             }
             else
             {
-                var exercises = new List<FavouriteWorkoutStartWidgetProvider.FavouriteWorkoutExerciseSnapshot>();
-                foreach (var we in template.WorkoutExercises)
-                {
-                    var exerciseName = we.Exercise?.Name ?? "Exercise";
-                    var setCount = we.Sets?.Count ?? we.SetCount;
-                    exercises.Add(new FavouriteWorkoutStartWidgetProvider.FavouriteWorkoutExerciseSnapshot(exerciseName, setCount));
-                }
-
-                var snapshot = new FavouriteWorkoutStartWidgetProvider.FavouriteWorkoutSnapshot(template.Name, exercises);
-                var json = JsonSerializer.Serialize(snapshot);
+                var json = JsonSerializer.Serialize(template);
                 editor!.PutString(FavouriteWorkoutStartWidgetProvider.SnapshotKey, json);
             }
 
             editor!.Apply();
+
+            FavouriteWorkoutShortcutHelper.Update(template);
         }
 
         static void RefreshWidget()
@@ -145,6 +176,7 @@ namespace FitISO.Maui.Services
             context.SendBroadcast(intent);
         }
 #else
+        static Workout? ReadWidgetSnapshot() => null;
         static void WriteWidgetSnapshot(Workout? template) { }
         static void RefreshWidget() { }
 #endif
