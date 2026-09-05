@@ -4,6 +4,7 @@
       xmlns:local="clr-namespace:FitISO.Maui"
       xmlns:nalu="https://nalu-development.github.com/nalu/layouts"
       SafeAreaEdges="None"
+      Opacity="0"
       x:Class="FitISO.Maui.AppShellTabBar">
     <Grid SafeAreaEdges="None"
           Margin="{OnPlatform Default=0, iOS='0,0,0,-12'}">

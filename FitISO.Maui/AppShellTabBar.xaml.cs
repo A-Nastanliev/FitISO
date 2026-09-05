@@ -116,9 +116,24 @@ public partial class AppShellTabBar
                 Shell.Current.Navigated += OnShellNavigated;
             }
 
+            var container = (View)SelectedShape.Parent.Parent;
+            container.SizeChanged -= OnContainerSizeChanged;
+            container.SizeChanged += OnContainerSizeChanged;
+
             RebuildButtons(animate: false);
             RefreshSelectedButtonCommand();
         }
+    }
+
+    private void OnContainerSizeChanged(object? sender, EventArgs e)
+    {
+        if (Opacity >= 1)
+            return;
+
+        if (((View)sender!).Width <= 0)
+            return;
+
+        UpdateCurrentItem(Item.CurrentItem, animate: false);
     }
 
     public ShellItem? ShellItem { get; set; }
@@ -238,6 +253,11 @@ public partial class AppShellTabBar
         var startTranslationX = SelectedShape.TranslationX;
         var availableTranslationWidth = ((View)SelectedShape.Parent.Parent).Width;
 
+        if (availableTranslationWidth <= 0)
+        {
+            return;
+        }
+
         var selectedShapeWidth = SelectedShape.Width > 0 ? SelectedShape.Width : 56;
         var endInsetStartX = endPosition * (availableTranslationWidth - TabBarShape.InsetWidth);
         var endTranslationX = endInsetStartX + TabBarShape.InsetWidth / 2 - selectedShapeWidth / 2;
@@ -255,9 +275,11 @@ public partial class AppShellTabBar
                 RefreshSelectedButtonCommand();
             }
 
+            Opacity = 1;
             return;
         }
 
+        Opacity = 1;
         AnimateSelectedShapeJump(selectedIndex);
 
         SelectedShapeContainer.TranslationX = startTranslationX - 0.001;

@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+	<shortcut
+        android:shortcutId="open_history"
+        android:enabled="true"
+        android:icon="@drawable/ic_shortcut_history"
+        android:shortcutShortLabel="@string/shortcut_history_short_label"
+        android:shortcutLongLabel="@string/shortcut_history_long_label">
+		<intent
+            android:action="com.companyname.fitiso.maui.shortcut.OPEN_HISTORY"
+            android:targetPackage="com.companyname.fitiso.maui" />
+	</shortcut>
+</shortcuts>

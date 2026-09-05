@@ -8,8 +8,12 @@ using FitISO.Maui.Services;
 namespace FitISO.Maui
 {
     [Activity(Theme = "@style/Maui.SplashTheme", MainLauncher = true, LaunchMode = LaunchMode.SingleTop, ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation | ConfigChanges.UiMode | ConfigChanges.ScreenLayout | ConfigChanges.SmallestScreenSize | ConfigChanges.Density)]
+    [MetaData("android.app.shortcuts", Resource = "@xml/shortcuts")]
+    [IntentFilter(new[] { ActionOpenHistory }, Categories = new[] { Intent.CategoryDefault })]
     public class MainActivity : MauiAppCompatActivity
     {
+        public const string ActionOpenHistory = "com.companyname.fitiso.maui.shortcut.OPEN_HISTORY";
+
         protected override void AttachBaseContext(Context @base)
         {
             var configuration = new Android.Content.Res.Configuration(@base.Resources.Configuration);
@@ -21,6 +25,8 @@ namespace FitISO.Maui
 
         protected override void OnCreate(Bundle? savedInstanceState)
         {
+            AppShell.PendingRoute = Intent?.Action == ActionOpenHistory ? "history" : null;
+
             base.OnCreate(savedInstanceState);
             HandleWidgetIntent(Intent);
         }
@@ -28,6 +34,13 @@ namespace FitISO.Maui
         protected override void OnNewIntent(Intent? intent)
         {
             base.OnNewIntent(intent);
+
+            if (intent?.Action == ActionOpenHistory)
+            {
+                intent.SetAction(Intent.ActionMain);
+                _ = Shell.Current?.GoToAsync("//history");
+            }
+
             HandleWidgetIntent(intent);
         }
 
