@@ -103,6 +103,21 @@ namespace FitISO.Maui.ViewModels
                 context,
                 Java.Lang.Class.FromType(typeof(FitISO.Maui.Platforms.Android.LastWorkoutSummaryWidgetProvider))));
             context.SendBroadcast(summaryRefreshIntent);
+
+            var heatmapPrefs = context.GetSharedPreferences(FitISO.Maui.Services.MonthlyHeatmapService.PrefsName,Android.Content.FileCreationMode.Private);
+
+            var heatmapEditor = heatmapPrefs?.Edit();
+            heatmapEditor?.PutInt(FitISO.Maui.Services.MonthlyHeatmapService.WorkoutColorKey, ToAndroidArgb(value.ChartAccentColor));
+            heatmapEditor?.PutInt(FitISO.Maui.Services.MonthlyHeatmapService.RestColorKey, ToAndroidArgb(value.HeatmapRestColor));
+            heatmapEditor?.PutInt(FitISO.Maui.Services.MonthlyHeatmapService.FutureColorKey, ToAndroidArgb(value.HeatmapFutureColor));
+            heatmapEditor?.PutInt(FitISO.Maui.Services.MonthlyHeatmapService.BackgroundColorKey, ToAndroidArgb(value.ChartBackgroundColor));
+            heatmapEditor?.Commit();
+
+            var heatmapRefreshIntent = new Android.Content.Intent(FitISO.Maui.Platforms.Android.MonthlyHeatmapWidgetProvider.ActionRefresh);
+            heatmapRefreshIntent.SetComponent(new Android.Content.ComponentName(
+                context,
+                Java.Lang.Class.FromType(typeof(FitISO.Maui.Platforms.Android.MonthlyHeatmapWidgetProvider))));
+            context.SendBroadcast(heatmapRefreshIntent);
 #endif
         }
 
