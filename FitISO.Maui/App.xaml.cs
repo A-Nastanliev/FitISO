@@ -39,6 +39,10 @@ namespace FitISO.Maui
                 nameof(Plum) => new Plum(),
                 nameof(Forest) => new Forest(),
                 nameof(Midnight) => new Midnight(),
+                nameof(Amber) => new Amber(),
+                nameof(Ink) => new Ink(),
+                nameof(Mauve) => new Mauve(),
+                nameof(Wine) => new Wine(),
                 _ => new Default()
             };
 

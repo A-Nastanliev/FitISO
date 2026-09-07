@@ -18,7 +18,24 @@ namespace FitISO.Maui.ViewModels
         bool isBusy;
 
         public bool IsNotBusy => !IsBusy;
-        public ObservableCollection<AccentTheme> AccentThemes { get; } = new();
+        public ObservableCollection<AccentTheme> AccentThemes { get; } = new()
+        {
+            new AccentTheme(nameof(Default), new Default()),
+            new AccentTheme(nameof(Slate), new Slate()),
+            new AccentTheme(nameof(DarkRed), new DarkRed()),
+            new AccentTheme(nameof(Rust), new Rust()),
+            new AccentTheme(nameof(Espresso), new Espresso()),
+            new AccentTheme(nameof(Amber), new Amber()),
+            new AccentTheme(nameof(Olive), new Olive()),
+            new AccentTheme(nameof(Forest), new Forest()),
+            new AccentTheme(nameof(DeepTeal), new DeepTeal()),
+            new AccentTheme(nameof(DarkBlue), new DarkBlue()),
+            new AccentTheme(nameof(Ink), new Ink()),
+            new AccentTheme(nameof(Midnight), new Midnight()),
+            new AccentTheme(nameof(Plum), new Plum()),
+            new AccentTheme(nameof(Mauve), new Mauve()),
+            new AccentTheme(nameof(Wine), new Wine())
+        };
 
         [ObservableProperty]
         AccentTheme selectedAccentTheme;
@@ -33,18 +50,6 @@ namespace FitISO.Maui.ViewModels
 
         public SettingsPageViewModel()
         {
-            AccentThemes.Add(new AccentTheme(nameof(Default), new Default()));
-            AccentThemes.Add(new AccentTheme(nameof(DarkBlue), new DarkBlue()));
-            AccentThemes.Add(new AccentTheme(nameof(DarkRed), new DarkRed()));
-            AccentThemes.Add(new AccentTheme(nameof(Olive), new Olive()));
-            AccentThemes.Add(new AccentTheme(nameof(DeepTeal), new DeepTeal()));
-            AccentThemes.Add(new AccentTheme(nameof(Slate), new Slate()));
-            AccentThemes.Add(new AccentTheme(nameof(Espresso), new Espresso()));
-            AccentThemes.Add(new AccentTheme(nameof(Rust), new Rust()));
-            AccentThemes.Add(new AccentTheme(nameof(Plum), new Plum()));
-            AccentThemes.Add(new AccentTheme(nameof(Forest), new Forest()));
-            AccentThemes.Add(new AccentTheme(nameof(Midnight), new Midnight()));
-
             var savedTheme = Preferences.Get("accent_theme", nameof(Default));
             selectedAccentTheme = AccentThemes.FirstOrDefault(t => t.Name == savedTheme) ?? AccentThemes[0];
 

@@ -10,6 +10,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.ComponentModel;
+using System.Linq;
 using System.Text;
 
 namespace FitISO.Maui.ViewModels
@@ -96,7 +97,7 @@ namespace FitISO.Maui.ViewModels
         {
             we.Sets.CollectionChanged += Sets_CollectionChanged;
             foreach (var s in we.Sets)
-                WireSet(s);
+                WireSet(we, s);
         }
 
         void UnwireWorkoutExercise(WorkoutExercise we)
@@ -108,9 +109,11 @@ namespace FitISO.Maui.ViewModels
 
         void Sets_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
         {
-            if (e.NewItems is not null)
+            var owner = Workout.WorkoutExercises.FirstOrDefault(we => ReferenceEquals(we.Sets, sender));
+
+            if (e.NewItems is not null && owner is not null)
                 foreach (Set s in e.NewItems)
-                    WireSet(s);
+                    WireSet(owner, s);
 
             if (e.OldItems is not null)
                 foreach (Set s in e.OldItems)
@@ -198,7 +201,7 @@ namespace FitISO.Maui.ViewModels
             _nameDebounceCts?.Cancel();
         }
 
-        void WireSet(Set set)
+        void WireSet(WorkoutExercise workoutExercise, Set set)
         {
             set.SaveAction = s => setService.UpdateAsync(s.Id, s.Weight, s.Reps);
             set.PropertyChanged += Set_PropertyChanged;
@@ -209,10 +212,47 @@ namespace FitISO.Maui.ViewModels
             set.PropertyChanged -= Set_PropertyChanged;
         }
 
+        WorkoutExercise? FindOwner(Set set) =>
+            Workout.WorkoutExercises.FirstOrDefault(we => we.Sets.Contains(set));
+
         void Set_PropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
+            if (sender is not Set set) return;
+
+            if (e.PropertyName == nameof(Set.Reps) && set.Reps is not null && set.Weight is null)
+            {
+                TryFillWeightFromHistory(set);
+                return;
+            }
+
             if (e.PropertyName == nameof(Set.Weight) || e.PropertyName == nameof(Set.Reps))
                 RecalculateProgress();
+        }
+
+        void TryFillWeightFromHistory(Set set)
+        {
+            var workoutExercise = FindOwner(set);
+            if (workoutExercise is null) return;
+
+            int index = workoutExercise.Sets.IndexOf(set);
+            if (index < 0) return;
+
+            for (int i = index - 1; i >= 0; i--)
+            {
+                var prior = workoutExercise.Sets[i];
+                if (prior.Weight is double w && prior.Reps is not null)
+                {
+                    set.Weight = w;
+                    return;
+                }
+            }
+
+            var suggested = workoutExercise.Exercise?.LastSets?
+                .Where(s => s.Weight is not null && s.Reps is not null)
+                .Max(s => s.Weight);
+
+            if (suggested is double lastWeight)
+                set.Weight = lastWeight;
         }
 
         [RelayCommand]
@@ -317,9 +357,9 @@ namespace FitISO.Maui.ViewModels
         public void Receive(ExerciseUpdatedMessage message)
         {
             Exercise exercise = message.Value;
-            foreach(var we in Workout.WorkoutExercises)
+            foreach (var we in Workout.WorkoutExercises)
             {
-                if(we.Exercise.Id == exercise.Id)
+                if (we.Exercise.Id == exercise.Id)
                 {
                     we.Exercise.Name = exercise.Name;
                 }
