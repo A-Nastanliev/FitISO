@@ -26,6 +26,7 @@ Congrats, you just read a whole paragraph about a bird. Anyway, here's what the 
 - **Custom tab bar** - a shaped bottom navigation bar (via `Nalu.Maui`) with a context-sensitive action button (e.g. "add exercise" while a workout is active).
 - **Accent themes** - switch the app's accent palette from Settings.
 - **Backup & restore** - export the SQLite database to a `.db3` file from Settings, and import a backup back in later.
+- **Auto backup** - optionally back up the database automatically to your phone's Downloads folder every time you finish a workout.
 - **Home screen widgets (Android)** - favourite exercise best set, favourite exercise history chart, favourite workout quick-start, days since last workout, last workout summary and monthly workout heatmap.
 - **App shortcuts (Android)** - long-press the app icon to quickly jump to your favourite workout or your workout history.
 

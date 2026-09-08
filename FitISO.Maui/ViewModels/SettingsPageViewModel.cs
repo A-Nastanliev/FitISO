@@ -4,14 +4,15 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using FitISO.Maui.Messages;
-using Microsoft.Data.Sqlite;
 using FitISO.Maui.Models;
-using System.Collections.ObjectModel;
 using FitISO.Maui.Resources.Styles.AccentThemes;
+using FitISO.Maui.Services;
+using Microsoft.Data.Sqlite;
+using System.Collections.ObjectModel;
 
 namespace FitISO.Maui.ViewModels
 {
-    public partial class SettingsPageViewModel : ObservableObject
+    public partial class SettingsPageViewModel : ObservableObject, IRecipient<AutoBackupCompletedMessage>
     {
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(IsNotBusy))]
@@ -44,19 +45,28 @@ namespace FitISO.Maui.ViewModels
         [NotifyPropertyChangedFor(nameof(HasLastBackup))]
         DateTime? lastBackupUtc;
 
-        public bool HasLastBackup => LastBackupUtc is not null;
+        [ObservableProperty]
+        bool autoSaveEnabled;
 
-        const string LastBackupPrefKey = "last_export_utc";
+        public bool HasLastBackup => LastBackupUtc is not null;
 
         public SettingsPageViewModel()
         {
+            WeakReferenceMessenger.Default.RegisterAll(this);
+
             var savedTheme = Preferences.Get("accent_theme", nameof(Default));
             selectedAccentTheme = AccentThemes.FirstOrDefault(t => t.Name == savedTheme) ?? AccentThemes[0];
 
-            var savedBackup = Preferences.Get(LastBackupPrefKey, string.Empty);
+            var savedBackup = Preferences.Get(AutoBackupService.LastBackupUtcKey, string.Empty);
             lastBackupUtc = string.IsNullOrEmpty(savedBackup) ? null
                 : DateTime.Parse(savedBackup, null, System.Globalization.DateTimeStyles.RoundtripKind);
+
+            AutoSaveEnabled = Preferences.Get(AutoBackupService.AutoSaveEnabledKey, false);
         }
+
+        public void Receive(AutoBackupCompletedMessage message) => LastBackupUtc = message.Value;
+
+        partial void OnAutoSaveEnabledChanged(bool value) => Preferences.Set(AutoBackupService.AutoSaveEnabledKey, value);
 
         partial void OnSelectedAccentThemeChanged(AccentTheme value)
         {
@@ -161,7 +171,7 @@ namespace FitISO.Maui.ViewModels
                 if (result.IsSuccessful)
                 {
                     LastBackupUtc = DateTime.UtcNow;
-                    Preferences.Set(LastBackupPrefKey, LastBackupUtc.Value.ToString("O"));
+                    Preferences.Set(AutoBackupService.LastBackupUtcKey, LastBackupUtc.Value.ToString("O"));
 
                     _ = Toast.Make("Database exported").Show();
                 }
@@ -231,7 +241,7 @@ namespace FitISO.Maui.ViewModels
                 }
 
                 LastBackupUtc = null;
-                Preferences.Remove(LastBackupPrefKey);
+                Preferences.Remove(AutoBackupService.LastBackupUtcKey);
 
                 _ = Toast.Make($"Database imported").Show();
                 WeakReferenceMessenger.Default.Send(new DbImportedMessage());

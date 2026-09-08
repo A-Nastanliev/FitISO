@@ -303,9 +303,10 @@ namespace FitISO.Maui.ViewModels
             await workoutService.EndWorkoutAsync(Workout.Id);
             Workout.EndTime = DateTime.UtcNow;
             _ = Toast.Make($"{Workout.Name} finished").Show();
+            Stop();            
+            await Shell.Current.GoToAsync("//main/history");
             WeakReferenceMessenger.Default.Send(new WorkoutFinishedMessage(Workout));
             ActiveWorkoutState.Instance.HasActiveWorkout = false;
-            await Shell.Current.GoToAsync("//main/history");
         }
 
         [RelayCommand]

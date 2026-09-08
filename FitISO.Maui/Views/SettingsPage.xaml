@@ -8,130 +8,165 @@
         <Label Text="Settings" FontSize="Medium" FontAttributes="Bold" VerticalTextAlignment="Center" HorizontalTextAlignment="Center"/>
     </Shell.TitleView>
 
-    <VerticalStackLayout Padding="24" Spacing="16">
+    <ScrollView VerticalScrollBarVisibility="Never" HorizontalScrollBarVisibility="Never">
+        <VerticalStackLayout Padding="24" Spacing="16">
 
-        <Label
-         Text="Appearance"
-         FontSize="Medium"
-         FontAttributes="Bold" />
+            <VerticalStackLayout Spacing="8">
+                <Label
+                 Text="Appearance"
+                 FontSize="Medium"
+                 FontAttributes="Bold" />
 
-        <Label
-         Text="Pick an accent color."
-         FontSize="Small"
-         TextColor="{DynamicResource Gray500}" />
+                <Label
+                 Text="Pick an accent color."
+                 FontSize="Small"
+                 TextColor="{DynamicResource Gray500}" />
+            </VerticalStackLayout>
 
-        <CollectionView ItemsSource="{Binding AccentThemes}" SelectedItem="{Binding SelectedAccentTheme, Mode=TwoWay}"
-         SelectionMode="Single" HorizontalOptions="Fill" VerticalScrollBarVisibility="Never" HorizontalScrollBarVisibility="Never">
-            <CollectionView.ItemsLayout>
-                <GridItemsLayout Orientation="Vertical" Span="6" HorizontalItemSpacing="12" VerticalItemSpacing="12"/>
-            </CollectionView.ItemsLayout>
-            <CollectionView.ItemTemplate>
-                <DataTemplate x:DataType="models:AccentTheme">
-                    <Grid WidthRequest="44" HeightRequest="44">
-                        <Ellipse Fill="{DynamicResource Gray900}" WidthRequest="44" HeightRequest="44"
-                         Stroke="{DynamicResource Gray600}" StrokeThickness="2"
-                         x:Name="Ring"/>
-                        <Ellipse Fill="{Binding Swatch}" WidthRequest="30" HeightRequest="30"
-                         HorizontalOptions="Center" VerticalOptions="Center"/>
+            <CollectionView ItemsSource="{Binding AccentThemes}" SelectedItem="{Binding SelectedAccentTheme, Mode=TwoWay}"
+             SelectionMode="Single" HorizontalOptions="Fill" VerticalScrollBarVisibility="Never" HorizontalScrollBarVisibility="Never">
+                <CollectionView.ItemsLayout>
+                    <GridItemsLayout Orientation="Vertical" Span="6" HorizontalItemSpacing="12" VerticalItemSpacing="12"/>
+                </CollectionView.ItemsLayout>
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="models:AccentTheme">
+                        <Grid WidthRequest="44" HeightRequest="44">
+                            <Ellipse Fill="{DynamicResource Gray900}" WidthRequest="44" HeightRequest="44"
+                             Stroke="{DynamicResource Gray600}" StrokeThickness="2"
+                             x:Name="Ring"/>
+                            <Ellipse Fill="{Binding Swatch}" WidthRequest="30" HeightRequest="30"
+                             HorizontalOptions="Center" VerticalOptions="Center"/>
 
-                        <VisualStateManager.VisualStateGroups>
-                            <VisualStateGroupList>
-                                <VisualStateGroup x:Name="CommonStates">
-                                    <VisualState x:Name="Normal" />
-                                    <VisualState x:Name="Selected">
-                                        <VisualState.Setters>
-                                            <Setter TargetName="Ring" Property="Ellipse.Stroke" Value="{StaticResource White}" />
-                                            <Setter TargetName="Ring" Property="BackgroundColor" Value="Transparent"/>
-                                        </VisualState.Setters>
-                                    </VisualState>
-                                </VisualStateGroup>
-                            </VisualStateGroupList>
-                        </VisualStateManager.VisualStateGroups>
-                    </Grid>
-                </DataTemplate>
-            </CollectionView.ItemTemplate>
-        </CollectionView>
+                            <VisualStateManager.VisualStateGroups>
+                                <VisualStateGroupList>
+                                    <VisualStateGroup x:Name="CommonStates">
+                                        <VisualState x:Name="Normal" />
+                                        <VisualState x:Name="Selected">
+                                            <VisualState.Setters>
+                                                <Setter TargetName="Ring" Property="Ellipse.Stroke" Value="{StaticResource White}" />
+                                                <Setter TargetName="Ring" Property="BackgroundColor" Value="Transparent"/>
+                                            </VisualState.Setters>
+                                        </VisualState>
+                                    </VisualStateGroup>
+                                </VisualStateGroupList>
+                            </VisualStateManager.VisualStateGroups>
+                        </Grid>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
 
-        <BoxView HeightRequest="1" BackgroundColor="{DynamicResource Gray700}" Margin="0,8"/>
-        
-        <Label
-            Text="Backup &amp; Restore"
-            FontSize="Medium"
-            FontAttributes="Bold" />
+            <BoxView HeightRequest="1" BackgroundColor="{DynamicResource Gray700}" Margin="0,8"/>
 
-        <Label
-            Text="Export a backup of your data or import a previously exported backup. Importing will replace all current data and close the app."
-            FontSize="Small" HorizontalTextAlignment="Justify"
-            TextColor="{DynamicResource Gray500}" />
+            <VerticalStackLayout Spacing="8">
+                <Label
+                    Text="Backup &amp; Restore"
+                    FontSize="Medium"
+                    FontAttributes="Bold" />
 
-        <ActivityIndicator
-            IsRunning="{Binding IsBusy}"
-            IsVisible="{Binding IsBusy}"
-            HorizontalOptions="Center" />
+                <Label
+                    Text="Export a backup of your data or import a previously exported backup. Importing will replace all current data and close the app."
+                    FontSize="Small" HorizontalTextAlignment="Justify"
+                    TextColor="{DynamicResource Gray500}" />
+            </VerticalStackLayout>
 
-        <Grid ColumnDefinitions="*,*" ColumnSpacing="16">
-            <Button
-                Text="Export Database" CornerRadius="24"
-                Command="{Binding ExportDatabaseCommand}"
-                IsEnabled="{Binding IsNotBusy}" FontSize="Small">
-                <VisualStateManager.VisualStateGroups>
-                    <VisualStateGroupList>
-                        <VisualStateGroup x:Name="CommonStates">
-                            <VisualState x:Name="Normal">
-                                <VisualState.Setters>
-                                    <Setter Property="BackgroundColor" Value="{DynamicResource Gray500}" />
-                                    <Setter Property="Opacity" Value="1" />
-                                </VisualState.Setters>
-                            </VisualState>
-                            <VisualState x:Name="Disabled">
-                                <VisualState.Setters>
-                                    <Setter Property="BackgroundColor" Value="{DynamicResource Gray500}" />
-                                    <Setter Property="Opacity" Value="0.5" />
-                                </VisualState.Setters>
-                            </VisualState>
-                        </VisualStateGroup>
-                    </VisualStateGroupList>
-                </VisualStateManager.VisualStateGroups>
-            </Button>
+            <ActivityIndicator
+                IsRunning="{Binding IsBusy}"
+                IsVisible="{Binding IsBusy}"
+                HorizontalOptions="Center" />
 
-            <Button
-                Text="Import Database" CornerRadius="24" Grid.Column="1"
-                Command="{Binding ImportDatabaseCommand}"
-                IsEnabled="{Binding IsNotBusy}" FontSize="Small">
-                <VisualStateManager.VisualStateGroups>
-                    <VisualStateGroupList>
-                        <VisualStateGroup x:Name="CommonStates">
-                            <VisualState x:Name="Normal">
-                                <VisualState.Setters>
-                                    <Setter Property="BackgroundColor" Value="{DynamicResource DeleteColor}" />
-                                    <Setter Property="Opacity" Value="1" />
-                                </VisualState.Setters>
-                            </VisualState>
-                            <VisualState x:Name="Disabled">
-                                <VisualState.Setters>
-                                    <Setter Property="BackgroundColor" Value="{DynamicResource DeleteColor}" />
-                                    <Setter Property="Opacity" Value="0.5" />
-                                </VisualState.Setters>
-                            </VisualState>
-                        </VisualStateGroup>
-                    </VisualStateGroupList>
-                </VisualStateManager.VisualStateGroups>
-            </Button>
-        </Grid>
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="16">
+                <Button
+                    Text="Export Database" CornerRadius="24"
+                    Command="{Binding ExportDatabaseCommand}"
+                    IsEnabled="{Binding IsNotBusy}" FontSize="Small">
+                    <VisualStateManager.VisualStateGroups>
+                        <VisualStateGroupList>
+                            <VisualStateGroup x:Name="CommonStates">
+                                <VisualState x:Name="Normal">
+                                    <VisualState.Setters>
+                                        <Setter Property="BackgroundColor" Value="{DynamicResource Gray500}" />
+                                        <Setter Property="Opacity" Value="1" />
+                                    </VisualState.Setters>
+                                </VisualState>
+                                <VisualState x:Name="Disabled">
+                                    <VisualState.Setters>
+                                        <Setter Property="BackgroundColor" Value="{DynamicResource Gray500}" />
+                                        <Setter Property="Opacity" Value="0.5" />
+                                    </VisualState.Setters>
+                                </VisualState>
+                            </VisualStateGroup>
+                        </VisualStateGroupList>
+                    </VisualStateManager.VisualStateGroups>
+                </Button>
 
-        <Label
-            FontSize="Small"
-            HorizontalOptions="Center"
-            TextColor="{DynamicResource Gray500}">
-            <Label.Triggers>
-                <DataTrigger TargetType="Label" Binding="{Binding HasLastBackup}" Value="True">
-                    <Setter Property="Text" Value="{Binding LastBackupUtc, Converter={StaticResource DateConverter}, StringFormat='Last backup: {0}'}" />
-                </DataTrigger>
-                <DataTrigger TargetType="Label" Binding="{Binding HasLastBackup}" Value="False">
-                    <Setter Property="Text" Value="No backup yet" />
-                </DataTrigger>
-            </Label.Triggers>
-        </Label>
+                <Button
+                    Text="Import Database" CornerRadius="24" Grid.Column="1"
+                    Command="{Binding ImportDatabaseCommand}"
+                    IsEnabled="{Binding IsNotBusy}" FontSize="Small">
+                    <VisualStateManager.VisualStateGroups>
+                        <VisualStateGroupList>
+                            <VisualStateGroup x:Name="CommonStates">
+                                <VisualState x:Name="Normal">
+                                    <VisualState.Setters>
+                                        <Setter Property="BackgroundColor" Value="{DynamicResource DeleteColor}" />
+                                        <Setter Property="Opacity" Value="1" />
+                                    </VisualState.Setters>
+                                </VisualState>
+                                <VisualState x:Name="Disabled">
+                                    <VisualState.Setters>
+                                        <Setter Property="BackgroundColor" Value="{DynamicResource DeleteColor}" />
+                                        <Setter Property="Opacity" Value="0.5" />
+                                    </VisualState.Setters>
+                                </VisualState>
+                            </VisualStateGroup>
+                        </VisualStateGroupList>
+                    </VisualStateManager.VisualStateGroups>
+                </Button>
+            </Grid>
 
-    </VerticalStackLayout>
+            <Label
+                FontSize="Small"
+                HorizontalOptions="Center"
+                TextColor="{DynamicResource Gray500}">
+                <Label.Triggers>
+                    <DataTrigger TargetType="Label" Binding="{Binding HasLastBackup}" Value="True">
+                        <Setter Property="Text" Value="{Binding LastBackupUtc, Converter={StaticResource DateConverter}, StringFormat='Last backup: {0}'}" />
+                    </DataTrigger>
+                    <DataTrigger TargetType="Label" Binding="{Binding HasLastBackup}" Value="False">
+                        <Setter Property="Text" Value="No backup yet" />
+                    </DataTrigger>
+                </Label.Triggers>
+            </Label>
+
+            <VerticalStackLayout Spacing="14">
+                <VerticalStackLayout.IsVisible>
+                    <OnPlatform x:TypeArguments="x:Boolean">
+                        <On Platform="Android" Value="True" />
+                        <On Platform="iOS, WinUI, MacCatalyst" Value="False" />
+                    </OnPlatform>
+                </VerticalStackLayout.IsVisible>
+
+                <BoxView HeightRequest="1" BackgroundColor="{DynamicResource Gray700}" Margin="0,4"/>
+
+                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="16">
+                    <VerticalStackLayout Grid.Column="0" Spacing="8" VerticalOptions="Center">
+                        <Label
+                            Text="Auto-save"
+                            FontSize="Medium" />
+                        <Label
+                            Text="Silently backs up your database to Downloads when a workout finishes."
+                            FontSize="Small"  HorizontalTextAlignment="Justify"
+                            TextColor="{DynamicResource Gray500}" />
+                    </VerticalStackLayout>
+
+                    <Switch
+                        Grid.Column="1"
+                        VerticalOptions="Center" OffColor="{DynamicResource Gray700}"
+                        IsToggled="{Binding AutoSaveEnabled, Mode=TwoWay}"
+                        OnColor="{DynamicResource Gray300}"
+                        ThumbColor="{StaticResource White}" />
+                </Grid>
+            </VerticalStackLayout>
+        </VerticalStackLayout>
+    </ScrollView>
 </ContentPage>
