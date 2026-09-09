@@ -8,6 +8,9 @@ namespace FitISO.Maui.Platforms.Android
 {
     public static class ExerciseChartDrawer
     {
+        const double RepsInfluence = 0.01;
+        const double MaxRepsOffset = 0.5;
+
         public static SKBitmap Draw(IReadOnlyList<ExerciseHistoryPoint> history, int width, int height, SKColor accent, SKColor gridColor)
         {
             var bitmap = new SKBitmap(width, height);
@@ -36,7 +39,7 @@ namespace FitISO.Maui.Platforms.Android
             var rightPadding = lastLabelWidth / 2f + 6f;
 
             var values = history
-                .Select(h => ExerciseChartMath.WeightWithRepsTiebreak(h.Weight, h.Reps))
+                .Select(h => WeightWithRepsTiebreak(h.Weight, h.Reps))
                 .ToList();
 
             var min = (float)values.Min();
@@ -147,6 +150,9 @@ namespace FitISO.Maui.Platforms.Android
 
             return bitmap;
         }
+
+        static double WeightWithRepsTiebreak(double weight, double reps) =>
+            weight + Math.Min(reps * RepsInfluence, MaxRepsOffset);
 
         static void DrawYAxisLabels(SKCanvas canvas, SKFont font, SKPaint paint, float min, float max, float plotTop, float plotBottom, float yAxisWidth)
         {

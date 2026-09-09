@@ -7,21 +7,18 @@ using Android.Widget;
 namespace FitISO.Maui.Platforms.Android
 {
     [BroadcastReceiver(Label = "Days Since Last Workout", Exported = false)]
-    [IntentFilter(new[] { AppWidgetManager.ActionAppwidgetUpdate })]
+    [IntentFilter(new[] { AppWidgetManager.ActionAppwidgetUpdate, WidgetTheme.ActionThemeChanged })]
     [MetaData(AppWidgetManager.MetaDataAppwidgetProvider, Resource = "@xml/last_workout_date_widget_provider")]
     public class LastWorkoutWidgetProvider : AppWidgetProvider
     {
         public const string ActionRefresh = "com.fitiso.maui.widget.DAYS_SINCE_LAST_WORKOUT_REFRESH";
         public const string LastWorkoutDateKey = "last_workout_date_ticks_utc";
 
-        const int DefaultBackgroundArgb = unchecked((int)0xFF1E1E1E);
-        const int DefaultAccentArgb = unchecked((int)0xFFCD5C5C);
-
         public override void OnReceive(Context? context, Intent? intent)
         {
             base.OnReceive(context, intent);
 
-            if (context is null || intent?.Action != ActionRefresh)
+            if (context is null || (intent?.Action != ActionRefresh && intent?.Action != WidgetTheme.ActionThemeChanged))
                 return;
 
             var manager = AppWidgetManager.GetInstance(context);
@@ -56,21 +53,11 @@ namespace FitISO.Maui.Platforms.Android
 
         static void ApplyToViews(Context context, RemoteViews views, DateTime? lastWorkoutUtc)
         {
-            var prefs = context.GetSharedPreferences(FavouriteExerciseHistoryWidgetProvider.PrefsName, FileCreationMode.Private);
-            var backgroundArgb = prefs?.GetInt(FavouriteExerciseHistoryWidgetProvider.BackgroundColorKey, DefaultBackgroundArgb) ?? DefaultBackgroundArgb;
-            var accentArgb = prefs?.GetInt(FavouriteExerciseHistoryWidgetProvider.AccentColorKey, DefaultAccentArgb) ?? DefaultAccentArgb;
+            var themePrefs = WidgetTheme.Prefs(context);
+            var backgroundArgb = WidgetTheme.BackgroundColor(context, themePrefs);
+            var accentArgb = WidgetTheme.AccentColor(context, themePrefs);
 
-            var androidColor = new global::Android.Graphics.Color(backgroundArgb);
-            if (OperatingSystem.IsAndroidVersionAtLeast(31))
-            {
-                views.SetColorStateList(Resource.Id.widget_root, "setBackgroundTintList",
-                    global::Android.Content.Res.ColorStateList.ValueOf(androidColor));
-            }
-            else
-            {
-                views.SetInt(Resource.Id.widget_root, "setBackgroundColor", backgroundArgb);
-            }
-
+            views.ApplyTint(Resource.Id.widget_root, backgroundArgb);
             views.SetTextColor(Resource.Id.widget_days_since, new global::Android.Graphics.Color(accentArgb));
 
             if (lastWorkoutUtc is null)

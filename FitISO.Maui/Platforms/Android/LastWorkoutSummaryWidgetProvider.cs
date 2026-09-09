@@ -10,21 +10,18 @@ using System.Text.Json;
 namespace FitISO.Maui.Platforms.Android
 {
     [BroadcastReceiver(Label = "Last Workout Summary", Exported = false)]
-    [IntentFilter(new[] { AppWidgetManager.ActionAppwidgetUpdate })]
+    [IntentFilter(new[] { AppWidgetManager.ActionAppwidgetUpdate, WidgetTheme.ActionThemeChanged })]
     [MetaData(AppWidgetManager.MetaDataAppwidgetProvider, Resource = "@xml/last_workout_summary_widget_provider")]
     public class LastWorkoutSummaryWidgetProvider : AppWidgetProvider
     {
         public const string ActionRefresh = "com.fitiso.maui.widget.LAST_WORKOUT_SUMMARY_REFRESH";
         public const string SnapshotKey = "last_workout_summary_json";
 
-        const int DefaultBackgroundArgb = unchecked((int)0xFF1E1E1E);
-        const int DefaultAccentArgb = unchecked((int)0xFFCD5C5C);
-
         public override void OnReceive(Context? context, Intent? intent)
         {
             base.OnReceive(context, intent);
 
-            if (context is null || intent?.Action != ActionRefresh)
+            if (context is null || (intent?.Action != ActionRefresh && intent?.Action != WidgetTheme.ActionThemeChanged))
                 return;
 
             var manager = AppWidgetManager.GetInstance(context);
@@ -38,15 +35,15 @@ namespace FitISO.Maui.Platforms.Android
                 return;
 
             var workout = ReadSnapshot(context);
-            var prefs = context.GetSharedPreferences(FavouriteExerciseHistoryWidgetProvider.PrefsName, FileCreationMode.Private);
-            var backgroundArgb = prefs?.GetInt(FavouriteExerciseHistoryWidgetProvider.BackgroundColorKey, DefaultBackgroundArgb) ?? DefaultBackgroundArgb;
-            var accentArgb = prefs?.GetInt(FavouriteExerciseHistoryWidgetProvider.AccentColorKey, DefaultAccentArgb) ?? DefaultAccentArgb;
+            var themePrefs = WidgetTheme.Prefs(context);
+            var backgroundArgb = WidgetTheme.BackgroundColor(context, themePrefs);
+            var accentArgb = WidgetTheme.AccentColor(context, themePrefs);
 
             foreach (var widgetId in appWidgetIds)
             {
                 var views = new RemoteViews(context.PackageName, Resource.Layout.last_workout_summary_widget_layout);
 
-                ApplyTint(views, Resource.Id.widget_root, backgroundArgb);
+                views.ApplyTint(Resource.Id.widget_root, backgroundArgb);
                 views.SetTextColor(Resource.Id.widget_title, new global::Android.Graphics.Color(accentArgb));
 
                 if (workout is null || workout.WorkoutExercises.Count == 0)
@@ -77,10 +74,11 @@ namespace FitISO.Maui.Platforms.Android
                 appWidgetManager.UpdateAppWidget(widgetId, views);
             }
 
-#pragma warning disable CA1422 
+#pragma warning disable CA1422
             appWidgetManager.NotifyAppWidgetViewDataChanged(appWidgetIds, Resource.Id.widget_list);
 #pragma warning restore CA1422
         }
+
         static Workout? ReadSnapshot(Context context)
         {
             var prefs = context.GetSharedPreferences(FavouriteExerciseHistoryWidgetProvider.PrefsName, FileCreationMode.Private);
@@ -95,21 +93,6 @@ namespace FitISO.Maui.Platforms.Android
             catch
             {
                 return null;
-            }
-        }
-
-        static void ApplyTint(RemoteViews views, int viewId, int argb)
-        {
-            var androidColor = new global::Android.Graphics.Color(argb);
-
-            if (OperatingSystem.IsAndroidVersionAtLeast(31))
-            {
-                views.SetColorStateList(viewId, "setBackgroundTintList",
-                    global::Android.Content.Res.ColorStateList.ValueOf(androidColor));
-            }
-            else
-            {
-                views.SetInt(viewId, "setBackgroundColor", argb);
             }
         }
     }

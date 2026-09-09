@@ -78,71 +78,14 @@ namespace FitISO.Maui.ViewModels
 #if ANDROID
             var context = global::Android.App.Application.Context;
 
-            var prefs = context.GetSharedPreferences(
-                FitISO.Maui.Platforms.Android.FavouriteExerciseHistoryWidgetProvider.PrefsName,
-                Android.Content.FileCreationMode.Private);
+            var prefs = FitISO.Maui.Platforms.Android.WidgetTheme.Prefs(context);
+            prefs?.Edit()?.PutString(FitISO.Maui.Platforms.Android.WidgetTheme.ThemeNameKey, value.Name)?.Commit();
 
-            var editor = prefs?.Edit();
-            editor?.PutInt(FitISO.Maui.Platforms.Android.FavouriteExerciseHistoryWidgetProvider.AccentColorKey, ToAndroidArgb(value.ChartAccentColor));
-            editor?.PutInt(FitISO.Maui.Platforms.Android.FavouriteExerciseHistoryWidgetProvider.GridColorKey, ToAndroidArgb(value.ChartGridColor));
-            editor?.PutInt(FitISO.Maui.Platforms.Android.FavouriteExerciseHistoryWidgetProvider.BackgroundColorKey, ToAndroidArgb(value.ChartBackgroundColor));
-            editor?.Commit();
-
-            var refreshIntent = new Android.Content.Intent(FitISO.Maui.Platforms.Android.FavouriteExerciseHistoryWidgetProvider.    ActionRefresh);
-            refreshIntent.SetComponent(new Android.Content.ComponentName(
-                context,
-                Java.Lang.Class.FromType(typeof(FitISO.Maui.Platforms.Android.FavouriteExerciseHistoryWidgetProvider))));
-            context.SendBroadcast(refreshIntent);
-
-
-            var bestSetRefreshIntent = new Android.Content.Intent(FitISO.Maui.Platforms.Android.FavouriteExerciseBestSetWidgetProvider.ActionRefresh);
-            bestSetRefreshIntent.SetComponent(new Android.Content.ComponentName(
-                context,
-                Java.Lang.Class.FromType(typeof(FitISO.Maui.Platforms.Android.FavouriteExerciseBestSetWidgetProvider))));
-            context.SendBroadcast(bestSetRefreshIntent);
-
-            var daysSinceRefreshIntent = new Android.Content.Intent(FitISO.Maui.Platforms.Android.LastWorkoutWidgetProvider.ActionRefresh);
-            daysSinceRefreshIntent.SetComponent(new Android.Content.ComponentName(
-                context,
-                Java.Lang.Class.FromType(typeof(FitISO.Maui.Platforms.Android.LastWorkoutWidgetProvider))));
-            context.SendBroadcast(daysSinceRefreshIntent);
-
-            var favouriteWorkoutRefreshIntent = new Android.Content.Intent(FitISO.Maui.Platforms.Android.FavouriteWorkoutStartWidgetProvider.ActionRefresh);
-            favouriteWorkoutRefreshIntent.SetComponent(new Android.Content.ComponentName(
-                context,
-                Java.Lang.Class.FromType(typeof(FitISO.Maui.Platforms.Android.FavouriteWorkoutStartWidgetProvider))));
-            context.SendBroadcast(favouriteWorkoutRefreshIntent);
-
-            var summaryRefreshIntent = new Android.Content.Intent(FitISO.Maui.Platforms.Android.LastWorkoutSummaryWidgetProvider.ActionRefresh);
-            summaryRefreshIntent.SetComponent(new Android.Content.ComponentName(
-                context,
-                Java.Lang.Class.FromType(typeof(FitISO.Maui.Platforms.Android.LastWorkoutSummaryWidgetProvider))));
-            context.SendBroadcast(summaryRefreshIntent);
-
-            var heatmapPrefs = context.GetSharedPreferences(FitISO.Maui.Services.MonthlyHeatmapService.PrefsName,Android.Content.FileCreationMode.Private);
-
-            var heatmapEditor = heatmapPrefs?.Edit();
-            heatmapEditor?.PutInt(FitISO.Maui.Services.MonthlyHeatmapService.WorkoutColorKey, ToAndroidArgb(value.ChartAccentColor));
-            heatmapEditor?.PutInt(FitISO.Maui.Services.MonthlyHeatmapService.RestColorKey, ToAndroidArgb(value.HeatmapRestColor));
-            heatmapEditor?.PutInt(FitISO.Maui.Services.MonthlyHeatmapService.FutureColorKey, ToAndroidArgb(value.HeatmapFutureColor));
-            heatmapEditor?.PutInt(FitISO.Maui.Services.MonthlyHeatmapService.BackgroundColorKey, ToAndroidArgb(value.ChartBackgroundColor));
-            heatmapEditor?.Commit();
-
-            var heatmapRefreshIntent = new Android.Content.Intent(FitISO.Maui.Platforms.Android.MonthlyHeatmapWidgetProvider.ActionRefresh);
-            heatmapRefreshIntent.SetComponent(new Android.Content.ComponentName(
-                context,
-                Java.Lang.Class.FromType(typeof(FitISO.Maui.Platforms.Android.MonthlyHeatmapWidgetProvider))));
-            context.SendBroadcast(heatmapRefreshIntent);
+            var themeChangedIntent = new Android.Content.Intent(FitISO.Maui.Platforms.Android.WidgetTheme.ActionThemeChanged);
+            themeChangedIntent.SetPackage(context.PackageName);
+            context.SendBroadcast(themeChangedIntent);
 #endif
         }
-
-#if ANDROID
-        static int ToAndroidArgb(Color color) =>
-            ((int)(color.Alpha * 255) << 24) |
-            ((int)(color.Red * 255) << 16) |
-            ((int)(color.Green * 255) << 8) |
-            (int)(color.Blue * 255);
-#endif
 
         [RelayCommand]
         private async Task ExportDatabaseAsync()

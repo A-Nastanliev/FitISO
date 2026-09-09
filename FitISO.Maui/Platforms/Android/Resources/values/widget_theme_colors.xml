@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Default -->
+    <color name="widget_accent_default">#CD5C5C</color>
+    <color name="widget_grid_default">#919191</color>
+    <color name="widget_bg_default">#141414</color>
+    <color name="widget_rest_default">#363636</color>
+    <color name="widget_future_default">#212121</color>
+
+    <!-- Slate -->
+    <color name="widget_accent_slate">#E8A33D</color>
+    <color name="widget_grid_slate">#8A9292</color>
+    <color name="widget_bg_slate">#111717</color>
+    <color name="widget_rest_slate">#374141</color>
+    <color name="widget_future_slate">#1D2424</color>
+
+    <!-- DarkRed -->
+    <color name="widget_accent_darkred">#E6C79C</color>
+    <color name="widget_grid_darkred">#AA7476</color>
+    <color name="widget_bg_darkred">#1D090A</color>
+    <color name="widget_rest_darkred">#4E1D1F</color>
+    <color name="widget_future_darkred">#301011</color>
+
+    <!-- Rust -->
+    <color name="widget_accent_rust">#47A3D1</color>
+    <color name="widget_grid_rust">#AA8174</color>
+    <color name="widget_bg_rust">#1D0E09</color>
+    <color name="widget_rest_rust">#4E291D</color>
+    <color name="widget_future_rust">#301810</color>
+
+    <!-- Espresso -->
+    <color name="widget_accent_espresso">#5EA6E8</color>
+    <color name="widget_grid_espresso">#A09082</color>
+    <color name="widget_bg_espresso">#1D130B</color>
+    <color name="widget_rest_espresso">#473525</color>
+    <color name="widget_future_espresso">#2E2014</color>
+
+    <!-- Amber -->
+    <color name="widget_accent_amber">#8F6FD4</color>
+    <color name="widget_grid_amber">#AEA26F</color>
+    <color name="widget_bg_amber">#1E1A08</color>
+    <color name="widget_rest_amber">#51461A</color>
+    <color name="widget_future_amber">#322B0E</color>
+
+    <!-- Olive -->
+    <color name="widget_accent_olive">#D9724F</color>
+    <color name="widget_grid_olive">#949D78</color>
+    <color name="widget_bg_olive">#151A11</color>
+    <color name="widget_rest_olive">#465035</color>
+    <color name="widget_future_olive">#252B1D</color>
+
+    <!-- Forest -->
+    <color name="widget_accent_forest">#E8B84D</color>
+    <color name="widget_grid_forest">#819C84</color>
+    <color name="widget_bg_forest">#0B190F</color>
+    <color name="widget_rest_forest">#24422C</color>
+    <color name="widget_future_forest">#142A1A</color>
+
+    <!-- DeepTeal -->
+    <color name="widget_accent_deepteal">#E6A25E</color>
+    <color name="widget_grid_deepteal">#829EA0</color>
+    <color name="widget_bg_deepteal">#0B1B1D</color>
+    <color name="widget_rest_deepteal">#254447</color>
+    <color name="widget_future_deepteal">#142C2E</color>
+
+    <!-- DarkBlue -->
+    <color name="widget_accent_darkblue">#E8A33D</color>
+    <color name="widget_grid_darkblue">#828DA1</color>
+    <color name="widget_bg_darkblue">#0B1422</color>
+    <color name="widget_rest_darkblue">#263349</color>
+    <color name="widget_future_darkblue">#141F31</color>
+
+    <!-- Ink -->
+    <color name="widget_accent_ink">#E8974D</color>
+    <color name="widget_grid_ink">#7D858E</color>
+    <color name="widget_bg_ink">#090B0D</color>
+    <color name="widget_rest_ink">#232830</color>
+    <color name="widget_future_ink">#12161A</color>
+
+    <!-- Midnight -->
+    <color name="widget_accent_midnight">#E8B84D</color>
+    <color name="widget_grid_midnight">#827FA5</color>
+    <color name="widget_bg_midnight">#0D0C1C</color>
+    <color name="widget_rest_midnight">#29254C</color>
+    <color name="widget_future_midnight">#17152E</color>
+
+    <!-- Plum -->
+    <color name="widget_accent_plum">#82CB4D</color>
+    <color name="widget_grid_plum">#96819C</color>
+    <color name="widget_bg_plum">#100D11</color>
+    <color name="widget_rest_plum">#392F3C</color>
+    <color name="widget_future_plum">#1E191F</color>
+
+    <!-- Mauve -->
+    <color name="widget_accent_mauve">#4DAF9E</color>
+    <color name="widget_grid_mauve">#A17D9B</color>
+    <color name="widget_bg_mauve">#1D0A19</color>
+    <color name="widget_rest_mauve">#472441</color>
+    <color name="widget_future_mauve">#2D1229</color>
+
+    <!-- Wine -->
+    <color name="widget_accent_wine">#5EC49A</color>
+    <color name="widget_grid_wine">#AA7486</color>
+    <color name="widget_bg_wine">#1D0910</color>
+    <color name="widget_rest_wine">#4E1D2D</color>
+    <color name="widget_future_wine">#30101B</color>
+
+</resources>

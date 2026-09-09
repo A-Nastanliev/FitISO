@@ -10,7 +10,7 @@ using System.Text.Json;
 namespace FitISO.Maui.Platforms.Android
 {
     [BroadcastReceiver(Label = "Favourite Workout", Exported = false)]
-    [IntentFilter(new[] { AppWidgetManager.ActionAppwidgetUpdate })]
+    [IntentFilter(new[] { AppWidgetManager.ActionAppwidgetUpdate, WidgetTheme.ActionThemeChanged })]
     [MetaData(AppWidgetManager.MetaDataAppwidgetProvider, Resource = "@xml/favourite_workout_start_widget_provider")]
     public class FavouriteWorkoutStartWidgetProvider : AppWidgetProvider
     {
@@ -21,14 +21,12 @@ namespace FitISO.Maui.Platforms.Android
         const int DetailedModeMinHeightDp = 110;
 
         const int PlayIconArgb = unchecked((int)0xFF212121);
-        const int DefaultBackgroundArgb = unchecked((int)0xFF1E1E1E);
-        const int DefaultAccentArgb = unchecked((int)0xFFCD5C5C);
 
         public override void OnReceive(Context? context, Intent? intent)
         {
             base.OnReceive(context, intent);
 
-            if (context is null || intent?.Action != ActionRefresh)
+            if (context is null || (intent?.Action != ActionRefresh && intent?.Action != WidgetTheme.ActionThemeChanged))
                 return;
 
             var manager = AppWidgetManager.GetInstance(context);
@@ -108,11 +106,11 @@ namespace FitISO.Maui.Platforms.Android
 
         static void ApplyToViews(Context context, RemoteViews views, Workout? snapshot, int widgetId, bool detailed)
         {
-            var themePrefs = context.GetSharedPreferences(FavouriteExerciseHistoryWidgetProvider.PrefsName, FileCreationMode.Private);
-            var backgroundArgb = themePrefs?.GetInt(FavouriteExerciseHistoryWidgetProvider.BackgroundColorKey, DefaultBackgroundArgb) ?? DefaultBackgroundArgb;
-            var accentArgb = themePrefs?.GetInt(FavouriteExerciseHistoryWidgetProvider.AccentColorKey, DefaultAccentArgb) ?? DefaultAccentArgb;
+            var themePrefs = WidgetTheme.Prefs(context);
+            var backgroundArgb = WidgetTheme.BackgroundColor(context, themePrefs);
+            var accentArgb = WidgetTheme.AccentColor(context, themePrefs);
 
-            ApplyTint(views, Resource.Id.widget_root, backgroundArgb);
+            views.ApplyTint(Resource.Id.widget_root, backgroundArgb);
 
             var name = snapshot?.Name;
 
@@ -131,7 +129,7 @@ namespace FitISO.Maui.Platforms.Android
             views.SetViewVisibility(Resource.Id.widget_start_button, ViewStates.Visible);
             views.SetTextViewText(Resource.Id.widget_title, name);
 
-            ApplyTint(views, Resource.Id.widget_start_button, accentArgb);
+            views.ApplyTint(Resource.Id.widget_start_button, accentArgb);
             views.SetInt(Resource.Id.widget_start_button, "setColorFilter", PlayIconArgb);
 
             var launchIntent = new Intent(context, typeof(MainActivity));
@@ -158,21 +156,6 @@ namespace FitISO.Maui.Platforms.Android
 #pragma warning disable CA1422
             views.SetRemoteAdapter(Resource.Id.widget_exercise_list, adapterIntent);
 #pragma warning restore CA1422
-        }
-
-        static void ApplyTint(RemoteViews views, int viewId, int argb)
-        {
-            var androidColor = new global::Android.Graphics.Color(argb);
-
-            if (OperatingSystem.IsAndroidVersionAtLeast(31))
-            {
-                views.SetColorStateList(viewId, "setBackgroundTintList",
-                    global::Android.Content.Res.ColorStateList.ValueOf(androidColor));
-            }
-            else
-            {
-                views.SetInt(viewId, "setBackgroundColor", argb);
-            }
         }
     }
 }

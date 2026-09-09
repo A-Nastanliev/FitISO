@@ -10,20 +10,13 @@ using System.Text.Json;
 namespace FitISO.Maui.Platforms.Android
 {
     [BroadcastReceiver(Label = "Favourite Exercise History", Exported = false)]
-    [IntentFilter(new[] { AppWidgetManager.ActionAppwidgetUpdate })]
+    [IntentFilter(new[] { AppWidgetManager.ActionAppwidgetUpdate, WidgetTheme.ActionThemeChanged })]
     [MetaData(AppWidgetManager.MetaDataAppwidgetProvider, Resource = "@xml/favourite_exercise_history_widget_provider")]
     public class FavouriteExerciseHistoryWidgetProvider : AppWidgetProvider
     {
         public const string ActionRefresh = "com.fitiso.maui.widget.FAVOURITE_EXERCISE_HISTORY_REFRESH";
         public const string PrefsName = "FitISO.FavouriteExerciseWidget";
         public const string SnapshotKey = "snapshot";
-        public const string AccentColorKey = "accent_color";
-        public const string GridColorKey = "grid_color";
-        public const string BackgroundColorKey = "background_color";
-
-        const int DefaultAccentArgb = unchecked((int)0xFFCD5C5C);
-        const int DefaultGridArgb = unchecked((int)0xFFFFFFFF);
-        const int DefaultBackgroundArgb = unchecked((int)0xFF1E1E1E);
 
         const int WidgetWidthDp = 180;
         const int WidgetHeightDp = 110;
@@ -32,7 +25,7 @@ namespace FitISO.Maui.Platforms.Android
         {
             base.OnReceive(context, intent);
 
-            if (context is null || intent?.Action != ActionRefresh)
+            if (context is null || (intent?.Action != ActionRefresh && intent?.Action != WidgetTheme.ActionThemeChanged))
                 return;
 
             var manager = AppWidgetManager.GetInstance(context);
@@ -78,9 +71,9 @@ namespace FitISO.Maui.Platforms.Android
 
         static void ApplyToViews(Context context, RemoteViews views, Exercise? snapshot, int widthPx, int heightPx)
         {
-            var prefs = context.GetSharedPreferences(PrefsName, FileCreationMode.Private);
-            var backgroundArgb = prefs?.GetInt(BackgroundColorKey, DefaultBackgroundArgb) ?? DefaultBackgroundArgb;
-            ApplyBackgroundTint(views, backgroundArgb);
+            var themePrefs = WidgetTheme.Prefs(context);
+            var backgroundArgb = WidgetTheme.BackgroundColor(context, themePrefs);
+            views.ApplyTint(Resource.Id.widget_root, backgroundArgb);
 
             if (snapshot is null || snapshot.History.Count == 0)
             {
@@ -88,8 +81,8 @@ namespace FitISO.Maui.Platforms.Android
                 return;
             }
 
-            var accent = ReadColor(prefs, AccentColorKey, DefaultAccentArgb);
-            var gridColor = ReadColor(prefs, GridColorKey, DefaultGridArgb);
+            var accent = WidgetTheme.ToSkColor(WidgetTheme.AccentColor(context, themePrefs));
+            var gridColor = WidgetTheme.ToSkColor(WidgetTheme.GridColor(context, themePrefs));
 
             using var skBitmap = ExerciseChartDrawer.Draw(snapshot.History, Math.Max(widthPx, 1), Math.Max(heightPx, 1), accent, gridColor);
             using var image = SKImage.FromBitmap(skBitmap);
@@ -101,31 +94,6 @@ namespace FitISO.Maui.Platforms.Android
             views.SetViewVisibility(Resource.Id.widget_empty_state, ViewStates.Gone);
             views.SetViewVisibility(Resource.Id.widget_chart, ViewStates.Visible);
             views.SetImageViewBitmap(Resource.Id.widget_chart, androidBitmap);
-        }
-
-        static SKColor ReadColor(ISharedPreferences? prefs, string key, int defaultArgb)
-        {
-            var argb = prefs?.GetInt(key, defaultArgb) ?? defaultArgb;
-            return new SKColor(
-                (byte)((argb >> 16) & 0xFF),
-                (byte)((argb >> 8) & 0xFF),
-                (byte)(argb & 0xFF),
-                (byte)((argb >> 24) & 0xFF));
-        }
-
-        static void ApplyBackgroundTint(RemoteViews views, int backgroundArgb)
-        {
-            var androidColor = new global::Android.Graphics.Color(backgroundArgb);
-
-            if (OperatingSystem.IsAndroidVersionAtLeast(31))
-            {
-                views.SetColorStateList(Resource.Id.widget_root, "setBackgroundTintList",
-                    global::Android.Content.Res.ColorStateList.ValueOf(androidColor));
-            }
-            else
-            {
-                views.SetInt(Resource.Id.widget_root, "setBackgroundColor", backgroundArgb);
-            }
         }
 
         static void ShowEmptyState(RemoteViews views, string title)

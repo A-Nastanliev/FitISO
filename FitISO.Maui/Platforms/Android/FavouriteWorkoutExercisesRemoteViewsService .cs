@@ -14,13 +14,10 @@ namespace FitISO.Maui.Platforms.Android
 
         class Factory : Java.Lang.Object, IRemoteViewsFactory
         {
-            const int DefaultAccentArgb = unchecked((int)0xFFCD5C5C);
-            const int DefaultGridArgb = unchecked((int)0xFFDDDDDD);
-
             readonly Context context;
             List<WorkoutExercise> exercises = new();
-            int accentArgb = DefaultAccentArgb;
-            int gridArgb = DefaultGridArgb;
+            int accentArgb;
+            int gridArgb;
 
             public Factory(Context context) => this.context = context;
 
@@ -33,9 +30,9 @@ namespace FitISO.Maui.Platforms.Android
                 var prefs = context.GetSharedPreferences(FavouriteWorkoutStartWidgetProvider.PrefsName, FileCreationMode.Private);
                 var json = prefs?.GetString(FavouriteWorkoutStartWidgetProvider.SnapshotKey, null);
 
-                var themePrefs = context.GetSharedPreferences(FavouriteExerciseHistoryWidgetProvider.PrefsName, FileCreationMode.Private);
-                accentArgb = themePrefs?.GetInt(FavouriteExerciseHistoryWidgetProvider.AccentColorKey, DefaultAccentArgb) ?? DefaultAccentArgb;
-                gridArgb = themePrefs?.GetInt(FavouriteExerciseHistoryWidgetProvider.GridColorKey, DefaultGridArgb) ?? DefaultGridArgb;
+                var themePrefs = WidgetTheme.Prefs(context);
+                accentArgb = WidgetTheme.AccentColor(context, themePrefs);
+                gridArgb = WidgetTheme.GridColor(context, themePrefs);
 
                 var newExercises = new List<WorkoutExercise>();
 

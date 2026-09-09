@@ -67,6 +67,7 @@
 
 	<ItemGroup>
 	  <None Remove="Platforms\Android\Resources\drawable\trophy_icon.png" />
+	  <None Remove="Platforms\Android\Resources\values\widget_theme_colors.xml" />
 	</ItemGroup>
 
 	<ItemGroup>

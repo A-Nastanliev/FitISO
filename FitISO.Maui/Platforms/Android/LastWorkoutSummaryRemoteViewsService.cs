@@ -14,13 +14,10 @@ namespace FitISO.Maui.Platforms.Android
 
         class Factory : Java.Lang.Object, IRemoteViewsFactory
         {
-            const int DefaultAccentArgb = unchecked((int)0xFFCD5C5C);
-            const int DefaultGridArgb = unchecked((int)0xFFDDDDDD);
-
             readonly Context context;
             List<Row> rows = new();
-            int accentArgb = DefaultAccentArgb;
-            int gridArgb = DefaultGridArgb;
+            int accentArgb;
+            int gridArgb;
 
             public Factory(Context context) => this.context = context;
 
@@ -32,11 +29,12 @@ namespace FitISO.Maui.Platforms.Android
 
             void Load()
             {
-                var prefs = context.GetSharedPreferences(FavouriteExerciseHistoryWidgetProvider.PrefsName, FileCreationMode.Private);
-                var json = prefs?.GetString(LastWorkoutSummaryWidgetProvider.SnapshotKey, null);
+                var snapshotPrefs = context.GetSharedPreferences(FavouriteExerciseHistoryWidgetProvider.PrefsName, FileCreationMode.Private);
+                var json = snapshotPrefs?.GetString(LastWorkoutSummaryWidgetProvider.SnapshotKey, null);
 
-                accentArgb = prefs?.GetInt(FavouriteExerciseHistoryWidgetProvider.AccentColorKey, DefaultAccentArgb) ?? DefaultAccentArgb;
-                gridArgb = prefs?.GetInt(FavouriteExerciseHistoryWidgetProvider.GridColorKey, DefaultGridArgb) ?? DefaultGridArgb;
+                var themePrefs = WidgetTheme.Prefs(context);
+                accentArgb = WidgetTheme.AccentColor(context, themePrefs);
+                gridArgb = WidgetTheme.GridColor(context, themePrefs);
 
                 var newRows = new List<Row>();
 

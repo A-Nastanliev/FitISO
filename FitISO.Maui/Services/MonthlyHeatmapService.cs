@@ -74,10 +74,6 @@ namespace FitISO.Maui.Services
         public const string CachedYearKey = "cached_year";
         public const string CachedMonthKey = "cached_month";
         public const string CachedDaysKey = "cached_workout_days";
-        public const string WorkoutColorKey = "heatmap_workout_color";
-        public const string RestColorKey = "heatmap_rest_color";
-        public const string FutureColorKey = "heatmap_future_color";
-        public const string BackgroundColorKey = "heatmap_background_color";
 
         static (int year, int month, HashSet<int> days) ReadCache()
         {
