@@ -22,6 +22,12 @@ namespace FitISO.Maui.Models
         static readonly TimeSpan DebounceDelay = TimeSpan.FromSeconds(1.2);
         CancellationTokenSource? _debounceCts;
 
+        public event EventHandler? JustCompleted;
+
+        bool _wasCompleteBeforeChange;
+
+        public bool IsComplete => Weight is >= 0 && Reps is > 0;
+
         public Set()
         {
 
@@ -34,19 +40,30 @@ namespace FitISO.Maui.Models
             Reps = set.Reps;
         }
 
-        partial void OnWeightChanged(double? value) 
+        partial void OnWeightChanging(double? value) => _wasCompleteBeforeChange = IsComplete;
+        partial void OnRepsChanging(double? value) => _wasCompleteBeforeChange = IsComplete;
+
+        partial void OnWeightChanged(double? value)
         {
             if (value < 0)
                 Weight = null;
 
             DebounceSave();
+            RaiseJustCompletedIfNeeded();
         }
-        partial void OnRepsChanged(double? value) 
+        partial void OnRepsChanged(double? value)
         {
             if (value < 0)
                 Reps = null;
 
             DebounceSave();
+            RaiseJustCompletedIfNeeded();
+        }
+
+        void RaiseJustCompletedIfNeeded()
+        {
+            if (!_wasCompleteBeforeChange && IsComplete)
+                JustCompleted?.Invoke(this, EventArgs.Empty);
         }
 
         void DebounceSave()
