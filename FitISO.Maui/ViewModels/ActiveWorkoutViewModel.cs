@@ -16,7 +16,8 @@ using System.Text;
 
 namespace FitISO.Maui.ViewModels
 {
-    public partial class ActiveWorkoutViewModel : ObservableObject, IRecipient<WorkoutStartedMessage>, IRecipient<DbImportedMessage>, IRecipient<ExerciseUpdatedMessage>
+    public partial class ActiveWorkoutViewModel : ObservableObject, IRecipient<WorkoutStartedMessage>, IRecipient<DbImportedMessage>, 
+        IRecipient<ExerciseUpdatedMessage>, IRecipient<RestStopwatchEnabledChangedMessage>
     {
         [ObservableProperty]
         Workout workout = new();
@@ -29,6 +30,9 @@ namespace FitISO.Maui.ViewModels
 
         [ObservableProperty]
         int totalSets;
+
+        [ObservableProperty]
+        bool restStopwatchEnabled;
 
         double progress;
         public double Progress
@@ -127,6 +131,15 @@ namespace FitISO.Maui.ViewModels
             this.workoutService = workoutService;
             this.workoutSettingsService = workoutSettingsService;
             this.serviceProvider = serviceProvider;
+            RestStopwatchEnabled = workoutSettingsService.RestStopwatchEnabled;
+        }
+
+        public void Receive(RestStopwatchEnabledChangedMessage message) => RestStopwatchEnabled = message.Value;
+
+        partial void OnRestStopwatchEnabledChanged(bool value)
+        {
+            if (!value)
+                ResetRest();
         }
 
         public void Receive(WorkoutStartedMessage message)
@@ -361,6 +374,8 @@ namespace FitISO.Maui.ViewModels
 
         void Set_JustCompleted(object? sender, EventArgs e)
         {
+            if (!RestStopwatchEnabled) return;
+
             if (sender is not Set set) return;
 
             var owner = FindOwner(set);

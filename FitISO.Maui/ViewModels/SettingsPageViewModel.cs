@@ -51,6 +51,9 @@ namespace FitISO.Maui.ViewModels
         [ObservableProperty]
         bool autoStartRestOnExerciseFinish;
 
+        [ObservableProperty]
+        bool restStopwatchEnabled;
+
         public bool HasLastBackup => LastBackupUtc is not null;
 
         readonly WorkoutSettingsService workoutSettingsService;
@@ -69,8 +72,8 @@ namespace FitISO.Maui.ViewModels
                 : DateTime.Parse(savedBackup, null, System.Globalization.DateTimeStyles.RoundtripKind);
 
             AutoSaveEnabled = Preferences.Get(AutoBackupService.AutoSaveEnabledKey, false);
-
             AutoStartRestOnExerciseFinish = workoutSettingsService.AutoStartRestOnExerciseFinish;
+            RestStopwatchEnabled = workoutSettingsService.RestStopwatchEnabled;
         }
 
         public void Receive(AutoBackupCompletedMessage message) => LastBackupUtc = message.Value;
@@ -78,6 +81,12 @@ namespace FitISO.Maui.ViewModels
         partial void OnAutoSaveEnabledChanged(bool value) => Preferences.Set(AutoBackupService.AutoSaveEnabledKey, value);
 
         partial void OnAutoStartRestOnExerciseFinishChanged(bool value) => workoutSettingsService.AutoStartRestOnExerciseFinish = value;
+
+        partial void OnRestStopwatchEnabledChanged(bool value)
+        {
+            workoutSettingsService.RestStopwatchEnabled = value;
+            WeakReferenceMessenger.Default.Send(new RestStopwatchEnabledChangedMessage(value));
+        }
 
         partial void OnSelectedAccentThemeChanged(AccentTheme value)
         {

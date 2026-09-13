@@ -14,6 +14,7 @@
             <converters:UtcToLocalDateConverter x:Key="DateConverter" />
             <converters:UtcToLocalTimeConverter x:Key="TimeConverter"/>
             <converters:NullableDoubleConverter x:Key="NullableDoubleConverter"/>
+            <converters:VisibilityAwareHeightConverter x:Key="VisibilityAwareHeightConverter"/>
         </ResourceDictionary>
     </Application.Resources>
 </Application>
