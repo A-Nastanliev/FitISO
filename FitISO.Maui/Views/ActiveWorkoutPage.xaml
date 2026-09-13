@@ -29,55 +29,56 @@
     </Shell.TitleView>
 
 
-    <Grid SafeAreaEdges="None" RowDefinitions="auto,*">
-        <Border Grid.Row="0" Margin="8,16,8,0" StrokeThickness="0" StrokeShape="RoundRectangle 25"
-        BackgroundColor="{DynamicResource Gray900}">
-            <Grid Padding="16,12" RowDefinitions="Auto">
-                <Button Text="Start rest" FontSize="Medium" HeightRequest="38"
-                    HorizontalOptions="Fill" VerticalOptions="Center" CornerRadius="20"
-                    BackgroundColor="{DynamicResource Gray600}" TextColor="White"
-                    ImageSource="{FontImageSource FontFamily=MaterialRound, Glyph='&#xE425;', Color=White, Size=16}"
-                    ContentLayout="Left,8" 
-                    IsVisible="{Binding ShowStartRest}"
-                    Command="{Binding StartRestCommand}"/>
-                <Grid RowDefinitions="Auto" ColumnDefinitions="Auto,*,Auto"
-                    VerticalOptions="Center" IsVisible="{Binding ShowRunningRest}">
-                    <Border Grid.Column="0" HeightRequest="50" WidthRequest="50" BackgroundColor="{DynamicResource Gray600}"
-                        StrokeThickness="0" Padding="8">
-                        <Border.StrokeShape>
-                            <RoundRectangle CornerRadius="25"/>
-                        </Border.StrokeShape>
-                        <Image>
-                            <Image.Source>
-                                <FontImageSource FontFamily="MaterialRound" Glyph="&#xE425;" Color="White" Size="18"/>
-                            </Image.Source>
-                        </Image>
-                    </Border>
-                    <Label Grid.Column="1" Text="{Binding RestElapsed, StringFormat='{0:mm\\:ss}'}"
-                        FontSize="Medium" FontAttributes="Bold" TextColor="White"
-                        HorizontalOptions="Center" VerticalOptions="Center"/>
-                    <ImageButton Grid.Column="2" HeightRequest="50" WidthRequest="50"
-                        Source="{FontImageSource FontFamily=MaterialRound, Glyph='&#xE047;', Color=White, Size=18}"
-                        BackgroundColor="{DynamicResource DeleteColor}" CornerRadius="25" Padding="8"
-                        Command="{Binding StopRestCommand}"/>
-                </Grid>
-                <Grid RowDefinitions="Auto" ColumnDefinitions="*,*" ColumnSpacing="12"
-                    VerticalOptions="Center" IsVisible="{Binding ShowStoppedRest}">
-                    <Button Grid.Column="0" Text="Resume" FontSize="Small" HeightRequest="38"
-                        VerticalOptions="Center" CornerRadius="20" BackgroundColor="{DynamicResource Gray600}" TextColor="White"
-                        ImageSource="{FontImageSource FontFamily=MaterialRound, Glyph='&#xE037;', Color=White, Size=16}"
-                        ContentLayout="Left,6"
-                        Command="{Binding ResumeRestCommand}"/>
-                    <Button Grid.Column="1" Text="Reset" FontSize="Small" HeightRequest="38"
-                        VerticalOptions="Center" CornerRadius="20" BackgroundColor="{DynamicResource Gray500}" TextColor="White"
-                        ImageSource="{FontImageSource FontFamily=MaterialRound, Glyph='&#xE5D5;', Color=White, Size=16}"
-                        ContentLayout="Left,6"
-                        Command="{Binding ManualResetRestCommand}"/>
-                </Grid>
-            </Grid>
-        </Border>
-        <CollectionView VerticalOptions="Fill" Grid.Row="1"
+    <Grid SafeAreaEdges="None" RowDefinitions="*">
+        <CollectionView VerticalOptions="Fill" Grid.Row="0"
             ItemsSource="{Binding Workout.WorkoutExercises}" Margin="0,6,0,6" SelectionMode="None" VerticalScrollBarVisibility="Never">
+            <CollectionView.Header>
+                <Border  Margin="8,16,8,0" StrokeThickness="0" StrokeShape="RoundRectangle 25"
+                    BackgroundColor="{DynamicResource Gray900}">
+                    <Grid Padding="16,12" RowDefinitions="Auto">
+                        <Button Text="Start rest" FontSize="Medium" HeightRequest="38"
+                            HorizontalOptions="Fill" VerticalOptions="Center" CornerRadius="20"
+                            BackgroundColor="{DynamicResource Gray600}" TextColor="White"
+                            ImageSource="{FontImageSource FontFamily=MaterialRound, Glyph='&#xE425;', Color=White, Size=16}"
+                            ContentLayout="Left,8" 
+                            IsVisible="{Binding ShowStartRest}"
+                            Command="{Binding StartRestCommand}"/>
+                        <Grid RowDefinitions="Auto" ColumnDefinitions="Auto,*,Auto" VerticalOptions="Center" IsVisible="{Binding ShowRunningRest}">
+                            <Border Grid.Column="0" HeightRequest="50" WidthRequest="50" BackgroundColor="{DynamicResource Gray600}"
+                                StrokeThickness="0" Padding="8">
+                                <Border.StrokeShape>
+                                    <RoundRectangle CornerRadius="25"/>
+                                </Border.StrokeShape>
+                                <Image>
+                                    <Image.Source>
+                                        <FontImageSource FontFamily="MaterialRound" Glyph="&#xE425;" Color="White" Size="18"/>
+                                    </Image.Source>
+                                </Image>
+                            </Border>
+                            <Label Grid.Column="1" Text="{Binding RestElapsed, StringFormat='{0:mm\\:ss}'}"
+                                FontSize="Medium" FontAttributes="Bold" TextColor="White"
+                                HorizontalOptions="Center" VerticalOptions="Center"/>
+                            <ImageButton Grid.Column="2" HeightRequest="50" WidthRequest="50"
+                                Source="{FontImageSource FontFamily=MaterialRound, Glyph='&#xE047;', Color=White, Size=18}"
+                                BackgroundColor="{DynamicResource DeleteColor}" CornerRadius="25" Padding="8"
+                                Command="{Binding StopRestCommand}"/>
+                        </Grid>
+                        <Grid RowDefinitions="Auto" ColumnDefinitions="*,*" ColumnSpacing="12"
+                            VerticalOptions="Center" IsVisible="{Binding ShowStoppedRest}">
+                            <Button Grid.Column="0" Text="Resume" FontSize="Small" HeightRequest="38"
+                                VerticalOptions="Center" CornerRadius="20" BackgroundColor="{DynamicResource Gray600}" TextColor="White"
+                                ImageSource="{FontImageSource FontFamily=MaterialRound, Glyph='&#xE037;', Color=White, Size=16}"
+                                ContentLayout="Left,6"
+                                Command="{Binding ResumeRestCommand}"/>
+                            <Button Grid.Column="1" Text="Reset" FontSize="Small" HeightRequest="38"
+                                VerticalOptions="Center" CornerRadius="20" BackgroundColor="{DynamicResource Gray500}" TextColor="White"
+                                ImageSource="{FontImageSource FontFamily=MaterialRound, Glyph='&#xE5D5;', Color=White, Size=16}"
+                                ContentLayout="Left,6"
+                                Command="{Binding ManualResetRestCommand}"/>
+                        </Grid>
+                    </Grid>
+                </Border>
+            </CollectionView.Header>
             <CollectionView.Footer>
                 <BoxView HeightRequest="100" Color="Transparent" BackgroundColor="Transparent" Background="Transparent"/>
             </CollectionView.Footer>

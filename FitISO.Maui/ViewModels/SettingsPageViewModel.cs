@@ -48,10 +48,17 @@ namespace FitISO.Maui.ViewModels
         [ObservableProperty]
         bool autoSaveEnabled;
 
+        [ObservableProperty]
+        bool autoStartRestOnExerciseFinish;
+
         public bool HasLastBackup => LastBackupUtc is not null;
 
-        public SettingsPageViewModel()
+        readonly WorkoutSettingsService workoutSettingsService;
+
+        public SettingsPageViewModel(WorkoutSettingsService workoutSettingsService)
         {
+            this.workoutSettingsService = workoutSettingsService;
+
             WeakReferenceMessenger.Default.RegisterAll(this);
 
             var savedTheme = Preferences.Get("accent_theme", nameof(Default));
@@ -62,11 +69,15 @@ namespace FitISO.Maui.ViewModels
                 : DateTime.Parse(savedBackup, null, System.Globalization.DateTimeStyles.RoundtripKind);
 
             AutoSaveEnabled = Preferences.Get(AutoBackupService.AutoSaveEnabledKey, false);
+
+            AutoStartRestOnExerciseFinish = workoutSettingsService.AutoStartRestOnExerciseFinish;
         }
 
         public void Receive(AutoBackupCompletedMessage message) => LastBackupUtc = message.Value;
 
         partial void OnAutoSaveEnabledChanged(bool value) => Preferences.Set(AutoBackupService.AutoSaveEnabledKey, value);
+
+        partial void OnAutoStartRestOnExerciseFinishChanged(bool value) => workoutSettingsService.AutoStartRestOnExerciseFinish = value;
 
         partial void OnSelectedAccentThemeChanged(AccentTheme value)
         {

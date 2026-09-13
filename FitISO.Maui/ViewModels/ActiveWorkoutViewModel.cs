@@ -5,6 +5,7 @@ using CommunityToolkit.Mvvm.Messaging;
 using FitISO.Maui.Messages;
 using FitISO.Maui.Models;
 using FitISO.Services;
+using FitISO.Maui.Services;
 using FitISO.Maui.Views;
 using System;
 using System.Collections.Generic;
@@ -115,13 +116,16 @@ namespace FitISO.Maui.ViewModels
         readonly SetService setService;
         readonly WorkoutExerciseService workoutExerciseService;
         readonly WorkoutService workoutService;
+        readonly WorkoutSettingsService workoutSettingsService;
 
-        public ActiveWorkoutViewModel(SetService setService, WorkoutService workoutService, WorkoutExerciseService workoutExerciseService, IServiceProvider serviceProvider)
+        public ActiveWorkoutViewModel(SetService setService, WorkoutService workoutService, WorkoutExerciseService workoutExerciseService,
+            WorkoutSettingsService workoutSettingsService, IServiceProvider serviceProvider)
         {
             WeakReferenceMessenger.Default.RegisterAll(this);
             this.setService = setService;
             this.workoutExerciseService = workoutExerciseService;
             this.workoutService = workoutService;
+            this.workoutSettingsService = workoutSettingsService;
             this.serviceProvider = serviceProvider;
         }
 
@@ -363,16 +367,18 @@ namespace FitISO.Maui.ViewModels
             if (owner is null) return;
 
             int index = owner.Sets.IndexOf(set);
-            if (index == owner.Sets.Count - 1)
+            bool isLastSetOfExercise = index == owner.Sets.Count - 1;
+
+            if (isLastSetOfExercise && !workoutSettingsService.AutoStartRestOnExerciseFinish)
             {
-                if (ReferenceEquals(_restTriggerExercise, owner))
-                    ResetRest();
+                ResetRest();
                 return;
             }
 
             RestStartTime = DateTime.UtcNow;
             RestIsStopped = false;
-            SetRestTrigger(owner, set);
+
+            SetRestTrigger(isLastSetOfExercise ? null : owner, isLastSetOfExercise ? null : set);
         }
 
         WorkoutExercise? FindOwner(Set set) =>

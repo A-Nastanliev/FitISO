@@ -69,6 +69,7 @@ namespace FitISO.Maui
             builder.Services.AddSingleton<FavouriteWorkoutTemplateService>();
             builder.Services.AddSingleton<MonthlyHeatmapService>();
             builder.Services.AddSingleton<AutoBackupService>();
+            builder.Services.AddSingleton<WorkoutSettingsService>();
 
 #if DEBUG
             builder.Logging.AddDebug();

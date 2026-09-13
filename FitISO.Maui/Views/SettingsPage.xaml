@@ -8,7 +8,7 @@
         <Label Text="Settings" FontSize="Medium" FontAttributes="Bold" VerticalTextAlignment="Center" HorizontalTextAlignment="Center"/>
     </Shell.TitleView>
 
-    <ScrollView VerticalScrollBarVisibility="Never" HorizontalScrollBarVisibility="Never">
+    <ScrollView VerticalScrollBarVisibility="Never" HorizontalScrollBarVisibility="Never" Padding="0,0,0,40">
         <VerticalStackLayout Padding="24" Spacing="16">
 
             <VerticalStackLayout Spacing="8">
@@ -138,35 +138,43 @@
                 </Label.Triggers>
             </Label>
 
-            <VerticalStackLayout Spacing="14">
-                <VerticalStackLayout.IsVisible>
-                    <OnPlatform x:TypeArguments="x:Boolean">
-                        <On Platform="Android" Value="True" />
-                        <On Platform="iOS, WinUI, MacCatalyst" Value="False" />
-                    </OnPlatform>
-                </VerticalStackLayout.IsVisible>
+            <BoxView HeightRequest="1" BackgroundColor="{DynamicResource Gray700}" Margin="0,8"/>
 
-                <BoxView HeightRequest="1" BackgroundColor="{DynamicResource Gray700}" Margin="0,4"/>
+            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="16">
+                <VerticalStackLayout Grid.Column="0" Spacing="8" VerticalOptions="Center">
+                    <Label
+                        Text="Auto-save"
+                        FontSize="Medium" />
+                    <Label
+                        Text="Silently backs up your database to Downloads when a workout finishes."
+                        FontSize="Small"  HorizontalTextAlignment="Justify"
+                        TextColor="{DynamicResource Gray500}" />
+                </VerticalStackLayout>
+                <Switch
+                    Grid.Column="1" VerticalOptions="Center" OffColor="{DynamicResource Gray700}"
+                    IsToggled="{Binding AutoSaveEnabled, Mode=TwoWay}"
+                    OnColor="{DynamicResource Gray300}"
+                    ThumbColor="{StaticResource White}" />
+            </Grid>
 
-                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="16">
-                    <VerticalStackLayout Grid.Column="0" Spacing="8" VerticalOptions="Center">
-                        <Label
-                            Text="Auto-save"
-                            FontSize="Medium" />
-                        <Label
-                            Text="Silently backs up your database to Downloads when a workout finishes."
-                            FontSize="Small"  HorizontalTextAlignment="Justify"
-                            TextColor="{DynamicResource Gray500}" />
-                    </VerticalStackLayout>
+            <BoxView HeightRequest="1" BackgroundColor="{DynamicResource Gray700}" Margin="0,8"/>
 
-                    <Switch
-                        Grid.Column="1"
-                        VerticalOptions="Center" OffColor="{DynamicResource Gray700}"
-                        IsToggled="{Binding AutoSaveEnabled, Mode=TwoWay}"
-                        OnColor="{DynamicResource Gray300}"
-                        ThumbColor="{StaticResource White}" />
-                </Grid>
-            </VerticalStackLayout>
+            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="16">
+                <VerticalStackLayout Grid.Column="0" Spacing="8" VerticalOptions="Center">
+                    <Label
+                        Text="Rest Stopwatch" FontSize="Medium" />
+                    <Label
+                        Text="Automatically restart the rest stopwatch when you finish an exercise."
+                        FontSize="Small" HorizontalTextAlignment="Justify"
+                        TextColor="{DynamicResource Gray500}" />
+                </VerticalStackLayout>
+                <Switch
+                    Grid.Column="1"
+                    VerticalOptions="Center" OffColor="{DynamicResource Gray700}"
+                    IsToggled="{Binding AutoStartRestOnExerciseFinish, Mode=TwoWay}"
+                    OnColor="{DynamicResource Gray300}"
+                    ThumbColor="{StaticResource White}" />
+            </Grid>
         </VerticalStackLayout>
     </ScrollView>
 </ContentPage>
