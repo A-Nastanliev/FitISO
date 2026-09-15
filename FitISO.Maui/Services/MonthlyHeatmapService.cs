@@ -1,7 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.Messaging;
-using FitISO.Data;
 using FitISO.Maui.Messages;
-using Microsoft.EntityFrameworkCore;
+using FitISO.Services;
 using System.Text.Json;
 #if ANDROID
 using Android.Content;
@@ -12,11 +11,11 @@ namespace FitISO.Maui.Services
 {
     public class MonthlyHeatmapService : IRecipient<WorkoutFinishedMessage>, IRecipient<DbImportedMessage>
     {
-        readonly IDbContextFactory<FitDbContext> contextFactory;
+        readonly WorkoutService workoutService;
 
-        public MonthlyHeatmapService(IDbContextFactory<FitDbContext> contextFactory)
+        public MonthlyHeatmapService(WorkoutService workoutService)
         {
-            this.contextFactory = contextFactory;
+            this.workoutService = workoutService;
             WeakReferenceMessenger.Default.RegisterAll(this);
         }
 
@@ -25,7 +24,7 @@ namespace FitISO.Maui.Services
             var start = message.Value.StartTime;
             if (start is null) return;
 
-            var startLocal = ToLocal(start.Value);
+            var startLocal = WorkoutService.ToLocal(start.Value);
             var (cachedYear, cachedMonth, days) = ReadCache();
 
             if (cachedYear != startLocal.Year || cachedMonth != startLocal.Month)
@@ -45,28 +44,9 @@ namespace FitISO.Maui.Services
         public async Task RebuildCacheForCurrentMonthAsync()
         {
             var nowLocal = DateTime.Now;
-
-            using var context = contextFactory.CreateDbContext();
-            var starts = await context.Workouts
-                .AsNoTracking()
-                .Where(w => w.StartTime != null && w.EndTime != null)
-                .Select(w => w.StartTime!.Value)
-                .ToListAsync();
-
-            var days = starts
-                .Select(ToLocal)
-                .Where(local => local.Year == nowLocal.Year && local.Month == nowLocal.Month)
-                .Select(local => local.Day);
-
-            WriteCache(nowLocal.Year, nowLocal.Month, new HashSet<int>(days));
-        }
-
-        static DateTime ToLocal(DateTime utcStoredValue)
-        {
-            var utc = utcStoredValue.Kind == DateTimeKind.Utc
-                ? utcStoredValue
-                : DateTime.SpecifyKind(utcStoredValue, DateTimeKind.Utc);
-            return utc.ToLocalTime();
+            var days = await workoutService.GetWorkoutDaysInMonthAsync(nowLocal.Year, nowLocal.Month)
+                       ?? new HashSet<int>();
+            WriteCache(nowLocal.Year, nowLocal.Month, days);
         }
 
 #if ANDROID

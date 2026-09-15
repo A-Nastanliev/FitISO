@@ -1,6 +1,6 @@
 ﻿using SkiaSharp;
 
-namespace FitISO.Maui.Platforms.Android
+namespace FitISO.Maui.Rendering
 {
     public static class HeatmapChartDrawer
     {
@@ -13,8 +13,17 @@ namespace FitISO.Maui.Platforms.Android
             using var canvas = new SKCanvas(bitmap);
             canvas.Clear(SKColors.Transparent);
 
+            Draw(canvas, workoutDays, today, daysInMonth, firstDayOfWeek,
+                workoutColor, restColor, futureColor, width, height);
+
+            return bitmap;
+        }
+
+        public static void Draw(SKCanvas canvas, HashSet<int> workoutDays, int today, int daysInMonth, DayOfWeek firstDayOfWeek,
+            SKColor workoutColor, SKColor restColor, SKColor futureColor, int width, int height)
+        {
             if (daysInMonth <= 0)
-                return bitmap;
+                return;
 
             var leadingBlanks = ((int)firstDayOfWeek + 6) % 7;
             var totalCells = leadingBlanks + daysInMonth;
@@ -40,8 +49,8 @@ namespace FitISO.Maui.Platforms.Android
             for (var day = 1; day <= daysInMonth; day++)
             {
                 var cellIndex = leadingBlanks + day - 1;
-                var row = cellIndex / Columns;  
-                var col = cellIndex % Columns;  
+                var row = cellIndex / Columns;
+                var col = cellIndex % Columns;
 
                 var left = offsetX + col * cellSize + gap / 2f;
                 var top = offsetY + row * cellSize + gap / 2f;
@@ -53,8 +62,6 @@ namespace FitISO.Maui.Platforms.Android
 
                 canvas.DrawRoundRect(rect, cornerRadius, cornerRadius, paint);
             }
-
-            return bitmap;
         }
     }
 }

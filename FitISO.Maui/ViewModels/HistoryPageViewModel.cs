@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.Maui.Alerts;
 using CommunityToolkit.Maui.Storage;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using FitISO.Maui.Messages;
@@ -18,6 +19,20 @@ namespace FitISO.Maui.ViewModels
           IRecipient<WorkoutFinishedMessage>, IRecipient<ExerciseUpdatedMessage>, IRecipient<DbImportedMessage>
     {
         readonly WorkoutService workoutService;
+        int heatmapYear;
+        int heatmapMonth;
+
+        [ObservableProperty]
+        HashSet<int> heatmapWorkoutDays = new();
+
+        [ObservableProperty]
+        int heatmapToday;
+
+        [ObservableProperty]
+        int heatmapDaysInMonth;
+
+        [ObservableProperty]
+        DayOfWeek heatmapFirstDayOfWeek;
 
         public HistoryPageViewModel(WorkoutService workoutService)
         {
@@ -25,6 +40,20 @@ namespace FitISO.Maui.ViewModels
         }
 
         protected override int BatchSize => 6;
+
+        public async Task LoadHeatmapAsync()
+        {
+            var now = DateTime.Now;
+            heatmapYear = now.Year;
+            heatmapMonth = now.Month;
+
+            var days = await workoutService.GetWorkoutDaysInMonthAsync(now.Year, now.Month) ?? new HashSet<int>();
+
+            HeatmapWorkoutDays = days;
+            HeatmapToday = now.Day;
+            HeatmapDaysInMonth = DateTime.DaysInMonth(now.Year, now.Month);
+            HeatmapFirstDayOfWeek = new DateTime(now.Year, now.Month, 1).DayOfWeek;
+        }
 
         protected override async Task<IReadOnlyList<FitISO.Data.Models.Workout>> FetchBatchAsync(int batchSize, int? cursor)
             => await workoutService.GetWorkoutsAsync(batchSize, cursor);
@@ -143,11 +172,23 @@ namespace FitISO.Maui.ViewModels
         {
             ResetPaging();
             await LoadFirst();
+            await LoadHeatmapAsync();
         }
 
         public void Receive(WorkoutFinishedMessage message)
         {
             Items.Insert(0, message.Value);
+
+            var start = message.Value.StartTime;
+            if (start is null)
+                return;
+
+            var startLocal = WorkoutService.ToLocal(start.Value);
+            if (startLocal.Year != heatmapYear || startLocal.Month != heatmapMonth)
+                return;
+
+            var updatedDays = new HashSet<int>(HeatmapWorkoutDays) { startLocal.Day };
+            HeatmapWorkoutDays = updatedDays;
         }
 
         public void Receive(ExerciseUpdatedMessage message)
@@ -163,6 +204,14 @@ namespace FitISO.Maui.ViewModels
                     }
                 }
             }
+        }
+
+        public Task RefreshHeatmapIfStaleAsync()
+        {
+            var now = DateTime.Now;
+            return (now.Year == heatmapYear && now.Month == heatmapMonth && now.Day == HeatmapToday)
+                ? Task.CompletedTask
+                : LoadHeatmapAsync();
         }
     }
 }

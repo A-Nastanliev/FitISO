@@ -3,9 +3,9 @@ using Android.Appwidget;
 using Android.Content;
 using Android.Views;
 using Android.Widget;
-using FitISO.Data;
+using FitISO.Maui.Rendering;
 using FitISO.Maui.Services;
-using Microsoft.EntityFrameworkCore;
+using FitISO.Services;
 using SkiaSharp;
 using System.Text.Json;
 
@@ -65,25 +65,16 @@ namespace FitISO.Maui.Platforms.Android
                 return;
             }
 
-            var factory = IPlatformApplication.Current?.Services.GetService<IDbContextFactory<FitDbContext>>();
-            if (factory is null) return;
+            var workoutService = IPlatformApplication.Current?.Services.GetService<WorkoutService>();
+            if (workoutService is null) return;
 
-            using var dbContext = factory.CreateDbContext();
-            var starts = await dbContext.Workouts
-                .AsNoTracking()
-                .Where(w => w.StartTime != null && w.EndTime != null)
-                .Select(w => w.StartTime!.Value)
-                .ToListAsync();
-
-            var days = starts
-                .Select(s => (s.Kind == DateTimeKind.Utc ? s : DateTime.SpecifyKind(s, DateTimeKind.Utc)).ToLocalTime())
-                .Where(local => local.Year == now.Year && local.Month == now.Month)
-                .Select(local => local.Day);
+            var days = await workoutService.GetWorkoutDaysInMonthAsync(now.Year, now.Month)
+                       ?? new HashSet<int>();
 
             using var editor = prefs!.Edit();
             editor!.PutInt(MonthlyHeatmapService.CachedYearKey, now.Year);
             editor!.PutInt(MonthlyHeatmapService.CachedMonthKey, now.Month);
-            editor!.PutString(MonthlyHeatmapService.CachedDaysKey, JsonSerializer.Serialize(new HashSet<int>(days)));
+            editor!.PutString(MonthlyHeatmapService.CachedDaysKey, JsonSerializer.Serialize(days));
             editor!.Apply();
         }
 

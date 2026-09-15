@@ -4,6 +4,7 @@
              x:Class="FitISO.Maui.Views.HistoryPage"
              xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
              xmlns:vm="clr-namespace:FitISO.Maui.ViewModels"
+             xmlns:skia="clr-namespace:SkiaSharp.Views.Maui.Controls;assembly=SkiaSharp.Views.Maui.Controls"
              x:DataType="vm:HistoryPageViewModel"
              x:Name="Root"
              xmlns:models="clr-namespace:FitISO.Maui.Models">
@@ -14,8 +15,10 @@
         </Grid>
     </Shell.TitleView>
 
-    <Grid RowDefinitions="*" SafeAreaEdges="None">
-        <CollectionView VerticalOptions="Fill"
+    <Grid RowDefinitions="Auto,*" SafeAreaEdges="None">
+        <skia:SKCanvasView x:Name="HeatmapCanvas" Grid.Row="0" HeightRequest="140" Margin="12,8"
+                            PaintSurface="OnHeatmapPaintSurface"/>
+        <CollectionView VerticalOptions="Fill" Grid.Row="1"
                    ItemsSource="{Binding Items}" Margin="6"
                    RemainingItemsThreshold="3" VerticalScrollBarVisibility="Never"
                    RemainingItemsThresholdReachedCommand="{Binding LoadCommand}">

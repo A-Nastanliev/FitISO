@@ -70,6 +70,7 @@ namespace FitISO.Maui
             builder.Services.AddSingleton<MonthlyHeatmapService>();
             builder.Services.AddSingleton<AutoBackupService>();
             builder.Services.AddSingleton<WorkoutSettingsService>();
+            builder.Services.AddSingleton<WidgetThemeSyncService>();
 
 #if DEBUG
             builder.Logging.AddDebug();
@@ -102,6 +103,7 @@ namespace FitISO.Maui
             app.Services.GetRequiredService<LastWorkoutService>();
             app.Services.GetRequiredService<MonthlyHeatmapService>();
             app.Services.GetRequiredService<AutoBackupService>();
+            app.Services.GetRequiredService<WidgetThemeSyncService>();
 
             return app;
         }

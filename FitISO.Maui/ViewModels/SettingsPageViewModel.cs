@@ -95,16 +95,7 @@ namespace FitISO.Maui.ViewModels
             Application.Current.Resources.MergedDictionaries.Add(value.Theme);
             Preferences.Set("accent_theme", value.Name);
 
-#if ANDROID
-            var context = global::Android.App.Application.Context;
-
-            var prefs = FitISO.Maui.Platforms.Android.WidgetTheme.Prefs(context);
-            prefs?.Edit()?.PutString(FitISO.Maui.Platforms.Android.WidgetTheme.ThemeNameKey, value.Name)?.Commit();
-
-            var themeChangedIntent = new Android.Content.Intent(FitISO.Maui.Platforms.Android.WidgetTheme.ActionThemeChanged);
-            themeChangedIntent.SetPackage(context.PackageName);
-            context.SendBroadcast(themeChangedIntent);
-#endif
+            WeakReferenceMessenger.Default.Send(new AccentThemeChangedMessage(value.Name));
         }
 
         [RelayCommand]

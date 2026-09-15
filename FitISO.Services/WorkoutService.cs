@@ -105,6 +105,55 @@ namespace FitISO.Services
         public Task<Workout> TemplateFromWorkoutAsync(int workoutId) =>
             CreateFromExistingWorkoutAsync(workoutId, requireTemplate: false, asTemplate: true);
 
+        public async Task<HashSet<int>?> GetWorkoutDaysInMonthAsync(int year, int month)
+        {
+            using var context = _contextFactory.CreateDbContext();
+
+            var earliestStart = await context.Workouts
+                .AsNoTracking()
+                .Where(w => w.StartTime != null && w.EndTime != null)
+                .MinAsync(w => (DateTime?)w.StartTime);
+
+            if (earliestStart is null)
+                return null;
+
+            var earliestLocal = ToLocal(earliestStart.Value);
+            var requestedMonth = new DateTime(year, month, 1);
+            var earliestMonth = new DateTime(earliestLocal.Year, earliestLocal.Month, 1);
+
+            if (requestedMonth < earliestMonth)
+                return null;
+
+            var localMonthStart = new DateTime(year, month, 1, 0, 0, 0, DateTimeKind.Unspecified);
+            var localMonthEnd = localMonthStart.AddMonths(1);
+            var utcStart = TimeZoneInfo.ConvertTimeToUtc(localMonthStart, TimeZoneInfo.Local);
+            var utcEnd = TimeZoneInfo.ConvertTimeToUtc(localMonthEnd, TimeZoneInfo.Local);
+
+            var monthRows = await context.Workouts
+                .AsNoTracking()
+                .Where(w => w.StartTime != null
+                         && w.EndTime != null
+                         && w.StartTime >= utcStart
+                         && w.StartTime < utcEnd)
+                .Select(w => w.StartTime!.Value)
+                .ToListAsync();
+
+            var days = monthRows
+                .Select(ToLocal)
+                .Where(local => local.Year == year && local.Month == month)
+                .Select(local => local.Day);
+
+            return new HashSet<int>(days);
+        }
+
+        public static DateTime ToLocal(DateTime utcStoredValue)
+        {
+            var utc = utcStoredValue.Kind == DateTimeKind.Utc
+                ? utcStoredValue
+                : DateTime.SpecifyKind(utcStoredValue, DateTimeKind.Utc);
+            return utc.ToLocalTime();
+        }
+
         public async Task<Workout> GetActiveWorkoutAsync()
         {
             using var _context = _contextFactory.CreateDbContext();
