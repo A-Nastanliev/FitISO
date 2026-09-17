@@ -87,6 +87,22 @@ namespace FitISO.Maui.ViewModels
             await ApplyHeatmapMonthAsync(target.Year, target.Month, days);
         }
 
+        [RelayCommand]
+        private async Task HeatmapGoToFirstMonthAsync()
+        {
+            var earliest = await workoutService.GetEarliestWorkoutMonthAsync();
+            if (earliest is null)
+                return;
+
+            var days = await workoutService.GetWorkoutDaysInMonthAsync(earliest.Value.Year, earliest.Value.Month)
+                ?? new HashSet<int>();
+
+            await ApplyHeatmapMonthAsync(earliest.Value.Year, earliest.Value.Month, days);
+        }
+
+        [RelayCommand]
+        private Task HeatmapGoToCurrentMonthAsync() => LoadHeatmapAsync();
+
         async Task ApplyHeatmapMonthAsync(int year, int month, HashSet<int> days)
         {
             heatmapYear = year;

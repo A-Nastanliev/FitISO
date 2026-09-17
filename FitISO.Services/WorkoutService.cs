@@ -146,6 +146,22 @@ namespace FitISO.Services
             return new HashSet<int>(days);
         }
 
+        public async Task<DateTime?> GetEarliestWorkoutMonthAsync()
+        {
+            using var context = _contextFactory.CreateDbContext();
+
+            var earliestStart = await context.Workouts
+                .AsNoTracking()
+                .Where(w => w.StartTime != null && w.EndTime != null)
+                .MinAsync(w => (DateTime?)w.StartTime);
+
+            if (earliestStart is null)
+                return null;
+
+            var local = ToLocal(earliestStart.Value);
+            return new DateTime(local.Year, local.Month, 1);
+        }
+
         public static DateTime ToLocal(DateTime utcStoredValue)
         {
             var utc = utcStoredValue.Kind == DateTimeKind.Utc

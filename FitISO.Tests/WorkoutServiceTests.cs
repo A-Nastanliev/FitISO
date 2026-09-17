@@ -615,5 +615,93 @@ namespace FitISO.Tests.Services
             Assert.ThrowsAsync<KeyNotFoundException>(
                 () => _service.DeleteAsync(9999));
         }
+
+        private async Task<Workout> CreateEndedWorkoutAsync(DateTime utcStartTime)
+        {
+            var workout = new Workout
+            {
+                Name = "Test Workout",
+                StartTime = utcStartTime,
+                EndTime = utcStartTime.AddHours(1),
+                WorkoutExercises = new List<WorkoutExercise>()
+            };
+            _context.Workouts.Add(workout);
+            await _context.SaveChangesAsync();
+            return workout;
+        }
+
+        [Test]
+        public async Task GetWorkoutDaysInMonthAsync_WithNoWorkouts_ReturnsNull()
+        {
+            var result = await _service.GetWorkoutDaysInMonthAsync(2026, 8);
+
+            Assert.That(result, Is.Null);
+        }
+
+        [Test]
+        public async Task GetWorkoutDaysInMonthAsync_ForMonthBeforeEarliestWorkout_ReturnsNull()
+        {
+            await CreateEndedWorkoutAsync(new DateTime(2026, 6, 15, 12, 0, 0, DateTimeKind.Utc));
+
+            var result = await _service.GetWorkoutDaysInMonthAsync(2026, 5);
+
+            Assert.That(result, Is.Null);
+        }
+
+        [Test]
+        public async Task GetWorkoutDaysInMonthAsync_ReturnsDaysWithWorkoutsInThatMonth()
+        {
+            await CreateEndedWorkoutAsync(new DateTime(2026, 8, 3, 12, 0, 0, DateTimeKind.Utc));
+            await CreateEndedWorkoutAsync(new DateTime(2026, 8, 3, 18, 0, 0, DateTimeKind.Utc)); 
+            await CreateEndedWorkoutAsync(new DateTime(2026, 8, 20, 9, 0, 0, DateTimeKind.Utc));
+            await CreateEndedWorkoutAsync(new DateTime(2026, 9, 1, 9, 0, 0, DateTimeKind.Utc)); 
+
+            var result = await _service.GetWorkoutDaysInMonthAsync(2026, 8);
+
+            Assert.That(result, Is.EquivalentTo(new[] { 3, 20 }));
+        }
+
+        [Test]
+        public async Task GetWorkoutDaysInMonthAsync_IgnoresUnstartedTemplates()
+        {
+            await _service.CreateAsync("Template", workoutExercises: null);
+            await CreateEndedWorkoutAsync(new DateTime(2026, 8, 3, 12, 0, 0, DateTimeKind.Utc));
+
+            var result = await _service.GetWorkoutDaysInMonthAsync(2026, 8);
+
+            Assert.That(result, Is.EquivalentTo(new[] { 3 }));
+        }
+
+        [Test]
+        public async Task GetEarliestWorkoutMonthAsync_WithNoWorkouts_ReturnsNull()
+        {
+            var result = await _service.GetEarliestWorkoutMonthAsync();
+
+            Assert.That(result, Is.Null);
+        }
+
+        [Test]
+        public async Task GetEarliestWorkoutMonthAsync_ReturnsFirstDayOfEarliestMonth()
+        {
+            await CreateEndedWorkoutAsync(new DateTime(2026, 8, 15, 12, 0, 0, DateTimeKind.Utc));
+            await CreateEndedWorkoutAsync(new DateTime(2026, 3, 2, 12, 0, 0, DateTimeKind.Utc));
+            await CreateEndedWorkoutAsync(new DateTime(2026, 5, 10, 12, 0, 0, DateTimeKind.Utc));
+
+            var result = await _service.GetEarliestWorkoutMonthAsync();
+
+            Assert.That(result, Is.EqualTo(new DateTime(2026, 3, 1)));
+        }
+
+        [Test]
+        public async Task GetEarliestWorkoutMonthAsync_IgnoresTemplatesAndActiveWorkouts()
+        {
+            await _service.CreateAsync("Template", workoutExercises: null); 
+            var started = await _service.StartFromTemplateAsync((await _service.CreateAsync("T2", null)).Id); 
+            await CreateEndedWorkoutAsync(new DateTime(2026, 4, 1, 12, 0, 0, DateTimeKind.Utc));
+
+            var result = await _service.GetEarliestWorkoutMonthAsync();
+
+            Assert.That(result, Is.EqualTo(new DateTime(2026, 4, 1)));
+        }
     }
 }

@@ -16,22 +16,38 @@
     </Shell.TitleView>
 
     <Grid RowDefinitions="Auto,Auto,*" SafeAreaEdges="None">
-        <Grid Grid.Row="0" ColumnDefinitions="Auto,*,Auto" Margin="12,4,12,0" VerticalOptions="Center">
+        <Grid Grid.Row="0" ColumnDefinitions="Auto,Auto,*,Auto,Auto" ColumnSpacing="12" Margin="12,4,12,0" VerticalOptions="Center">
             <ImageButton Grid.Column="0"
+                Source="{FontImageSource FontFamily=MaterialRound, Glyph='&#xE5DC;', Size=24, Color={DynamicResource Gray300}}"
+                BackgroundColor="Transparent" Aspect="Center"
+                IsEnabled="{Binding CanGoPreviousMonth}"
+                Command="{Binding HeatmapGoToFirstMonthCommand}"/>
+            <ImageButton Grid.Column="1"
                 Source="{FontImageSource FontFamily=MaterialRound, Glyph='&#xE5CB;', Size=24, Color={DynamicResource Gray300}}"
                 BackgroundColor="Transparent" Aspect="Center"
                 IsEnabled="{Binding CanGoPreviousMonth}"
                 Command="{Binding HeatmapPreviousMonthCommand}"/>
-            <Label Grid.Column="1" Text="{Binding HeatmapMonthLabel}"
+            <Label Grid.Column="2" Text="{Binding HeatmapMonthLabel}"
                 FontSize="Small" HorizontalTextAlignment="Center" VerticalTextAlignment="Center"/>
-            <ImageButton Grid.Column="2"
+            <ImageButton Grid.Column="3"
                 Source="{FontImageSource FontFamily=MaterialRound, Glyph='&#xE5CC;', Size=24, Color={DynamicResource Gray300}}"
                 BackgroundColor="Transparent" Aspect="Center"
                 IsEnabled="{Binding CanGoNextMonth}"
                 Command="{Binding HeatmapNextMonthCommand}"/>
+            <ImageButton Grid.Column="4"
+                Source="{FontImageSource FontFamily=MaterialRound, Glyph='&#xE5DD;', Size=24, Color={DynamicResource Gray300}}"
+                BackgroundColor="Transparent" Aspect="Center"
+                IsEnabled="{Binding CanGoNextMonth}"
+                Command="{Binding HeatmapGoToCurrentMonthCommand}"/>
         </Grid>
-        <skia:SKCanvasView x:Name="HeatmapCanvas" Grid.Row="1" HeightRequest="140" Margin="12,8"
-                            PaintSurface="OnHeatmapPaintSurface"/>
+        <Grid Grid.Row="1">
+            <Grid.GestureRecognizers>
+                <SwipeGestureRecognizer Direction="Left" Command="{Binding HeatmapNextMonthCommand}"/>
+                <SwipeGestureRecognizer Direction="Right" Command="{Binding HeatmapPreviousMonthCommand}"/>
+            </Grid.GestureRecognizers>
+            <skia:SKCanvasView x:Name="HeatmapCanvas" HeightRequest="140" Margin="12,8"
+                        PaintSurface="OnHeatmapPaintSurface"/>
+        </Grid>
         <CollectionView VerticalOptions="Fill" Grid.Row="2"
                    ItemsSource="{Binding Items}" Margin="6"
                    RemainingItemsThreshold="3" VerticalScrollBarVisibility="Never"

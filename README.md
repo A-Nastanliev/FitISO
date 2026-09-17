@@ -22,7 +22,8 @@ Congrats, you just read a whole paragraph about a bird. Anyway, here's what the 
 - **Personal records & history at a glance** - each exercise card surfaces your best-ever set and your most recent sets for quick comparison while you train.
 - **Exercise library** - browse, search, add, and inspect exercises via dedicated popups.
 - **Workout templates** - save and reuse workout structures instead of building them from scratch every time.
-- **Workout history** - review past completed workouts, with one-tap PDF export for sharing.
+- **Workout history** - review past completed workouts, with one-tap PDF export for sharing and a monthly calendar heatmap showing which days you trained. Step month-by-month, swipe left/right or jump straight to your first workout month or back to the present.
+- **Rest stopwatch** - an optional rest stopwatch during active workouts that auto-starts the moment a set is marked complete (weight + reps both entered), survives app restarts/kills via persisted state and can optionally chain into the next exercise's first set instead of stopping when you finish the last set of an exercise. Toggle it from Settings.
 - **Custom tab bar** - a shaped bottom navigation bar (via `Nalu.Maui`) with a context-sensitive action button (e.g. "add exercise" while a workout is active).
 - **Accent themes** - switch the app's accent palette from Settings.
 - **Backup & restore** - export the SQLite database to a `.db3` file from Settings, and import a backup back in later.
@@ -40,30 +41,26 @@ Congrats, you just read a whole paragraph about a bird. Anyway, here's what the 
 | `FitISO.Tests` | Testing | NUnit, `Microsoft.EntityFrameworkCore.InMemory` |
  
 ## Architecture
- 
-The solution is split into four projects, layered so the UI depends on services, and services depend on data — never the reverse:
- 
+
+The solution is split into four projects, layered so the UI depends on services and services depend on data - never the reverse:
+
 ```
-FitISO.Data/            EF Core DbContext, entity models, and migrations.
-                         Owns the SQLite schema (Workout → WorkoutExercise → Set, Exercise).
- 
-FitISO.Services/        Business logic sitting between the UI and the database
-                         (ExerciseService, SetService, WorkoutExerciseService, WorkoutService).
-                         Depends only on FitISO.Data.
- 
-FitISO.Maui/             The MAUI app itself:
-  ├─ Models/             UI-facing observable wrappers around the FitISO.Data entities
-  │                      (e.g. Models.Set wraps Data.Models.Set, adding debounced
-  │                      autosave and INotifyPropertyChanged for two-way bindings).
-  ├─ ViewModels/          One view model per page/popup, using CommunityToolkit.Mvvm.
-  ├─ Views/               XAML pages and popups.
-  ├─ Messages/            WeakReferenceMessenger message types for cross-view-model
-  │                      communication (WorkoutStartedMessage, WorkoutFinishedMessage,
-  │                      WorkoutTemplateCreatedMessage).
-  └─ Converters/          Value converters for XAML bindings.
- 
-FitISO.Tests/            NUnit tests for the service layer, backed by EF Core's
-                         in-memory provider.
+FitISO.Data/            EF Core DbContext, entity models and migrations.
+FitISO.Services/        Business logic sitting between the UI and the database. Depends only on FitISO.Data.
+FitISO.Maui/            The MAUI app itself:
+  ├─ Models/             UI-facing observable wrappers around the FitISO.Data entities.
+  ├─ ViewModels/         One view model per page/popup, using CommunityToolkit.Mvvm.
+  ├─ Views/              XAML pages and popups.
+  ├─ Rendering/          Imperative SkiaSharp canvas-drawing code, invoked from code-behind.
+  ├─ Messages/           WeakReferenceMessenger message types for cross-view-model communication.
+  ├─ Services/           MAUI-layer application services (settings, backup, widget state) — see note below.
+  ├─ Converters/         Value converters for XAML bindings.
+  ├─ Resources/          Styles, accent-theme resource dictionaries, fonts, images.
+  └─ Platforms/          Per-platform entry points and platform-specific code.
+FitISO.Tests/           NUnit tests for the service layer, backed by EF Core's in-memory provider.
 ```
- 
-Notably, **FitISO.Maui.Models** and **FitISO.Data.Models** are intentionally separate: the `Data` models are plain EF entities, while the `Maui` models are `ObservableObject`- based wrappers that add change notification, debounced autosave, and null-coercion needed for live-editable UI - without polluting the persistence layer with UI concerns.
+
+Two pairs of names are easy to mix up across layers:
+
+- **`FitISO.Maui.Models`** vs **`FitISO.Data.Models`** - the `Data` models are plain EF entities, while the `Maui` models are `ObservableObject` - based wrappers that add change notification, debounced autosave and null-coercion needed for live-editable UI, without polluting the persistence layer with UI concerns.
+- **`FitISO.Services`** (the project) vs **`FitISO.Maui/Services`** (the folder) - the former is plain C# with zero MAUI/platform dependencies and is what's covered by `FitISO.Tests`; the latter is MAUI-side glue that talks to `Preferences`, the file system, or Android widget APIs (e.g. `WorkoutSettingsService`, `AutoBackupService`, `MonthlyHeatmapService`), and generally wraps or coordinates calls into the former rather than duplicating its logic.
