@@ -2,6 +2,7 @@ using FitISO.Maui.Rendering;
 using FitISO.Maui.ViewModels;
 using SkiaSharp;
 using SkiaSharp.Views.Maui;
+using System.ComponentModel;
 
 namespace FitISO.Maui.Views;
 
@@ -14,6 +15,7 @@ public partial class HistoryPage : ContentPage
         InitializeComponent();
         BindingContext = historyPageViewModel;
         viewModel = historyPageViewModel;
+        viewModel.PropertyChanged += OnViewModelPropertyChanged;
     }
 
     protected async override void OnAppearing()
@@ -21,6 +23,19 @@ public partial class HistoryPage : ContentPage
         base.OnAppearing();
         await viewModel.LoadFirst();
         await viewModel.RefreshHeatmapIfStaleAsync();
+    }
+
+    void OnViewModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        switch (e.PropertyName)
+        {
+            case nameof(HistoryPageViewModel.HeatmapWorkoutDays):
+            case nameof(HistoryPageViewModel.HeatmapToday):
+            case nameof(HistoryPageViewModel.HeatmapDaysInMonth):
+            case nameof(HistoryPageViewModel.HeatmapFirstDayOfWeek):
+                HeatmapCanvas.InvalidateSurface();
+                break;
+        }
     }
 
     void OnHeatmapPaintSurface(object? sender, SKPaintSurfaceEventArgs e)

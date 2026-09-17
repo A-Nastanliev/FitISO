@@ -34,6 +34,17 @@ namespace FitISO.Maui.ViewModels
         [ObservableProperty]
         DayOfWeek heatmapFirstDayOfWeek;
 
+        [ObservableProperty]
+        string heatmapMonthLabel = string.Empty;
+
+        [ObservableProperty]
+        bool canGoPreviousMonth;
+
+        [ObservableProperty]
+        bool canGoNextMonth;
+
+        bool isFollowingCurrentMonth = true;
+
         public HistoryPageViewModel(WorkoutService workoutService)
         {
             this.workoutService = workoutService;
@@ -44,15 +55,66 @@ namespace FitISO.Maui.ViewModels
         public async Task LoadHeatmapAsync()
         {
             var now = DateTime.Now;
-            heatmapYear = now.Year;
-            heatmapMonth = now.Month;
-
             var days = await workoutService.GetWorkoutDaysInMonthAsync(now.Year, now.Month) ?? new HashSet<int>();
+            await ApplyHeatmapMonthAsync(now.Year, now.Month, days);
+        }
+
+        [RelayCommand]
+        private async Task HeatmapPreviousMonthAsync()
+        {
+            var target = new DateTime(heatmapYear, heatmapMonth, 1).AddMonths(-1);
+            var days = await workoutService.GetWorkoutDaysInMonthAsync(target.Year, target.Month);
+
+            if (days is null)
+            {
+                CanGoPreviousMonth = false;
+                return;
+            }
+
+            await ApplyHeatmapMonthAsync(target.Year, target.Month, days);
+        }
+
+        [RelayCommand]
+        private async Task HeatmapNextMonthAsync()
+        {
+            var now = DateTime.Now;
+            var target = new DateTime(heatmapYear, heatmapMonth, 1).AddMonths(1);
+
+            if (target.Year > now.Year || (target.Year == now.Year && target.Month > now.Month))
+                return;
+
+            var days = await workoutService.GetWorkoutDaysInMonthAsync(target.Year, target.Month) ?? new HashSet<int>();
+            await ApplyHeatmapMonthAsync(target.Year, target.Month, days);
+        }
+
+        async Task ApplyHeatmapMonthAsync(int year, int month, HashSet<int> days)
+        {
+            heatmapYear = year;
+            heatmapMonth = month;
+
+            var now = DateTime.Now;
+            var isCurrentMonth = year == now.Year && month == now.Month;
+            isFollowingCurrentMonth = isCurrentMonth;
 
             HeatmapWorkoutDays = days;
-            HeatmapToday = now.Day;
-            HeatmapDaysInMonth = DateTime.DaysInMonth(now.Year, now.Month);
-            HeatmapFirstDayOfWeek = new DateTime(now.Year, now.Month, 1).DayOfWeek;
+            HeatmapDaysInMonth = DateTime.DaysInMonth(year, month);
+            HeatmapToday = isCurrentMonth ? now.Day : HeatmapDaysInMonth;
+            HeatmapFirstDayOfWeek = new DateTime(year, month, 1).DayOfWeek;
+            HeatmapMonthLabel = new DateTime(year, month, 1).ToString("MMMM yyyy");
+
+            CanGoNextMonth = !isCurrentMonth;
+
+            var previous = new DateTime(year, month, 1).AddMonths(-1);
+            CanGoPreviousMonth = await workoutService.GetWorkoutDaysInMonthAsync(previous.Year, previous.Month) is not null;
+        }
+        public Task RefreshHeatmapIfStaleAsync()
+        {
+            if (!isFollowingCurrentMonth)
+                return Task.CompletedTask;
+
+            var now = DateTime.Now;
+            return (now.Year == heatmapYear && now.Month == heatmapMonth && now.Day == HeatmapToday)
+                ? Task.CompletedTask : LoadHeatmapAsync();
         }
 
         protected override async Task<IReadOnlyList<FitISO.Data.Models.Workout>> FetchBatchAsync(int batchSize, int? cursor)
@@ -204,14 +266,6 @@ namespace FitISO.Maui.ViewModels
                     }
                 }
             }
-        }
-
-        public Task RefreshHeatmapIfStaleAsync()
-        {
-            var now = DateTime.Now;
-            return (now.Year == heatmapYear && now.Month == heatmapMonth && now.Day == HeatmapToday)
-                ? Task.CompletedTask
-                : LoadHeatmapAsync();
         }
     }
 }
