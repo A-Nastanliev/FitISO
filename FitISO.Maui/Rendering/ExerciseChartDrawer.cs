@@ -4,7 +4,7 @@ using FitISO.Maui.Models;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace FitISO.Maui.Platforms.Android
+namespace FitISO.Maui.Rendering
 {
     public static class ExerciseChartDrawer
     {
@@ -13,12 +13,14 @@ namespace FitISO.Maui.Platforms.Android
 
         public static SKBitmap Draw(IReadOnlyList<ExerciseHistoryPoint> history, int width, int height, SKColor accent, SKColor gridColor)
         {
-            var bitmap = new SKBitmap(width, height);
-            using var canvas = new SKCanvas(bitmap);
-            canvas.Clear(SKColors.Transparent);
+            return SkiaDrawer.CreateTransparentBitmap(width, height, canvas =>
+                Draw(canvas, history, width, height, accent, gridColor));
+        }
 
+        public static void Draw(SKCanvas canvas, IReadOnlyList<ExerciseHistoryPoint> history, int width, int height, SKColor accent, SKColor gridColor)
+        {
             if (history.Count == 0)
-                return bitmap;
+                return;
 
             var axisTextSize = Math.Clamp(height * 0.10f, 20f, 34f);
             using var axisFont = new SKFont
@@ -147,8 +149,6 @@ namespace FitISO.Maui.Platforms.Android
 
             DrawYAxisLabels(canvas, axisFont, axisPaint, min, max, plotTop, plotBottom, yAxisWidth);
             DrawXAxisLabels(canvas, axisFont, axisPaint, history, points, plotBottom, xAxisHeight, width);
-
-            return bitmap;
         }
 
         static double WeightWithRepsTiebreak(double weight, double reps) =>

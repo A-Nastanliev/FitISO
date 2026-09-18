@@ -4,6 +4,7 @@ using Android.Content;
 using Android.Views;
 using Android.Widget;
 using FitISO.Maui.Models;
+using FitISO.Maui.Rendering;
 using SkiaSharp;
 using System.Text.Json;
 

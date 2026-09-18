@@ -58,27 +58,31 @@ namespace FitISO.Maui.ViewModels
 
         readonly WorkoutSettingsService workoutSettingsService;
 
-        public SettingsPageViewModel(WorkoutSettingsService workoutSettingsService)
+        readonly AccentThemeService accentThemeService;
+
+        readonly AutoBackupService autoBackupService;
+
+        public SettingsPageViewModel(WorkoutSettingsService workoutSettingsService, AccentThemeService accentThemeService,
+            AutoBackupService autoBackupService)
         {
             this.workoutSettingsService = workoutSettingsService;
+            this.accentThemeService = accentThemeService;
+            this.autoBackupService = autoBackupService;
 
             WeakReferenceMessenger.Default.RegisterAll(this);
 
-            var savedTheme = Preferences.Get("accent_theme", nameof(Default));
+            var savedTheme = accentThemeService.AccentThemeName;
             selectedAccentTheme = AccentThemes.FirstOrDefault(t => t.Name == savedTheme) ?? AccentThemes[0];
 
-            var savedBackup = Preferences.Get(AutoBackupService.LastBackupUtcKey, string.Empty);
-            lastBackupUtc = string.IsNullOrEmpty(savedBackup) ? null
-                : DateTime.Parse(savedBackup, null, System.Globalization.DateTimeStyles.RoundtripKind);
-
-            AutoSaveEnabled = Preferences.Get(AutoBackupService.AutoSaveEnabledKey, false);
+            lastBackupUtc = autoBackupService.LastBackupUtc;
+            AutoSaveEnabled = autoBackupService.AutoSaveEnabled;
             AutoStartRestOnExerciseFinish = workoutSettingsService.AutoStartRestOnExerciseFinish;
             RestStopwatchEnabled = workoutSettingsService.RestStopwatchEnabled;
         }
 
         public void Receive(AutoBackupCompletedMessage message) => LastBackupUtc = message.Value;
 
-        partial void OnAutoSaveEnabledChanged(bool value) => Preferences.Set(AutoBackupService.AutoSaveEnabledKey, value);
+        partial void OnAutoSaveEnabledChanged(bool value) => autoBackupService.AutoSaveEnabled = value;
 
         partial void OnAutoStartRestOnExerciseFinishChanged(bool value) => workoutSettingsService.AutoStartRestOnExerciseFinish = value;
 
@@ -93,9 +97,7 @@ namespace FitISO.Maui.ViewModels
             var existing = Application.Current.Resources.MergedDictionaries.FirstOrDefault(d => d.ContainsKey("Gray100"));
             Application.Current.Resources.MergedDictionaries.Remove(existing);
             Application.Current.Resources.MergedDictionaries.Add(value.Theme);
-            Preferences.Set("accent_theme", value.Name);
-
-            WeakReferenceMessenger.Default.Send(new AccentThemeChangedMessage(value.Name));
+            accentThemeService.AccentThemeName = value.Name;       
         }
 
         [RelayCommand]
@@ -125,7 +127,7 @@ namespace FitISO.Maui.ViewModels
                 if (result.IsSuccessful)
                 {
                     LastBackupUtc = DateTime.UtcNow;
-                    Preferences.Set(AutoBackupService.LastBackupUtcKey, LastBackupUtc.Value.ToString("O"));
+                    autoBackupService.LastBackupUtc = LastBackupUtc;
 
                     _ = Toast.Make("Database exported").Show();
                 }
@@ -195,7 +197,7 @@ namespace FitISO.Maui.ViewModels
                 }
 
                 LastBackupUtc = null;
-                Preferences.Remove(AutoBackupService.LastBackupUtcKey);
+                autoBackupService.LastBackupUtc = LastBackupUtc;
 
                 _ = Toast.Make($"Database imported").Show();
                 WeakReferenceMessenger.Default.Send(new DbImportedMessage());

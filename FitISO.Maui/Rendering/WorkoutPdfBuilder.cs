@@ -1,7 +1,7 @@
 ﻿using SkiaSharp;
 using FitISO.Maui.Models;
 
-namespace FitISO.Maui.Services
+namespace FitISO.Maui.Rendering
 {
     public static class WorkoutPdfBuilder
     {

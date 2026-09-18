@@ -2,6 +2,7 @@
 using FitISO.Maui.Messages;
 using FitISO.Maui.Models;
 using FitISO.Maui.Resources.Styles.AccentThemes;
+using FitISO.Maui.Services;
 using FitISO.Services;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -15,17 +16,17 @@ namespace FitISO.Maui
 
         public static string DatabasePath => Path.Combine(FileSystem.AppDataDirectory, DatabaseFileName);
 
-        public App(WorkoutService workoutService)
+        public App(WorkoutService workoutService, AccentThemeService accentThemeService)
         {
             InitializeComponent();
             _workoutService = workoutService;
 
-            ApplySavedAccentTheme();
+            ApplySavedAccentTheme(accentThemeService);
         }
 
-        private static void ApplySavedAccentTheme()
+        private static void ApplySavedAccentTheme(AccentThemeService accentThemeService)
         {
-            var savedTheme = Preferences.Get("accent_theme", nameof(Default));
+            var savedTheme = accentThemeService.AccentThemeName;
 
             ResourceDictionary theme = savedTheme switch
             {

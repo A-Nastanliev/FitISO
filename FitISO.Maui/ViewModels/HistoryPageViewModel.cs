@@ -5,7 +5,7 @@ using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using FitISO.Maui.Messages;
 using FitISO.Maui.Models;
-using FitISO.Maui.Services;
+using FitISO.Maui.Rendering;
 using FitISO.Services;
 using System;
 using System.Collections.Generic;
@@ -141,43 +141,14 @@ namespace FitISO.Maui.ViewModels
         protected override int? GetCursor(Workout item) => item.Id;
 
         [RelayCommand]
-        private async Task ExportWorkoutImageAsync(Workout workout)
-        {
-            if (workout is null)
-                return;
-
-            try
-            {
-                using var stream = new MemoryStream();
-                WorkoutImageBuilder.Build(workout, stream);
-                stream.Position = 0;
-
-                var invalidChars = Path.GetInvalidFileNameChars();
-                var safeWorkoutName = string.Concat(workout.Name.Split(invalidChars));
-                var fileName = $"FitISO_{safeWorkoutName}_{workout.StartTime:yyyy_MM_dd}.png";
-
-                var result = await FileSaver.Default.SaveAsync(fileName, stream, CancellationToken.None);
-
-                if (result.IsSuccessful)
-                {
-                    _ = Toast.Make("Image saved").Show();
-                }
-                else if (result.Exception is not null && result.Exception is not OperationCanceledException)
-                {
-                    await Shell.Current.DisplayAlertAsync("Export failed", result.Exception.Message, "OK");
-                }
-            }
-            catch (OperationCanceledException)
-            {
-            }
-            catch (Exception ex)
-            {
-                await Shell.Current.DisplayAlertAsync("Export failed", ex.Message, "OK");
-            }
-        }
+        private Task ExportWorkoutImageAsync(Workout workout) =>
+            ExportWorkoutAsync(workout, WorkoutImageBuilder.Build, "png", "Image saved");
 
         [RelayCommand]
-        private async Task ExportWorkoutPdfAsync(Workout workout)
+        private Task ExportWorkoutPdfAsync(Workout workout) =>
+            ExportWorkoutAsync(workout, WorkoutPdfBuilder.Build, "pdf", "PDF saved");
+
+        async Task ExportWorkoutAsync(Workout workout, Action<Workout, Stream> build, string extension, string successMessage)
         {
             if (workout is null)
                 return;
@@ -185,18 +156,18 @@ namespace FitISO.Maui.ViewModels
             try
             {
                 using var stream = new MemoryStream();
-                WorkoutPdfBuilder.Build(workout, stream);
+                build(workout, stream);
                 stream.Position = 0;
 
                 var invalidChars = Path.GetInvalidFileNameChars();
                 var safeWorkoutName = string.Concat(workout.Name.Split(invalidChars));
-                var fileName = $"FitISO_{safeWorkoutName}_{workout.StartTime:yyyy_MM_dd}.pdf";
+                var fileName = $"FitISO_{safeWorkoutName}_{workout.StartTime:yyyy_MM_dd}.{extension}";
 
                 var result = await FileSaver.Default.SaveAsync(fileName, stream, CancellationToken.None);
 
                 if (result.IsSuccessful)
                 {
-                    _ = Toast.Make("PDF saved").Show();
+                    _ = Toast.Make(successMessage).Show();
                 }
                 else if (result.Exception is not null && result.Exception is not OperationCanceledException)
                 {

@@ -1,22 +1,23 @@
-﻿using CommunityToolkit.Mvvm.Messaging;
-using FitISO.Maui.Messages;
-#if ANDROID
+﻿#if ANDROID
 using FitISO.Maui.Platforms.Android;
 #endif
 
 namespace FitISO.Maui.Services
 {
-    public class WidgetThemeSyncService : IRecipient<AccentThemeChangedMessage>
+    public class AccentThemeService
     {
-        public WidgetThemeSyncService()
-        {
-            WeakReferenceMessenger.Default.RegisterAll(this);
-        }
+        const string AccentThemeKey = "accent_theme";
+        const string DefaultThemeName = "Default";
 
-        public void Receive(AccentThemeChangedMessage message)
+        public string AccentThemeName
         {
-            WriteThemeName(message.Value);
-            BroadcastThemeChanged();
+            get => Preferences.Default.Get(AccentThemeKey, DefaultThemeName);
+            set
+            {
+                Preferences.Default.Set(AccentThemeKey, value);
+                WriteThemeName(value);
+                BroadcastThemeChanged();
+            }
         }
 
 #if ANDROID

@@ -55,59 +55,11 @@ namespace FitISO.Maui.ViewModels
         [NotifyPropertyChangedFor(nameof(ShowStoppedRest))]
         bool restIsStopped;
 
-        partial void OnRestStartTimeChanged(DateTime? value)
-        {
-            if (_restoringRest) return;
-
-            if (value is DateTime dt)
-            {
-                Preferences.Default.Set(RestPrefWorkoutId, Workout.Id);
-                Preferences.Default.Set(RestPrefStartTimeTicks, dt.Ticks);
-                Preferences.Default.Set(RestPrefIsStopped, RestIsStopped);
-            }
-            else
-            {
-                ClearPersistedRest();
-            }
-        }
-
-        void ClearPersistedRest()
-        {
-            Preferences.Default.Remove(RestPrefWorkoutId);
-            Preferences.Default.Remove(RestPrefStartTimeTicks);
-            Preferences.Default.Remove(RestPrefIsStopped);
-            Preferences.Default.Remove(RestPrefTriggerExerciseId);
-            Preferences.Default.Remove(RestPrefTriggerSetId);
-        }
-
-        void SetRestTrigger(WorkoutExercise? exercise, Set? set)
-        {
-            _restTriggerExercise = exercise;
-            _restTriggerSet = set;
-
-            if (RestStartTime is null) return;
-
-            Preferences.Default.Set(RestPrefTriggerExerciseId, exercise?.Id ?? 0);
-            Preferences.Default.Set(RestPrefTriggerSetId, set?.Id ?? 0);
-        }
-
-        partial void OnRestIsStoppedChanged(bool value)
-        {
-            if (_restoringRest || RestStartTime is null) return;
-
-            Preferences.Default.Set(RestPrefIsStopped, value);
-        }
-
         public bool ShowStartRest => RestStartTime is null;
         public bool ShowRunningRest => RestStartTime is not null && !RestIsStopped;
         public bool ShowStoppedRest => RestStartTime is not null && RestIsStopped;
         WorkoutExercise? _restTriggerExercise;
         Set? _restTriggerSet;
-        const string RestPrefWorkoutId = "ActiveRest_WorkoutId";
-        const string RestPrefStartTimeTicks = "ActiveRest_StartTimeTicks";
-        const string RestPrefIsStopped = "ActiveRest_IsStopped";
-        const string RestPrefTriggerExerciseId = "ActiveRest_TriggerExerciseId";
-        const string RestPrefTriggerSetId = "ActiveRest_TriggerSetId";
         bool _restoringRest;
 
         IDispatcherTimer? _timer;
@@ -121,17 +73,53 @@ namespace FitISO.Maui.ViewModels
         readonly WorkoutExerciseService workoutExerciseService;
         readonly WorkoutService workoutService;
         readonly WorkoutSettingsService workoutSettingsService;
+        readonly RestStopwatchStateService restStopwatchStateService;
 
         public ActiveWorkoutViewModel(SetService setService, WorkoutService workoutService, WorkoutExerciseService workoutExerciseService,
-            WorkoutSettingsService workoutSettingsService, IServiceProvider serviceProvider)
+            WorkoutSettingsService workoutSettingsService, RestStopwatchStateService restStopwatchStateService, IServiceProvider serviceProvider)
         {
             WeakReferenceMessenger.Default.RegisterAll(this);
             this.setService = setService;
             this.workoutExerciseService = workoutExerciseService;
             this.workoutService = workoutService;
             this.workoutSettingsService = workoutSettingsService;
+            this.restStopwatchStateService = restStopwatchStateService;
             this.serviceProvider = serviceProvider;
             RestStopwatchEnabled = workoutSettingsService.RestStopwatchEnabled;
+        }
+
+        partial void OnRestStartTimeChanged(DateTime? value)
+        {
+            if (_restoringRest) return;
+
+            if (value is DateTime dt)
+            {
+                restStopwatchStateService.WorkoutId = Workout.Id;
+                restStopwatchStateService.StartTimeUtc = dt;
+                restStopwatchStateService.IsStopped = RestIsStopped;
+            }
+            else
+            {
+                restStopwatchStateService.Clear();
+            }
+        }
+
+        void SetRestTrigger(WorkoutExercise? exercise, Set? set)
+        {
+            _restTriggerExercise = exercise;
+            _restTriggerSet = set;
+
+            if (RestStartTime is null) return;
+
+            restStopwatchStateService.TriggerExerciseId = exercise?.Id ?? 0;
+            restStopwatchStateService.TriggerSetId = set?.Id ?? 0;
+        }
+
+        partial void OnRestIsStoppedChanged(bool value)
+        {
+            if (_restoringRest || RestStartTime is null) return;
+
+            restStopwatchStateService.IsStopped = value;
         }
 
         public void Receive(RestStopwatchEnabledChangedMessage message) => RestStopwatchEnabled = message.Value;
@@ -170,18 +158,18 @@ namespace FitISO.Maui.ViewModels
 
         void RestoreRestState(Workout newValue)
         {
-            int savedWorkoutId = Preferences.Default.Get(RestPrefWorkoutId, 0);
-            long savedTicks = Preferences.Default.Get(RestPrefStartTimeTicks, 0L);
+            int savedWorkoutId = restStopwatchStateService.WorkoutId;
+            DateTime? savedStartTime = restStopwatchStateService.StartTimeUtc;
 
-            if (savedWorkoutId != 0 && savedWorkoutId == newValue.Id && savedTicks > 0)
+            if (savedWorkoutId != 0 && savedWorkoutId == newValue.Id && savedStartTime is DateTime savedDt)
             {
                 _restoringRest = true;
-                RestStartTime = new DateTime(savedTicks, DateTimeKind.Utc);
-                RestIsStopped = Preferences.Default.Get(RestPrefIsStopped, false);
+                RestStartTime = savedDt;
+                RestIsStopped = restStopwatchStateService.IsStopped;
                 _restoringRest = false;
 
-                int triggerExerciseId = Preferences.Default.Get(RestPrefTriggerExerciseId, 0);
-                int triggerSetId = Preferences.Default.Get(RestPrefTriggerSetId, 0);
+                int triggerExerciseId = restStopwatchStateService.TriggerExerciseId;
+                int triggerSetId = restStopwatchStateService.TriggerSetId;
 
                 _restTriggerExercise = triggerExerciseId != 0
                     ? newValue.WorkoutExercises.FirstOrDefault(we => we.Id == triggerExerciseId)
@@ -541,7 +529,7 @@ namespace FitISO.Maui.ViewModels
 
         public async void Receive(DbImportedMessage message)
         {
-            ClearPersistedRest();
+            restStopwatchStateService.Clear();
 
             var activeWorkout = await workoutService.GetActiveWorkoutAsync();
 

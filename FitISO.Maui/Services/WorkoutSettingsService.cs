@@ -2,7 +2,7 @@
 {
     public class WorkoutSettingsService
     {
-        public const string AutoStartRestOnExerciseFinishKey = "AutoStartRestOnExerciseFinish";
+        const string AutoStartRestOnExerciseFinishKey = "AutoStartRestOnExerciseFinish";
 
         public bool AutoStartRestOnExerciseFinish
         {
@@ -10,7 +10,7 @@
             set => Preferences.Default.Set(AutoStartRestOnExerciseFinishKey, value);
         }
 
-        public const string RestStopwatchEnabledKey = "RestStopwatchEnabled";
+        const string RestStopwatchEnabledKey = "RestStopwatchEnabled";
 
         public bool RestStopwatchEnabled
         {

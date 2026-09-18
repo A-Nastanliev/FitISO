@@ -9,14 +9,9 @@ namespace FitISO.Maui.Rendering
         public static SKBitmap Draw(HashSet<int> workoutDays, int today, int daysInMonth, DayOfWeek firstDayOfWeek,
             SKColor workoutColor, SKColor restColor, SKColor futureColor, int width, int height)
         {
-            var bitmap = new SKBitmap(Math.Max(width, 1), Math.Max(height, 1));
-            using var canvas = new SKCanvas(bitmap);
-            canvas.Clear(SKColors.Transparent);
-
-            Draw(canvas, workoutDays, today, daysInMonth, firstDayOfWeek,
-                workoutColor, restColor, futureColor, width, height);
-
-            return bitmap;
+            return SkiaDrawer.CreateTransparentBitmap(width, height, canvas =>
+                Draw(canvas, workoutDays, today, daysInMonth, firstDayOfWeek,
+                    workoutColor, restColor, futureColor, width, height));
         }
 
         public static void Draw(SKCanvas canvas, HashSet<int> workoutDays, int today, int daysInMonth, DayOfWeek firstDayOfWeek,

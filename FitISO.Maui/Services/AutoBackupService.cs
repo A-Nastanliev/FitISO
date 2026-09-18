@@ -2,6 +2,7 @@
 using CommunityToolkit.Mvvm.Messaging;
 using FitISO.Maui.Messages;
 using Microsoft.Data.Sqlite;
+using System.Globalization;
 #if ANDROID
 using Android.Content;
 using Android.OS;
@@ -13,8 +14,32 @@ namespace FitISO.Maui.Services
 {
     public class AutoBackupService : IRecipient<WorkoutFinishedMessage>
     {
-        public const string AutoSaveEnabledKey = "auto_save_enabled";
-        public const string LastBackupUtcKey = "last_export_utc";
+        const string AutoSaveEnabledKey = "auto_save_enabled";
+        const string LastBackupUtcKey = "last_export_utc";
+
+        public bool AutoSaveEnabled
+        {
+            get => Preferences.Default.Get(AutoSaveEnabledKey, false);
+            set => Preferences.Default.Set(AutoSaveEnabledKey, value);
+        }
+
+        public DateTime? LastBackupUtc
+        {
+            get
+            {
+                var saved = Preferences.Default.Get(LastBackupUtcKey, string.Empty);
+                return string.IsNullOrEmpty(saved)
+                    ? null
+                    : DateTime.Parse(saved, null, DateTimeStyles.RoundtripKind);
+            }
+            set
+            {
+                if (value is DateTime dt)
+                    Preferences.Default.Set(LastBackupUtcKey, dt.ToString("O"));
+                else
+                    Preferences.Default.Remove(LastBackupUtcKey);
+            }
+        }
 
         public AutoBackupService()
         {
@@ -23,7 +48,7 @@ namespace FitISO.Maui.Services
 
         public void Receive(WorkoutFinishedMessage message)
         {
-            if (!Preferences.Get(AutoSaveEnabledKey, false))
+            if (!AutoSaveEnabled)
                 return;
 
             _ = RunAutoBackupAsync();
@@ -37,7 +62,7 @@ namespace FitISO.Maui.Services
                 return;
 
             var backupUtc = DateTime.UtcNow;
-            Preferences.Set(LastBackupUtcKey, backupUtc.ToString("O"));
+            LastBackupUtc = backupUtc;
 
             await MainThread.InvokeOnMainThreadAsync(() =>
             {
