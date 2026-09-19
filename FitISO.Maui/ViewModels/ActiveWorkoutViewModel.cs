@@ -16,8 +16,8 @@ using System.Text;
 
 namespace FitISO.Maui.ViewModels
 {
-    public partial class ActiveWorkoutViewModel : ObservableObject, IRecipient<WorkoutStartedMessage>, IRecipient<DbImportedMessage>, 
-        IRecipient<ExerciseUpdatedMessage>, IRecipient<RestStopwatchEnabledChangedMessage>
+    public partial class ActiveWorkoutViewModel : ObservableObject, IRecipient<WorkoutStartedMessage>, IRecipient<DbImportedMessage>,
+        IRecipient<ExerciseUpdatedMessage>, IRecipient<RestStopwatchEnabledChangedMessage>, IRecipient<ProgressCardEnabledChangedMessage>
     {
         [ObservableProperty]
         Workout workout = new();
@@ -32,7 +32,14 @@ namespace FitISO.Maui.ViewModels
         int totalSets;
 
         [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(ShowTopCards))]
         bool restStopwatchEnabled;
+
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(ShowTopCards))]
+        bool progressCardEnabled;
+
+        public bool ShowTopCards => RestStopwatchEnabled || ProgressCardEnabled;
 
         double progress;
         public double Progress
@@ -86,6 +93,7 @@ namespace FitISO.Maui.ViewModels
             this.restStopwatchStateService = restStopwatchStateService;
             this.serviceProvider = serviceProvider;
             RestStopwatchEnabled = workoutSettingsService.RestStopwatchEnabled;
+            ProgressCardEnabled = workoutSettingsService.ProgressCardEnabled;
         }
 
         partial void OnRestStartTimeChanged(DateTime? value)
@@ -123,6 +131,8 @@ namespace FitISO.Maui.ViewModels
         }
 
         public void Receive(RestStopwatchEnabledChangedMessage message) => RestStopwatchEnabled = message.Value;
+
+        public void Receive(ProgressCardEnabledChangedMessage message) => ProgressCardEnabled = message.Value;
 
         partial void OnRestStopwatchEnabledChanged(bool value)
         {

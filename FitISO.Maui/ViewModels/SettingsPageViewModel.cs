@@ -12,7 +12,8 @@ using System.Collections.ObjectModel;
 
 namespace FitISO.Maui.ViewModels
 {
-    public partial class SettingsPageViewModel : ObservableObject, IRecipient<AutoBackupCompletedMessage>
+    public partial class SettingsPageViewModel : ObservableObject, IRecipient<AutoBackupCompletedMessage>, IRecipient<RestStopwatchEnabledChangedMessage>,
+        IRecipient<ProgressCardEnabledChangedMessage>
     {
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(IsNotBusy))]
@@ -54,6 +55,9 @@ namespace FitISO.Maui.ViewModels
         [ObservableProperty]
         bool restStopwatchEnabled;
 
+        [ObservableProperty]
+        bool progressCardEnabled;
+
         public bool HasLastBackup => LastBackupUtc is not null;
 
         readonly WorkoutSettingsService workoutSettingsService;
@@ -78,6 +82,7 @@ namespace FitISO.Maui.ViewModels
             AutoSaveEnabled = autoBackupService.AutoSaveEnabled;
             AutoStartRestOnExerciseFinish = workoutSettingsService.AutoStartRestOnExerciseFinish;
             RestStopwatchEnabled = workoutSettingsService.RestStopwatchEnabled;
+            ProgressCardEnabled = workoutSettingsService.ProgressCardEnabled;
         }
 
         public void Receive(AutoBackupCompletedMessage message) => LastBackupUtc = message.Value;
@@ -86,18 +91,20 @@ namespace FitISO.Maui.ViewModels
 
         partial void OnAutoStartRestOnExerciseFinishChanged(bool value) => workoutSettingsService.AutoStartRestOnExerciseFinish = value;
 
-        partial void OnRestStopwatchEnabledChanged(bool value)
-        {
-            workoutSettingsService.RestStopwatchEnabled = value;
-            WeakReferenceMessenger.Default.Send(new RestStopwatchEnabledChangedMessage(value));
-        }
+        partial void OnRestStopwatchEnabledChanged(bool value) => workoutSettingsService.RestStopwatchEnabled = value;
+
+        partial void OnProgressCardEnabledChanged(bool value) => workoutSettingsService.ProgressCardEnabled = value;
+
+        public void Receive(RestStopwatchEnabledChangedMessage message) => RestStopwatchEnabled = message.Value;
+
+        public void Receive(ProgressCardEnabledChangedMessage message) => ProgressCardEnabled = message.Value;
 
         partial void OnSelectedAccentThemeChanged(AccentTheme value)
         {
             var existing = Application.Current.Resources.MergedDictionaries.FirstOrDefault(d => d.ContainsKey("Gray100"));
             Application.Current.Resources.MergedDictionaries.Remove(existing);
             Application.Current.Resources.MergedDictionaries.Add(value.Theme);
-            accentThemeService.AccentThemeName = value.Name;       
+            accentThemeService.AccentThemeName = value.Name;
         }
 
         [RelayCommand]
