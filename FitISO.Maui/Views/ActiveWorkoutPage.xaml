@@ -11,6 +11,7 @@
              xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
              xmlns:views="clr-namespace:FitISO.Maui.Views"
              x:DataType="vm:ActiveWorkoutViewModel"
+             xmlns:behaviors="clr-namespace:FitISO.Maui.Behaviors"
              x:Name="Root"
              Title="Active">
 
@@ -31,8 +32,20 @@
             <Border x:Name="ProgressCard" StrokeThickness="0" StrokeShape="RoundRectangle 25"
                 BackgroundColor="{DynamicResource Gray800}" IsVisible="{Binding ProgressCardEnabled}">
                 <Grid Padding="20,12">
-                    <ProgressBar Progress="{Binding Progress}" ProgressColor="{DynamicResource Gray100}" 
-                        BackgroundColor="{DynamicResource Gray600}" HeightRequest="10" VerticalOptions="Center"/>
+                    <Border StrokeThickness="0" StrokeShape="RoundRectangle 7" 
+                            HeightRequest="14" VerticalOptions="Center" Padding="0"
+                            BackgroundColor="{DynamicResource Gray600}">
+                        <ProgressBar ProgressColor="{DynamicResource Gray100}"
+                                 BackgroundColor="Transparent" ScaleY="6"
+                                 HeightRequest="14" VerticalOptions="Fill">
+                            <ProgressBar.Behaviors>
+                                <behaviors:AnimatedProgressBehavior
+                                    TargetProgress="{Binding Progress}" Duration="600"
+                                    DefaultColorKey="Gray100" CompletedColorKey="ChartAccentColor"
+                                    PulseTarget="{x:Reference ProgressCard}"/>
+                            </ProgressBar.Behaviors>
+                        </ProgressBar>
+                    </Border>
                 </Grid>
             </Border>
             <Border x:Name="StopwatchCard" StrokeThickness="0" StrokeShape="RoundRectangle 25"
