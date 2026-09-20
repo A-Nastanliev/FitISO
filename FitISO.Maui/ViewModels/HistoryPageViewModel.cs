@@ -43,6 +43,9 @@ namespace FitISO.Maui.ViewModels
         [ObservableProperty]
         bool canGoNextMonth;
 
+        [ObservableProperty]
+        int heatmapMonthIndex;
+
         bool isFollowingCurrentMonth = true;
 
         public HistoryPageViewModel(WorkoutService workoutService)
@@ -117,7 +120,7 @@ namespace FitISO.Maui.ViewModels
             HeatmapToday = isCurrentMonth ? now.Day : HeatmapDaysInMonth;
             HeatmapFirstDayOfWeek = new DateTime(year, month, 1).DayOfWeek;
             HeatmapMonthLabel = new DateTime(year, month, 1).ToString("MMMM yyyy");
-
+            HeatmapMonthIndex = year * 12 + month;
             CanGoNextMonth = !isCurrentMonth;
 
             var previous = new DateTime(year, month, 1).AddMonths(-1);

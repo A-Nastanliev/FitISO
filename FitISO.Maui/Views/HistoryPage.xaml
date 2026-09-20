@@ -6,6 +6,7 @@
              xmlns:vm="clr-namespace:FitISO.Maui.ViewModels"
              xmlns:skia="clr-namespace:SkiaSharp.Views.Maui.Controls;assembly=SkiaSharp.Views.Maui.Controls"
              x:DataType="vm:HistoryPageViewModel"
+             xmlns:behaviors="clr-namespace:FitISO.Maui.Behaviors"
              x:Name="Root"
              xmlns:models="clr-namespace:FitISO.Maui.Models">
 
@@ -28,7 +29,11 @@
                 IsEnabled="{Binding CanGoPreviousMonth}"
                 Command="{Binding HeatmapPreviousMonthCommand}"/>
             <Label Grid.Column="2" Text="{Binding HeatmapMonthLabel}"
-                FontSize="Small" HorizontalTextAlignment="Center" VerticalTextAlignment="Center"/>
+                FontSize="Small" HorizontalTextAlignment="Center" VerticalTextAlignment="Center">
+                <Label.Behaviors>
+                    <behaviors:SlideOnChangeBehavior Value="{Binding HeatmapMonthIndex}" Distance="16" Duration="300"/>
+                </Label.Behaviors>
+            </Label>
             <ImageButton Grid.Column="3"
                 Source="{FontImageSource FontFamily=MaterialRound, Glyph='&#xE5CC;', Size=24, Color={DynamicResource Gray300}}"
                 BackgroundColor="Transparent" Aspect="Center"
@@ -46,7 +51,11 @@
                 <SwipeGestureRecognizer Direction="Right" Command="{Binding HeatmapPreviousMonthCommand}"/>
             </Grid.GestureRecognizers>
             <skia:SKCanvasView x:Name="HeatmapCanvas" HeightRequest="140" Margin="12,8"
-                        PaintSurface="OnHeatmapPaintSurface"/>
+                        PaintSurface="OnHeatmapPaintSurface">
+                <skia:SKCanvasView.Behaviors>
+                    <behaviors:SlideOnChangeBehavior Value="{Binding HeatmapMonthIndex}" Distance="48" Duration="300"/>
+                </skia:SKCanvasView.Behaviors>
+            </skia:SKCanvasView>
         </Grid>
         <CollectionView VerticalOptions="Fill" Grid.Row="2"
                    ItemsSource="{Binding Items}" Margin="6"
