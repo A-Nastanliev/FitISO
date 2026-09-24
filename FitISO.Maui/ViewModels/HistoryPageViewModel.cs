@@ -6,6 +6,7 @@ using CommunityToolkit.Mvvm.Messaging;
 using FitISO.Maui.Messages;
 using FitISO.Maui.Models;
 using FitISO.Maui.Rendering;
+using FitISO.Maui.Services;
 using FitISO.Services;
 using System;
 using System.Collections.Generic;
@@ -16,9 +17,11 @@ using System.Threading.Tasks;
 namespace FitISO.Maui.ViewModels
 {
     public partial class HistoryPageViewModel : PagedCollectionViewModel<FitISO.Data.Models.Workout, Workout, int?>,
-          IRecipient<WorkoutFinishedMessage>, IRecipient<ExerciseUpdatedMessage>, IRecipient<DbImportedMessage>
+          IRecipient<WorkoutFinishedMessage>, IRecipient<ExerciseUpdatedMessage>, IRecipient<DbImportedMessage>,
+          IRecipient<HeatmapWeekStartsOnMondayChangedMessage>, IRecipient<HeatmapGitHubStyleChangedMessage>
     {
         readonly WorkoutService workoutService;
+        readonly HeatmapSettingsService heatmapSettingsService;
         int heatmapYear;
         int heatmapMonth;
 
@@ -35,6 +38,12 @@ namespace FitISO.Maui.ViewModels
         DayOfWeek heatmapFirstDayOfWeek;
 
         [ObservableProperty]
+        DayOfWeek heatmapWeekStartDay;
+
+        [ObservableProperty]
+        bool heatmapUseGitHubStyleLayout;
+
+        [ObservableProperty]
         string heatmapMonthLabel = string.Empty;
 
         [ObservableProperty]
@@ -48,9 +57,13 @@ namespace FitISO.Maui.ViewModels
 
         bool isFollowingCurrentMonth = true;
 
-        public HistoryPageViewModel(WorkoutService workoutService)
+        public HistoryPageViewModel(WorkoutService workoutService, HeatmapSettingsService heatmapSettingsService)
         {
             this.workoutService = workoutService;
+            this.heatmapSettingsService = heatmapSettingsService;
+
+            heatmapWeekStartDay = heatmapSettingsService.WeekStartDay;
+            heatmapUseGitHubStyleLayout = heatmapSettingsService.GitHubStyle;
         }
 
         protected override int BatchSize => 6;
@@ -198,7 +211,7 @@ namespace FitISO.Maui.ViewModels
                 ActiveWorkoutState.Instance.HasActiveWorkout = true;
                 await Shell.Current.GoToAsync("//active");
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 await Shell.Current.DisplayAlertAsync("Error", ex.Message, "OK");
             }
@@ -257,5 +270,11 @@ namespace FitISO.Maui.ViewModels
                 }
             }
         }
+
+        public void Receive(HeatmapWeekStartsOnMondayChangedMessage message)
+            => HeatmapWeekStartDay = message.Value ? DayOfWeek.Monday : DayOfWeek.Sunday;
+
+        public void Receive(HeatmapGitHubStyleChangedMessage message)
+            => HeatmapUseGitHubStyleLayout = message.Value;
     }
 }

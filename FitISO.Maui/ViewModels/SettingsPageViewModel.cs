@@ -13,7 +13,7 @@ using System.Collections.ObjectModel;
 namespace FitISO.Maui.ViewModels
 {
     public partial class SettingsPageViewModel : ObservableObject, IRecipient<AutoBackupCompletedMessage>, IRecipient<RestStopwatchEnabledChangedMessage>,
-        IRecipient<ProgressCardEnabledChangedMessage>
+        IRecipient<ProgressCardEnabledChangedMessage>, IRecipient<HeatmapWeekStartsOnMondayChangedMessage>, IRecipient<HeatmapGitHubStyleChangedMessage>
     {
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(IsNotBusy))]
@@ -58,18 +58,27 @@ namespace FitISO.Maui.ViewModels
         [ObservableProperty]
         bool progressCardEnabled;
 
+        [ObservableProperty]
+        bool heatmapWeekStartsOnMonday;
+
+        [ObservableProperty]
+        bool heatmapGitHubStyle;
+
         public bool HasLastBackup => LastBackupUtc is not null;
 
         readonly WorkoutSettingsService workoutSettingsService;
+
+        readonly HeatmapSettingsService heatmapSettingsService;
 
         readonly AccentThemeService accentThemeService;
 
         readonly AutoBackupService autoBackupService;
 
-        public SettingsPageViewModel(WorkoutSettingsService workoutSettingsService, AccentThemeService accentThemeService,
-            AutoBackupService autoBackupService)
+        public SettingsPageViewModel(WorkoutSettingsService workoutSettingsService, HeatmapSettingsService heatmapSettingsService,
+            AccentThemeService accentThemeService, AutoBackupService autoBackupService)
         {
             this.workoutSettingsService = workoutSettingsService;
+            this.heatmapSettingsService = heatmapSettingsService;
             this.accentThemeService = accentThemeService;
             this.autoBackupService = autoBackupService;
 
@@ -83,6 +92,8 @@ namespace FitISO.Maui.ViewModels
             AutoStartRestOnExerciseFinish = workoutSettingsService.AutoStartRestOnExerciseFinish;
             RestStopwatchEnabled = workoutSettingsService.RestStopwatchEnabled;
             ProgressCardEnabled = workoutSettingsService.ProgressCardEnabled;
+            HeatmapWeekStartsOnMonday = heatmapSettingsService.WeekStartsOnMonday;
+            HeatmapGitHubStyle = heatmapSettingsService.GitHubStyle;
         }
 
         public void Receive(AutoBackupCompletedMessage message) => LastBackupUtc = message.Value;
@@ -95,9 +106,17 @@ namespace FitISO.Maui.ViewModels
 
         partial void OnProgressCardEnabledChanged(bool value) => workoutSettingsService.ProgressCardEnabled = value;
 
+        partial void OnHeatmapWeekStartsOnMondayChanged(bool value) => heatmapSettingsService.WeekStartsOnMonday = value;
+
+        partial void OnHeatmapGitHubStyleChanged(bool value) => heatmapSettingsService.GitHubStyle = value;
+
         public void Receive(RestStopwatchEnabledChangedMessage message) => RestStopwatchEnabled = message.Value;
 
         public void Receive(ProgressCardEnabledChangedMessage message) => ProgressCardEnabled = message.Value;
+
+        public void Receive(HeatmapWeekStartsOnMondayChangedMessage message) => HeatmapWeekStartsOnMonday = message.Value;
+
+        public void Receive(HeatmapGitHubStyleChangedMessage message) => HeatmapGitHubStyle = message.Value;
 
         partial void OnSelectedAccentThemeChanged(AccentTheme value)
         {

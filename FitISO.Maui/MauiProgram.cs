@@ -72,6 +72,7 @@ namespace FitISO.Maui
             builder.Services.AddSingleton<WorkoutSettingsService>();
             builder.Services.AddSingleton<AccentThemeService>();
             builder.Services.AddSingleton<RestStopwatchStateService>();
+            builder.Services.AddSingleton<HeatmapSettingsService>();
 
 #if DEBUG
             builder.Logging.AddDebug();

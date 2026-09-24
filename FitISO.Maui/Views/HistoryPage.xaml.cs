@@ -33,6 +33,8 @@ public partial class HistoryPage : ContentPage
             case nameof(HistoryPageViewModel.HeatmapToday):
             case nameof(HistoryPageViewModel.HeatmapDaysInMonth):
             case nameof(HistoryPageViewModel.HeatmapFirstDayOfWeek):
+            case nameof(HistoryPageViewModel.HeatmapWeekStartDay):
+            case nameof(HistoryPageViewModel.HeatmapUseGitHubStyleLayout):
                 HeatmapCanvas.InvalidateSurface();
                 break;
         }
@@ -45,8 +47,9 @@ public partial class HistoryPage : ContentPage
 
         var (workoutColor, restColor, futureColor) = ResolveHeatmapColors();
 
-        HeatmapChartDrawer.Draw(canvas, viewModel.HeatmapWorkoutDays, viewModel.HeatmapToday,  viewModel.HeatmapDaysInMonth,
-            viewModel.HeatmapFirstDayOfWeek, workoutColor, restColor, futureColor, e.Info.Width, e.Info.Height);
+        HeatmapChartDrawer.Draw(canvas, viewModel.HeatmapWorkoutDays, viewModel.HeatmapToday, viewModel.HeatmapDaysInMonth,
+              viewModel.HeatmapFirstDayOfWeek, viewModel.HeatmapWeekStartDay, viewModel.HeatmapUseGitHubStyleLayout,
+              workoutColor, restColor, futureColor, e.Info.Width, e.Info.Height);
     }
 
     static (SKColor workout, SKColor rest, SKColor future) ResolveHeatmapColors()

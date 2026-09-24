@@ -5,32 +5,35 @@ namespace FitISO.Maui.Rendering
     public static class HeatmapChartDrawer
     {
         const float CellGapRatio = 0.18f;
+        const int Lines = 7;
 
         public static SKBitmap Draw(HashSet<int> workoutDays, int today, int daysInMonth, DayOfWeek firstDayOfWeek,
+            DayOfWeek weekStartDay, bool useGitHubStyleLayout,
             SKColor workoutColor, SKColor restColor, SKColor futureColor, int width, int height)
         {
             return SkiaDrawer.CreateTransparentBitmap(width, height, canvas =>
-                Draw(canvas, workoutDays, today, daysInMonth, firstDayOfWeek,
+                Draw(canvas, workoutDays, today, daysInMonth, firstDayOfWeek, weekStartDay, useGitHubStyleLayout,
                     workoutColor, restColor, futureColor, width, height));
         }
 
         public static void Draw(SKCanvas canvas, HashSet<int> workoutDays, int today, int daysInMonth, DayOfWeek firstDayOfWeek,
+            DayOfWeek weekStartDay, bool useGitHubStyleLayout,
             SKColor workoutColor, SKColor restColor, SKColor futureColor, int width, int height)
         {
             if (daysInMonth <= 0)
                 return;
 
-            var leadingBlanks = ((int)firstDayOfWeek + 6) % 7;
+            var leadingBlanks = (((int)firstDayOfWeek - (int)weekStartDay) + 7) % 7;
             var totalCells = leadingBlanks + daysInMonth;
 
-            const int Columns = 7;
-            var rows = (int)Math.Ceiling(totalCells / (double)Columns);
+            var columns = useGitHubStyleLayout ? (int)Math.Ceiling(totalCells / (double)Lines) : Lines;
+            var rows = useGitHubStyleLayout ? Lines : (int)Math.Ceiling(totalCells / (double)Lines);
 
-            var cellWidth = (float)width / Columns;
+            var cellWidth = (float)width / columns;
             var cellHeight = (float)height / rows;
             var cellSize = Math.Min(cellWidth, cellHeight);
 
-            var gridWidth = cellSize * Columns;
+            var gridWidth = cellSize * columns;
             var gridHeight = cellSize * rows;
             var offsetX = (width - gridWidth) / 2f;
             var offsetY = (height - gridHeight) / 2f;
@@ -44,8 +47,18 @@ namespace FitISO.Maui.Rendering
             for (var day = 1; day <= daysInMonth; day++)
             {
                 var cellIndex = leadingBlanks + day - 1;
-                var row = cellIndex / Columns;
-                var col = cellIndex % Columns;
+
+                int row, col;
+                if (useGitHubStyleLayout)
+                {
+                    row = cellIndex % Lines;
+                    col = cellIndex / Lines;
+                }
+                else
+                {
+                    row = cellIndex / Lines;
+                    col = cellIndex % Lines;
+                }
 
                 var left = offsetX + col * cellSize + gap / 2f;
                 var top = offsetY + row * cellSize + gap / 2f;

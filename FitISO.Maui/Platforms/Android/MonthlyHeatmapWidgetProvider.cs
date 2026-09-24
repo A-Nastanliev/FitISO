@@ -71,10 +71,18 @@ namespace FitISO.Maui.Platforms.Android
             var days = await workoutService.GetWorkoutDaysInMonthAsync(now.Year, now.Month)
                        ?? new HashSet<int>();
 
+            var heatmapSettingsService = IPlatformApplication.Current?.Services.GetService<HeatmapSettingsService>();
+            var weekStartsOnMonday = heatmapSettingsService?.WeekStartsOnMonday
+                ?? prefs?.GetBoolean(MonthlyHeatmapService.CachedWeekStartsOnMondayKey, true) ?? true;
+            var gitHubStyle = heatmapSettingsService?.GitHubStyle
+                ?? prefs?.GetBoolean(MonthlyHeatmapService.CachedGitHubStyleKey, false) ?? false;
+
             using var editor = prefs!.Edit();
             editor!.PutInt(MonthlyHeatmapService.CachedYearKey, now.Year);
             editor!.PutInt(MonthlyHeatmapService.CachedMonthKey, now.Month);
             editor!.PutString(MonthlyHeatmapService.CachedDaysKey, JsonSerializer.Serialize(days));
+            editor!.PutBoolean(MonthlyHeatmapService.CachedWeekStartsOnMondayKey, weekStartsOnMonday);
+            editor!.PutBoolean(MonthlyHeatmapService.CachedGitHubStyleKey, gitHubStyle);
             editor!.Apply();
         }
 
@@ -86,6 +94,9 @@ namespace FitISO.Maui.Platforms.Android
             var year = cachePrefs?.GetInt(MonthlyHeatmapService.CachedYearKey, 0) ?? 0;
             var month = cachePrefs?.GetInt(MonthlyHeatmapService.CachedMonthKey, 0) ?? 0;
             var daysJson = cachePrefs?.GetString(MonthlyHeatmapService.CachedDaysKey, null);
+            var weekStartsOnMonday = cachePrefs?.GetBoolean(MonthlyHeatmapService.CachedWeekStartsOnMondayKey, true) ?? true;
+            var useGitHubStyleLayout = cachePrefs?.GetBoolean(MonthlyHeatmapService.CachedGitHubStyleKey, false) ?? false;
+            var weekStartDay = weekStartsOnMonday ? DayOfWeek.Monday : DayOfWeek.Sunday;
 
             var themePrefs = WidgetTheme.Prefs(context);
             var backgroundArgb = WidgetTheme.BackgroundColor(context, themePrefs);
@@ -128,7 +139,7 @@ namespace FitISO.Maui.Platforms.Android
             var futureColor = WidgetTheme.ToSkColor(WidgetTheme.FutureColor(context, themePrefs));
 
             using var skBitmap = HeatmapChartDrawer.Draw(
-                workoutDays, today, daysInMonth, firstDayOfWeek,
+                workoutDays, today, daysInMonth, firstDayOfWeek, weekStartDay, useGitHubStyleLayout,
                 workoutColor, restColor, futureColor, w, h);
             using var image = SKImage.FromBitmap(skBitmap);
             using var data = image.Encode(SKEncodedImageFormat.Png, 100);
