@@ -11,6 +11,12 @@ namespace FitISO.Maui.Platforms.Android
         public const string PrefsName = "FitISO.WidgetTheme";
         public const string ThemeNameKey = "theme_name";
         const string DefaultThemeName = "Default";
+        public const string DynamicThemeName = "Dynamic";
+        public const string DynAccentArgbKey = "dynamic_accent_argb";
+        public const string DynGridArgbKey = "dynamic_grid_argb";
+        public const string DynBackgroundArgbKey = "dynamic_background_argb";
+        public const string DynRestArgbKey = "dynamic_rest_argb";
+        public const string DynFutureArgbKey = "dynamic_future_argb";
 
         public const string ActionThemeChanged = "com.fitiso.maui.widget.THEME_CHANGED";
 
@@ -19,6 +25,17 @@ namespace FitISO.Maui.Platforms.Android
 
         public static string ReadThemeName(ISharedPreferences? prefs) =>
             prefs?.GetString(ThemeNameKey, DefaultThemeName) ?? DefaultThemeName;
+
+        public static void WriteDynamicColors(ISharedPreferences? prefs, DynamicWidgetColors.Result colors)
+        {
+            using var editor = prefs?.Edit();
+            editor?.PutInt(DynAccentArgbKey, colors.Accent);
+            editor?.PutInt(DynGridArgbKey, colors.Grid);
+            editor?.PutInt(DynBackgroundArgbKey, colors.Background);
+            editor?.PutInt(DynRestArgbKey, colors.Rest);
+            editor?.PutInt(DynFutureArgbKey, colors.Future);
+            editor?.Apply();
+        }
 
         public static int AccentColor(Context context, string themeName) =>
             ContextCompat.GetColor(context, AccentColorRes(themeName));
@@ -35,20 +52,45 @@ namespace FitISO.Maui.Platforms.Android
         public static int FutureColor(Context context, string themeName) =>
             ContextCompat.GetColor(context, FutureColorRes(themeName));
 
-        public static int AccentColor(Context context, ISharedPreferences? prefs) =>
-            AccentColor(context, ReadThemeName(prefs));
+        public static int AccentColor(Context context, ISharedPreferences? prefs)
+        {
+            var themeName = ReadThemeName(prefs);
+            if (themeName == DynamicThemeName)
+                return prefs?.GetInt(DynAccentArgbKey, AccentColor(context, DefaultThemeName)) ?? AccentColor(context, DefaultThemeName);
+            return AccentColor(context, themeName);
+        }
 
-        public static int GridColor(Context context, ISharedPreferences? prefs) =>
-            GridColor(context, ReadThemeName(prefs));
+        public static int GridColor(Context context, ISharedPreferences? prefs)
+        {
+            var themeName = ReadThemeName(prefs);
+            if (themeName == DynamicThemeName)
+                return prefs?.GetInt(DynGridArgbKey, GridColor(context, DefaultThemeName)) ?? GridColor(context, DefaultThemeName);
+            return GridColor(context, themeName);
+        }
 
-        public static int BackgroundColor(Context context, ISharedPreferences? prefs) =>
-            BackgroundColor(context, ReadThemeName(prefs));
+        public static int BackgroundColor(Context context, ISharedPreferences? prefs)
+        {
+            var themeName = ReadThemeName(prefs);
+            if (themeName == DynamicThemeName)
+                return prefs?.GetInt(DynBackgroundArgbKey, BackgroundColor(context, DefaultThemeName)) ?? BackgroundColor(context, DefaultThemeName);
+            return BackgroundColor(context, themeName);
+        }
 
-        public static int RestColor(Context context, ISharedPreferences? prefs) =>
-            RestColor(context, ReadThemeName(prefs));
+        public static int RestColor(Context context, ISharedPreferences? prefs)
+        {
+            var themeName = ReadThemeName(prefs);
+            if (themeName == DynamicThemeName)
+                return prefs?.GetInt(DynRestArgbKey, RestColor(context, DefaultThemeName)) ?? RestColor(context, DefaultThemeName);
+            return RestColor(context, themeName);
+        }
 
-        public static int FutureColor(Context context, ISharedPreferences? prefs) =>
-            FutureColor(context, ReadThemeName(prefs));
+        public static int FutureColor(Context context, ISharedPreferences? prefs)
+        {
+            var themeName = ReadThemeName(prefs);
+            if (themeName == DynamicThemeName)
+                return prefs?.GetInt(DynFutureArgbKey, FutureColor(context, DefaultThemeName)) ?? FutureColor(context, DefaultThemeName);
+            return FutureColor(context, themeName);
+        }
 
 
         static int AccentColorRes(string themeName) => themeName switch

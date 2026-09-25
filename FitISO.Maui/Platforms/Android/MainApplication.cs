@@ -1,5 +1,6 @@
 ﻿using Android.App;
 using Android.Runtime;
+using FitISO.Maui.Platforms.Android;
 
 namespace FitISO.Maui
 {
@@ -9,6 +10,13 @@ namespace FitISO.Maui
         public MainApplication(IntPtr handle, JniHandleOwnership ownership)
             : base(handle, ownership)
         {
+        }
+
+        public override void OnCreate()
+        {
+            base.OnCreate();
+            WallpaperColorObserver.Register(this);
+            ThemeOverlayObserver.Register(this);
         }
 
         protected override MauiApp CreateMauiApp() => MauiProgram.CreateMauiApp();
