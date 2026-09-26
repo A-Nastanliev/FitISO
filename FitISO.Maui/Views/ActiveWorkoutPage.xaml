@@ -13,10 +13,11 @@
              x:DataType="vm:ActiveWorkoutViewModel"
              xmlns:behaviors="clr-namespace:FitISO.Maui.Behaviors"
              x:Name="Root"
-             Title="Active">
+             Title="Active"
+             Shell.NavBarIsVisible="{Binding IsNotInPipMode}">
 
     <Shell.TitleView>
-        <Grid Grid.Row="0" ColumnDefinitions="auto,*,auto" ColumnSpacing="10" Padding="10,0">
+        <Grid Grid.Row="0" ColumnDefinitions="auto,*,auto" ColumnSpacing="10" Padding="10,0" >
             <Label Text="{Binding Duration, StringFormat='{0:hh\\:mm\\:ss}'}" Grid.Column="0" FontSize="Medium" VerticalOptions="Center" VerticalTextAlignment="Center"/>
             <Entry Grid.Column="1" Text="{Binding Workout.Name, Mode=TwoWay}" FontSize="Medium" MaxLength="40" HorizontalOptions="Fill" MinimumWidthRequest="60"
                 FontAttributes="Bold" VerticalTextAlignment="Center" HorizontalTextAlignment="Center" VerticalOptions="Center"/>
@@ -30,7 +31,7 @@
         <VerticalStackLayout x:Name="TopCards" Margin="8,16,8,0" Spacing="12" VerticalOptions="Start" ZIndex="1" SafeAreaEdges="None"
             IsVisible="{Binding ShowTopCards}">
             <Border x:Name="ProgressCard" StrokeThickness="0" StrokeShape="RoundRectangle 25"
-                BackgroundColor="{DynamicResource Gray800}" IsVisible="{Binding ProgressCardEnabled}">
+                BackgroundColor="{DynamicResource Gray800}" IsVisible="{Binding ShowProgressCard}">
                 <Grid Padding="20,12">
                     <Border StrokeThickness="0" StrokeShape="RoundRectangle 7" 
                             HeightRequest="14" VerticalOptions="Center" Padding="0"
@@ -92,7 +93,19 @@
                 </Grid>
             </Border>
         </VerticalStackLayout>
-        <CollectionView VerticalOptions="Fill" 
+        <Grid IsVisible="{Binding IsInPipMode}" BackgroundColor="{DynamicResource Gray900}">
+            <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center" Spacing="8" IsVisible="{Binding ShowRunningRest}">
+                <Label Text="{Binding RestElapsed, StringFormat='{0:mm\\:ss}'}"
+                   FontSize="48" FontAttributes="Bold" TextColor="White"
+                   HorizontalTextAlignment="Center"/>
+                <Label Text="Resting" FontSize="Small" TextColor="{DynamicResource Gray400}" HorizontalTextAlignment="Center"/>
+            </VerticalStackLayout>
+            <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center" Spacing="8"
+                IsVisible="{Binding ShowStoppedRest}">
+                <Label Text="Paused" FontSize="28" FontAttributes="Bold" TextColor="White" HorizontalTextAlignment="Center"/>
+            </VerticalStackLayout>
+        </Grid>
+        <CollectionView VerticalOptions="Fill" IsVisible="{Binding IsNotInPipMode}"
             ItemsSource="{Binding Workout.WorkoutExercises}" Margin="0,0,0,6" SelectionMode="None" VerticalScrollBarVisibility="Never">
             <CollectionView.Header>
                 <BoxView Color="Transparent" BackgroundColor="Transparent" Background="Transparent">

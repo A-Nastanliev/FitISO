@@ -37,9 +37,18 @@ namespace FitISO.Maui.ViewModels
 
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(ShowTopCards))]
+        [NotifyPropertyChangedFor(nameof(ShowProgressCard))]
         bool progressCardEnabled;
 
-        public bool ShowTopCards => RestStopwatchEnabled || ProgressCardEnabled;
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(IsNotInPipMode))]
+        [NotifyPropertyChangedFor(nameof(ShowProgressCard))]
+        [NotifyPropertyChangedFor(nameof(ShowTopCards))]
+        bool isInPipMode;
+
+        public bool ShowTopCards => (RestStopwatchEnabled || ProgressCardEnabled) && !IsInPipMode;
+        public bool IsNotInPipMode => !IsInPipMode;
+        public bool ShowProgressCard => ProgressCardEnabled && !IsInPipMode;
 
         double progress;
         public double Progress
@@ -94,6 +103,14 @@ namespace FitISO.Maui.ViewModels
             this.serviceProvider = serviceProvider;
             RestStopwatchEnabled = workoutSettingsService.RestStopwatchEnabled;
             ProgressCardEnabled = workoutSettingsService.ProgressCardEnabled;
+            ActiveWorkoutState.Instance.PropertyChanged += ActiveWorkoutState_PropertyChanged;
+            IsInPipMode = ActiveWorkoutState.Instance.IsInPipMode;
+        }
+
+        void ActiveWorkoutState_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(ActiveWorkoutState.IsInPipMode))
+                IsInPipMode = ActiveWorkoutState.Instance.IsInPipMode;
         }
 
         partial void OnRestStartTimeChanged(DateTime? value)

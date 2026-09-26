@@ -1,34 +1,25 @@
-﻿using System.ComponentModel;
-using System.Runtime.CompilerServices;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 
-namespace FitISO.Maui;
-public class ActiveWorkoutState : INotifyPropertyChanged
+namespace FitISO.Maui
 {
-    public static ActiveWorkoutState Instance { get; } = new();
-
-    private ActiveWorkoutState()
+    public partial class ActiveWorkoutState : ObservableObject
     {
-    }
+        public static ActiveWorkoutState Instance { get; } = new();
 
-    private bool _hasActiveWorkout;
-
-    public bool HasActiveWorkout
-    {
-        get => _hasActiveWorkout;
-        set
+        private ActiveWorkoutState()
         {
-            if (_hasActiveWorkout == value)
-            {
-                return;
-            }
-
-            _hasActiveWorkout = value;
-            OnPropertyChanged();
         }
+
+        [ObservableProperty]
+        bool hasActiveWorkout;
+
+        [ObservableProperty]
+        bool isActiveWorkoutPageVisible;
+
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(IsNotInPipMode))]
+        bool isInPipMode;
+
+        public bool IsNotInPipMode => !IsInPipMode;
     }
-
-    public event PropertyChangedEventHandler? PropertyChanged;
-
-    private void OnPropertyChanged([CallerMemberName] string? propertyName = null)
-        => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 }

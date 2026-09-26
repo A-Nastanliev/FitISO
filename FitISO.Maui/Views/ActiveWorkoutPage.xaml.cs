@@ -17,11 +17,13 @@ public partial class ActiveWorkoutPage : ContentPage
     {
         base.OnAppearing();
         viewModel.EnsureTimerRunning();
+        ActiveWorkoutState.Instance.IsActiveWorkoutPageVisible = true;
     }
 
     protected override void OnDisappearing()
     {
         base.OnDisappearing();
         viewModel.Stop();
+        ActiveWorkoutState.Instance.IsActiveWorkoutPageVisible = false;
     }
 }
