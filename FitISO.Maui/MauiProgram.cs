@@ -50,7 +50,10 @@ namespace FitISO.Maui
             builder.Services.AddTransient<ExerciseDetailsPopupPage>();
             builder.Services.AddTransient<ExerciseDetailsPopupViewModel>();
 
-            builder.Services.AddSingleton<SettingsPageViewModel>();
+            builder.Services.AddSingleton<AccentThemeSettingsViewModel>();
+            builder.Services.AddSingleton<BackupSettingsViewModel>();
+            builder.Services.AddSingleton<HeatmapSettingsViewModel>();
+            builder.Services.AddSingleton<WorkoutSettingsViewModel>();
 
             builder.Services.AddTransient<WorkoutFormPage>();
             builder.Services.AddTransient<WorkoutFormViewModel>();
@@ -63,6 +66,7 @@ namespace FitISO.Maui
             builder.Services.AddTransient<SelectExercisePopupViewModel>();
 
             builder.Services.AddSingleton<HistoryPageViewModel>();
+            builder.Services.AddTransient<HeatmapViewModel>();
 
             builder.Services.AddSingleton<FavouriteExerciseService>();
             builder.Services.AddSingleton<LastWorkoutService>();

@@ -11,248 +11,255 @@
     <ScrollView VerticalScrollBarVisibility="Never" HorizontalScrollBarVisibility="Never" Padding="0,0,0,40">
         <VerticalStackLayout Padding="24" Spacing="16">
 
-            <VerticalStackLayout Spacing="8">
-                <Label
-                 Text="Appearance"
-                 FontSize="Medium"
-                 FontAttributes="Bold" />
+            <VerticalStackLayout x:Name="AccentSection" Spacing="16">
+                <VerticalStackLayout Spacing="8">
+                    <Label
+                     Text="Appearance"
+                     FontSize="Medium"
+                     FontAttributes="Bold" />
 
-                <Label
-                 Text="Pick an accent color."
-                 FontSize="Small"
-                 TextColor="{DynamicResource Gray500}" />
+                    <Label
+                     Text="Pick an accent color."
+                     FontSize="Small"
+                     TextColor="{DynamicResource Gray500}" />
+                </VerticalStackLayout>
+
+                <CollectionView ItemsSource="{Binding AccentThemes}" SelectedItem="{Binding SelectedAccentTheme, Mode=TwoWay}"
+                 SelectionMode="Single" HorizontalOptions="Fill" VerticalScrollBarVisibility="Never" HorizontalScrollBarVisibility="Never">
+                    <CollectionView.ItemsLayout>
+                        <GridItemsLayout Orientation="Vertical" Span="6" HorizontalItemSpacing="12" VerticalItemSpacing="12"/>
+                    </CollectionView.ItemsLayout>
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate x:DataType="models:AccentTheme">
+                            <Grid WidthRequest="44" HeightRequest="44">
+                                <Ellipse Fill="{DynamicResource Gray900}" WidthRequest="44" HeightRequest="44"
+                                 Stroke="{DynamicResource Gray600}" StrokeThickness="2"
+                                 x:Name="Ring"/>
+                                <Ellipse Fill="{Binding Swatch}" WidthRequest="30" HeightRequest="30"
+                                 HorizontalOptions="Center" VerticalOptions="Center"/>
+
+                                <VisualStateManager.VisualStateGroups>
+                                    <VisualStateGroupList>
+                                        <VisualStateGroup x:Name="CommonStates">
+                                            <VisualState x:Name="Normal" />
+                                            <VisualState x:Name="Selected">
+                                                <VisualState.Setters>
+                                                    <Setter TargetName="Ring" Property="Ellipse.Stroke" Value="{StaticResource White}" />
+                                                    <Setter TargetName="Ring" Property="BackgroundColor" Value="Transparent"/>
+                                                </VisualState.Setters>
+                                            </VisualState>
+                                        </VisualStateGroup>
+                                    </VisualStateGroupList>
+                                </VisualStateManager.VisualStateGroups>
+                            </Grid>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
             </VerticalStackLayout>
 
-            <CollectionView ItemsSource="{Binding AccentThemes}" SelectedItem="{Binding SelectedAccentTheme, Mode=TwoWay}"
-             SelectionMode="Single" HorizontalOptions="Fill" VerticalScrollBarVisibility="Never" HorizontalScrollBarVisibility="Never">
-                <CollectionView.ItemsLayout>
-                    <GridItemsLayout Orientation="Vertical" Span="6" HorizontalItemSpacing="12" VerticalItemSpacing="12"/>
-                </CollectionView.ItemsLayout>
-                <CollectionView.ItemTemplate>
-                    <DataTemplate x:DataType="models:AccentTheme">
-                        <Grid WidthRequest="44" HeightRequest="44">
-                            <Ellipse Fill="{DynamicResource Gray900}" WidthRequest="44" HeightRequest="44"
-                             Stroke="{DynamicResource Gray600}" StrokeThickness="2"
-                             x:Name="Ring"/>
-                            <Ellipse Fill="{Binding Swatch}" WidthRequest="30" HeightRequest="30"
-                             HorizontalOptions="Center" VerticalOptions="Center"/>
-
-                            <VisualStateManager.VisualStateGroups>
-                                <VisualStateGroupList>
-                                    <VisualStateGroup x:Name="CommonStates">
-                                        <VisualState x:Name="Normal" />
-                                        <VisualState x:Name="Selected">
-                                            <VisualState.Setters>
-                                                <Setter TargetName="Ring" Property="Ellipse.Stroke" Value="{StaticResource White}" />
-                                                <Setter TargetName="Ring" Property="BackgroundColor" Value="Transparent"/>
-                                            </VisualState.Setters>
-                                        </VisualState>
-                                    </VisualStateGroup>
-                                </VisualStateGroupList>
-                            </VisualStateManager.VisualStateGroups>
-                        </Grid>
-                    </DataTemplate>
-                </CollectionView.ItemTemplate>
-            </CollectionView>
-
             <BoxView HeightRequest="1" BackgroundColor="{DynamicResource Gray700}" Margin="0,8"/>
 
-            <VerticalStackLayout Spacing="8">
-                <Label
-                    Text="Backup &amp; Restore"
-                    FontSize="Medium"
-                    FontAttributes="Bold" />
+            <VerticalStackLayout x:Name="BackupSection" Spacing="16">
+                <VerticalStackLayout Spacing="8">
+                    <Label
+                        Text="Backup &amp; Restore"
+                        FontSize="Medium"
+                        FontAttributes="Bold" />
+
+                    <Label
+                        Text="Export a backup of your data or import a previously exported backup. Importing will replace all current data and close the app."
+                        FontSize="Small" HorizontalTextAlignment="Justify"
+                        TextColor="{DynamicResource Gray500}" />
+                </VerticalStackLayout>
+
+                <ActivityIndicator
+                    IsRunning="{Binding IsBusy}"
+                    IsVisible="{Binding IsBusy}"
+                    HorizontalOptions="Center" />
+
+                <Grid ColumnDefinitions="*,*" ColumnSpacing="16">
+                    <Button
+                        Text="Export Database" CornerRadius="24"
+                        Command="{Binding ExportDatabaseCommand}"
+                        IsEnabled="{Binding IsNotBusy}" FontSize="Small">
+                        <VisualStateManager.VisualStateGroups>
+                            <VisualStateGroupList>
+                                <VisualStateGroup x:Name="CommonStates">
+                                    <VisualState x:Name="Normal">
+                                        <VisualState.Setters>
+                                            <Setter Property="BackgroundColor" Value="{DynamicResource Gray500}" />
+                                            <Setter Property="Opacity" Value="1" />
+                                        </VisualState.Setters>
+                                    </VisualState>
+                                    <VisualState x:Name="Disabled">
+                                        <VisualState.Setters>
+                                            <Setter Property="BackgroundColor" Value="{DynamicResource Gray500}" />
+                                            <Setter Property="Opacity" Value="0.5" />
+                                        </VisualState.Setters>
+                                    </VisualState>
+                                </VisualStateGroup>
+                            </VisualStateGroupList>
+                        </VisualStateManager.VisualStateGroups>
+                    </Button>
+
+                    <Button
+                        Text="Import Database" CornerRadius="24" Grid.Column="1"
+                        Command="{Binding ImportDatabaseCommand}"
+                        IsEnabled="{Binding IsNotBusy}" FontSize="Small">
+                        <VisualStateManager.VisualStateGroups>
+                            <VisualStateGroupList>
+                                <VisualStateGroup x:Name="CommonStates">
+                                    <VisualState x:Name="Normal">
+                                        <VisualState.Setters>
+                                            <Setter Property="BackgroundColor" Value="{DynamicResource DeleteColor}" />
+                                            <Setter Property="Opacity" Value="1" />
+                                        </VisualState.Setters>
+                                    </VisualState>
+                                    <VisualState x:Name="Disabled">
+                                        <VisualState.Setters>
+                                            <Setter Property="BackgroundColor" Value="{DynamicResource DeleteColor}" />
+                                            <Setter Property="Opacity" Value="0.5" />
+                                        </VisualState.Setters>
+                                    </VisualState>
+                                </VisualStateGroup>
+                            </VisualStateGroupList>
+                        </VisualStateManager.VisualStateGroups>
+                    </Button>
+                </Grid>
 
                 <Label
-                    Text="Export a backup of your data or import a previously exported backup. Importing will replace all current data and close the app."
-                    FontSize="Small" HorizontalTextAlignment="Justify"
-                    TextColor="{DynamicResource Gray500}" />
+                    FontSize="Small"
+                    HorizontalOptions="Center"
+                    TextColor="{DynamicResource Gray500}">
+                    <Label.Triggers>
+                        <DataTrigger TargetType="Label" Binding="{Binding HasLastBackup}" Value="True">
+                            <Setter Property="Text" Value="{Binding LastBackupUtc, Converter={StaticResource DateConverter}, StringFormat='Last backup: {0}'}" />
+                        </DataTrigger>
+                        <DataTrigger TargetType="Label" Binding="{Binding HasLastBackup}" Value="False">
+                            <Setter Property="Text" Value="No backup yet" />
+                        </DataTrigger>
+                    </Label.Triggers>
+                </Label>
+
+                <BoxView HeightRequest="1" BackgroundColor="{DynamicResource Gray700}" Margin="0,8"/>
+
+                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="16">
+                    <VerticalStackLayout Grid.Column="0" Spacing="8" VerticalOptions="Center">
+                        <Label
+                            Text="Auto-save"
+                            FontSize="Medium" />
+                        <Label
+                            Text="Silently backs up your database to Downloads when a workout finishes."
+                            FontSize="Small"  HorizontalTextAlignment="Justify"
+                            TextColor="{DynamicResource Gray500}" />
+                    </VerticalStackLayout>
+                    <Switch
+                        Grid.Column="1" VerticalOptions="Center" OffColor="{DynamicResource Gray700}"
+                        IsToggled="{Binding AutoSaveEnabled, Mode=TwoWay}"
+                        OnColor="{DynamicResource Gray300}"
+                        ThumbColor="{StaticResource White}" />
+                </Grid>
             </VerticalStackLayout>
 
-            <ActivityIndicator
-                IsRunning="{Binding IsBusy}"
-                IsVisible="{Binding IsBusy}"
-                HorizontalOptions="Center" />
+            <BoxView HeightRequest="1" BackgroundColor="{DynamicResource Gray700}" Margin="0,8"/>
 
-            <Grid ColumnDefinitions="*,*" ColumnSpacing="16">
-                <Button
-                    Text="Export Database" CornerRadius="24"
-                    Command="{Binding ExportDatabaseCommand}"
-                    IsEnabled="{Binding IsNotBusy}" FontSize="Small">
-                    <VisualStateManager.VisualStateGroups>
-                        <VisualStateGroupList>
-                            <VisualStateGroup x:Name="CommonStates">
-                                <VisualState x:Name="Normal">
-                                    <VisualState.Setters>
-                                        <Setter Property="BackgroundColor" Value="{DynamicResource Gray500}" />
-                                        <Setter Property="Opacity" Value="1" />
-                                    </VisualState.Setters>
-                                </VisualState>
-                                <VisualState x:Name="Disabled">
-                                    <VisualState.Setters>
-                                        <Setter Property="BackgroundColor" Value="{DynamicResource Gray500}" />
-                                        <Setter Property="Opacity" Value="0.5" />
-                                    </VisualState.Setters>
-                                </VisualState>
-                            </VisualStateGroup>
-                        </VisualStateGroupList>
-                    </VisualStateManager.VisualStateGroups>
-                </Button>
+            <VerticalStackLayout x:Name="WorkoutSettingsSection" Spacing="16">
+                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="16">
+                    <VerticalStackLayout Grid.Column="0" Spacing="8" VerticalOptions="Center">
+                        <Label
+                            Text="Progress Card" FontSize="Medium" />
+                        <Label
+                            Text="Show a card with your set completion progress during your workout."
+                            FontSize="Small" HorizontalTextAlignment="Justify"
+                            TextColor="{DynamicResource Gray500}" />
+                    </VerticalStackLayout>
+                    <Switch
+                        Grid.Column="1"
+                        VerticalOptions="Center" OffColor="{DynamicResource Gray700}"
+                        IsToggled="{Binding ProgressCardEnabled, Mode=TwoWay}"
+                        OnColor="{DynamicResource Gray300}"
+                        ThumbColor="{StaticResource White}" />
+                </Grid>
 
-                <Button
-                    Text="Import Database" CornerRadius="24" Grid.Column="1"
-                    Command="{Binding ImportDatabaseCommand}"
-                    IsEnabled="{Binding IsNotBusy}" FontSize="Small">
-                    <VisualStateManager.VisualStateGroups>
-                        <VisualStateGroupList>
-                            <VisualStateGroup x:Name="CommonStates">
-                                <VisualState x:Name="Normal">
-                                    <VisualState.Setters>
-                                        <Setter Property="BackgroundColor" Value="{DynamicResource DeleteColor}" />
-                                        <Setter Property="Opacity" Value="1" />
-                                    </VisualState.Setters>
-                                </VisualState>
-                                <VisualState x:Name="Disabled">
-                                    <VisualState.Setters>
-                                        <Setter Property="BackgroundColor" Value="{DynamicResource DeleteColor}" />
-                                        <Setter Property="Opacity" Value="0.5" />
-                                    </VisualState.Setters>
-                                </VisualState>
-                            </VisualStateGroup>
-                        </VisualStateGroupList>
-                    </VisualStateManager.VisualStateGroups>
-                </Button>
-            </Grid>
+                <BoxView HeightRequest="1" BackgroundColor="{DynamicResource Gray700}" Margin="0,8"/>
 
-            <Label
-                FontSize="Small"
-                HorizontalOptions="Center"
-                TextColor="{DynamicResource Gray500}">
-                <Label.Triggers>
-                    <DataTrigger TargetType="Label" Binding="{Binding HasLastBackup}" Value="True">
-                        <Setter Property="Text" Value="{Binding LastBackupUtc, Converter={StaticResource DateConverter}, StringFormat='Last backup: {0}'}" />
-                    </DataTrigger>
-                    <DataTrigger TargetType="Label" Binding="{Binding HasLastBackup}" Value="False">
-                        <Setter Property="Text" Value="No backup yet" />
-                    </DataTrigger>
-                </Label.Triggers>
-            </Label>
+                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="16">
+                    <VerticalStackLayout Grid.Column="0" Spacing="8" VerticalOptions="Center">
+                        <Label
+                            Text="Rest Stopwatch" FontSize="Medium" />
+                        <Label
+                            Text="Track rest time between sets with a stopwatch during your workout."
+                            FontSize="Small" HorizontalTextAlignment="Justify"
+                            TextColor="{DynamicResource Gray500}" />
+                    </VerticalStackLayout>
+                    <Switch
+                        Grid.Column="1"
+                        VerticalOptions="Center" OffColor="{DynamicResource Gray700}"
+                        IsToggled="{Binding RestStopwatchEnabled, Mode=TwoWay}"
+                        OnColor="{DynamicResource Gray300}"
+                        ThumbColor="{StaticResource White}" />
+                </Grid>
+
+                <BoxView HeightRequest="1" BackgroundColor="{DynamicResource Gray700}" Margin="0,8"/>
+
+                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="16">
+                    <VerticalStackLayout Grid.Column="0" Spacing="8" VerticalOptions="Center">
+                        <Label
+                            Text="Auto-Start Rest" FontSize="Medium" />
+                        <Label
+                            Text="Automatically restart the rest stopwatch when you finish an exercise."
+                            FontSize="Small" HorizontalTextAlignment="Justify"
+                            TextColor="{DynamicResource Gray500}" />
+                    </VerticalStackLayout>
+                    <Switch
+                        Grid.Column="1"
+                        IsEnabled="{Binding RestStopwatchEnabled}"
+                        VerticalOptions="Center" OffColor="{DynamicResource Gray700}"
+                        IsToggled="{Binding AutoStartRestOnExerciseFinish, Mode=TwoWay}"
+                        OnColor="{DynamicResource Gray300}"
+                        ThumbColor="{StaticResource White}" />
+                </Grid>
+            </VerticalStackLayout>
 
             <BoxView HeightRequest="1" BackgroundColor="{DynamicResource Gray700}" Margin="0,8"/>
 
-            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="16">
-                <VerticalStackLayout Grid.Column="0" Spacing="8" VerticalOptions="Center">
-                    <Label
-                        Text="Auto-save"
-                        FontSize="Medium" />
-                    <Label
-                        Text="Silently backs up your database to Downloads when a workout finishes."
-                        FontSize="Small"  HorizontalTextAlignment="Justify"
-                        TextColor="{DynamicResource Gray500}" />
-                </VerticalStackLayout>
-                <Switch
-                    Grid.Column="1" VerticalOptions="Center" OffColor="{DynamicResource Gray700}"
-                    IsToggled="{Binding AutoSaveEnabled, Mode=TwoWay}"
-                    OnColor="{DynamicResource Gray300}"
-                    ThumbColor="{StaticResource White}" />
-            </Grid>
+            <VerticalStackLayout x:Name="HeatmapSection" Spacing="16">
+                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="16">
+                    <VerticalStackLayout Grid.Column="0" Spacing="8" VerticalOptions="Center">
+                        <Label
+                            Text="Start Week on Monday" FontSize="Medium" />
+                        <Label
+                            Text="Disable to start your week on Sunday instead."
+                            FontSize="Small" HorizontalTextAlignment="Justify"
+                            TextColor="{DynamicResource Gray500}" />
+                    </VerticalStackLayout>
+                    <Switch
+                        Grid.Column="1"
+                        VerticalOptions="Center" OffColor="{DynamicResource Gray700}"
+                        IsToggled="{Binding HeatmapWeekStartsOnMonday, Mode=TwoWay}"
+                        OnColor="{DynamicResource Gray300}"
+                        ThumbColor="{StaticResource White}" />
+                </Grid>
 
-            <BoxView HeightRequest="1" BackgroundColor="{DynamicResource Gray700}" Margin="0,8"/>
+                <BoxView HeightRequest="1" BackgroundColor="{DynamicResource Gray700}" Margin="0,8"/>
 
-            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="16">
-                <VerticalStackLayout Grid.Column="0" Spacing="8" VerticalOptions="Center">
-                    <Label
-                        Text="Progress Card" FontSize="Medium" />
-                    <Label
-                        Text="Show a card with your set completion progress during your workout."
-                        FontSize="Small" HorizontalTextAlignment="Justify"
-                        TextColor="{DynamicResource Gray500}" />
-                </VerticalStackLayout>
-                <Switch
-                    Grid.Column="1"
-                    VerticalOptions="Center" OffColor="{DynamicResource Gray700}"
-                    IsToggled="{Binding ProgressCardEnabled, Mode=TwoWay}"
-                    OnColor="{DynamicResource Gray300}"
-                    ThumbColor="{StaticResource White}" />
-            </Grid>
-
-            <BoxView HeightRequest="1" BackgroundColor="{DynamicResource Gray700}" Margin="0,8"/>
-
-            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="16">
-                <VerticalStackLayout Grid.Column="0" Spacing="8" VerticalOptions="Center">
-                    <Label
-                        Text="Rest Stopwatch" FontSize="Medium" />
-                    <Label
-                        Text="Track rest time between sets with a stopwatch during your workout."
-                        FontSize="Small" HorizontalTextAlignment="Justify"
-                        TextColor="{DynamicResource Gray500}" />
-                </VerticalStackLayout>
-                <Switch
-                    Grid.Column="1"
-                    VerticalOptions="Center" OffColor="{DynamicResource Gray700}"
-                    IsToggled="{Binding RestStopwatchEnabled, Mode=TwoWay}"
-                    OnColor="{DynamicResource Gray300}"
-                    ThumbColor="{StaticResource White}" />
-            </Grid>
-
-            <BoxView HeightRequest="1" BackgroundColor="{DynamicResource Gray700}" Margin="0,8"/>
-
-            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="16">
-                <VerticalStackLayout Grid.Column="0" Spacing="8" VerticalOptions="Center">
-                    <Label
-                        Text="Auto-Start Rest" FontSize="Medium" />
-                    <Label
-                        Text="Automatically restart the rest stopwatch when you finish an exercise."
-                        FontSize="Small" HorizontalTextAlignment="Justify"
-                        TextColor="{DynamicResource Gray500}" />
-                </VerticalStackLayout>
-                <Switch
-                    Grid.Column="1"
-                    IsEnabled="{Binding RestStopwatchEnabled}"
-                    VerticalOptions="Center" OffColor="{DynamicResource Gray700}"
-                    IsToggled="{Binding AutoStartRestOnExerciseFinish, Mode=TwoWay}"
-                    OnColor="{DynamicResource Gray300}"
-                    ThumbColor="{StaticResource White}" />
-            </Grid>
-
-            <BoxView HeightRequest="1" BackgroundColor="{DynamicResource Gray700}" Margin="0,8"/>
-
-            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="16">
-                <VerticalStackLayout Grid.Column="0" Spacing="8" VerticalOptions="Center">
-                    <Label
-                        Text="Start Week on Monday" FontSize="Medium" />
-                    <Label
-                        Text="Disable to start your week on Sunday instead."
-                        FontSize="Small" HorizontalTextAlignment="Justify"
-                        TextColor="{DynamicResource Gray500}" />
-                </VerticalStackLayout>
-                <Switch
-                    Grid.Column="1"
-                    VerticalOptions="Center" OffColor="{DynamicResource Gray700}"
-                    IsToggled="{Binding HeatmapWeekStartsOnMonday, Mode=TwoWay}"
-                    OnColor="{DynamicResource Gray300}"
-                    ThumbColor="{StaticResource White}" />
-            </Grid>
-
-            <BoxView HeightRequest="1" BackgroundColor="{DynamicResource Gray700}" Margin="0,8"/>
-
-            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="16">
-                <VerticalStackLayout Grid.Column="0" Spacing="8" VerticalOptions="Center">
-                    <Label
-                        Text="GitHub-Style Heatmap" FontSize="Medium" />
-                    <Label
-                        Text="Show the heatmap as 7 rows of weekdays with weeks running left to right, like GitHub's contribution graph."
-                        FontSize="Small" HorizontalTextAlignment="Justify"
-                        TextColor="{DynamicResource Gray500}" />
-                </VerticalStackLayout>
-                <Switch
-                    Grid.Column="1"
-                    VerticalOptions="Center" OffColor="{DynamicResource Gray700}"
-                    IsToggled="{Binding HeatmapGitHubStyle, Mode=TwoWay}"
-                    OnColor="{DynamicResource Gray300}"
-                    ThumbColor="{StaticResource White}" />
-            </Grid>
-
+                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="16">
+                    <VerticalStackLayout Grid.Column="0" Spacing="8" VerticalOptions="Center">
+                        <Label
+                            Text="GitHub-Style Heatmap" FontSize="Medium" />
+                        <Label
+                            Text="Show the heatmap as 7 rows of weekdays with weeks running left to right, like GitHub's contribution graph."
+                            FontSize="Small" HorizontalTextAlignment="Justify"
+                            TextColor="{DynamicResource Gray500}" />
+                    </VerticalStackLayout>
+                    <Switch
+                        Grid.Column="1"
+                        VerticalOptions="Center" OffColor="{DynamicResource Gray700}"
+                        IsToggled="{Binding HeatmapGitHubStyle, Mode=TwoWay}"
+                        OnColor="{DynamicResource Gray300}"
+                        ThumbColor="{StaticResource White}" />
+                </Grid>
+            </VerticalStackLayout>
         </VerticalStackLayout>
     </ScrollView>
 </ContentPage>
