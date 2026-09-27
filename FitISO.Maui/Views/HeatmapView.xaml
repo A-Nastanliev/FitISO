@@ -36,15 +36,21 @@
                 IsEnabled="{Binding CanGoNextMonth}"
                 Command="{Binding HeatmapGoToCurrentMonthCommand}"/>
         </Grid>
-        <Grid Grid.Row="1">
+        <Grid Grid.Row="1" x:Name="HeatmapSwipeContainer" HeightRequest="140" Margin="12,8" IsClippedToBounds="True">
             <Grid.GestureRecognizers>
-                <SwipeGestureRecognizer Direction="Left" Command="{Binding HeatmapNextMonthCommand}"/>
-                <SwipeGestureRecognizer Direction="Right" Command="{Binding HeatmapPreviousMonthCommand}"/>
+                <PanGestureRecognizer PanUpdated="OnHeatmapPanUpdated"/>
             </Grid.GestureRecognizers>
-            <skia:SKCanvasView x:Name="HeatmapCanvas" HeightRequest="140" Margin="12,8"
+
+            <skia:SKCanvasView x:Name="HeatmapPreviewCanvas"
+                        InputTransparent="True" IsVisible="False" Opacity="0"
+                        PaintSurface="OnHeatmapPreviewPaintSurface"/>
+
+            <skia:SKCanvasView x:Name="HeatmapCanvas"
+                        InputTransparent="True"
                         PaintSurface="OnHeatmapPaintSurface">
                 <skia:SKCanvasView.Behaviors>
-                    <behaviors:SlideOnChangeBehavior Value="{Binding HeatmapMonthIndex}" Distance="48" Duration="300"/>
+                    <behaviors:SlideOnChangeBehavior x:Name="HeatmapCanvasSlideBehavior"
+                        Value="{Binding HeatmapMonthIndex}" Distance="48" Duration="600"/>
                 </skia:SKCanvasView.Behaviors>
             </skia:SKCanvasView>
         </Grid>

@@ -17,6 +17,8 @@
         public uint Duration { get; set; } = 300;
 
         VisualElement? view;
+        bool skipNext;
+        public void SkipNextChange() => skipNext = true;
 
         protected override void OnAttachedTo(VisualElement bindable)
         {
@@ -43,6 +45,15 @@
         async void OnValueChanged(int oldValue, int newValue)
         {
             if (view is null || !view.IsLoaded || oldValue == 0 || oldValue == newValue) return;
+
+            if (skipNext)
+            {
+                skipNext = false;
+                view.CancelAnimations();
+                view.TranslationX = 0;
+                view.Opacity = 1;
+                return;
+            }
 
             int direction = newValue > oldValue ? 1 : -1;
 
