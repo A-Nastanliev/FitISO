@@ -209,15 +209,18 @@
                                     <CollectionView.ItemTemplate>
                                         <DataTemplate x:DataType="models:Set">
                                             <Grid RowDefinitions="Auto, Auto">
+                                                <Grid.Behaviors>
+                                                    <behaviors:SetCompleteBehavior PunchTarget="{x:Reference SetValues}"
+                                                          Ripple="{x:Reference SetRipple}" ColorKey="ChartAccentColor"/>
+                                                </Grid.Behaviors>
                                                 <BoxView HeightRequest="1" Color="{DynamicResource Gray600}"/>
-                                                <Grid Margin="0,0,30,0" Grid.Row="1" ColumnDefinitions="3* , 2*" ColumnSpacing="12" VerticalOptions="Center">
+                                                <Grid x:Name="SetValues" Margin="0,0,30,0" Grid.Row="1" ColumnDefinitions="3* , 2*" ColumnSpacing="12" VerticalOptions="Center">
                                                     <Grid Grid.Column="0" ColumnSpacing="8" HorizontalOptions="Center" 
                                                                   IsClippedToBounds="True" ColumnDefinitions="5*,auto,4*">
-                                                        <BoxView Color="{Binding BackgroundColor, Source={x:Reference OuterBorder}}"  />
                                                         <Entry   Text="{Binding Weight, StringFormat='{0:0.##}', Mode=TwoWay, 
                                                             Converter={StaticResource NullableDoubleConverter}}"  Keyboard="Numeric" MaxLength="7" 
-                                                            PlaceholderColor="{DynamicResource Gray400}" Placeholder="W" MinimumWidthRequest="90"
-                                                            HorizontalOptions="Fill" HorizontalTextAlignment="End" FontSize="Small"/>
+                                                            BackgroundColor="Transparent" PlaceholderColor="{DynamicResource Gray400}" Placeholder="W" 
+                                                            MinimumWidthRequest="90" HorizontalOptions="Fill" HorizontalTextAlignment="End" FontSize="Small"/>
                                                         <Label Text="kg" FontSize="Small" VerticalTextAlignment="Center" 
                                                              Grid.Column="1" TextColor="{DynamicResource Gray400}"/>
                                                     </Grid>
@@ -226,6 +229,7 @@
                                                          HorizontalOptions="Center" HorizontalTextAlignment="End" FontSize="Small" MinimumWidthRequest="90"
                                                          PlaceholderColor="{DynamicResource Gray400}" Placeholder="R"/>
                                                 </Grid>
+                                                <views:SetRippleView x:Name="SetRipple" Grid.Row="1"/>
                                             </Grid>
                                         </DataTemplate>
                                     </CollectionView.ItemTemplate>
