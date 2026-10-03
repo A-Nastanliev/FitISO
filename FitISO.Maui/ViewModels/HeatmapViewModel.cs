@@ -52,6 +52,8 @@ namespace FitISO.Maui.ViewModels
         readonly Queue<(int Year, int Month)> monthDaysCacheOrder = new();
         const int MonthDaysCacheLimit = 36;
 
+        int cacheVersion;
+
         public HeatmapViewModel(WorkoutService workoutService, HeatmapSettingsService heatmapSettingsService)
         {
             this.workoutService = workoutService;
@@ -169,15 +171,27 @@ namespace FitISO.Maui.ViewModels
 
                 if (!monthDaysCache.ContainsKey((previous.Year, previous.Month)))
                 {
+                    var versionAtStart = Volatile.Read(ref cacheVersion);
                     var previousDays = await workoutService.GetWorkoutDaysInMonthAsync(previous.Year, previous.Month);
-                    if (previousDays is not null)
+
+                    if (previousDays is not null
+                        && versionAtStart == Volatile.Read(ref cacheVersion)
+                        && !monthDaysCache.ContainsKey((previous.Year, previous.Month)))
+                    {
                         CacheMonthDays(previous.Year, previous.Month, previousDays);
+                    }
                 }
 
                 if (nextIsAllowed && !monthDaysCache.ContainsKey((next.Year, next.Month)))
                 {
+                    var versionAtStart = Volatile.Read(ref cacheVersion);
                     var nextDays = await workoutService.GetWorkoutDaysInMonthAsync(next.Year, next.Month) ?? new HashSet<int>();
-                    CacheMonthDays(next.Year, next.Month, nextDays);
+
+                    if (versionAtStart == Volatile.Read(ref cacheVersion)
+                        && !monthDaysCache.ContainsKey((next.Year, next.Month)))
+                    {
+                        CacheMonthDays(next.Year, next.Month, nextDays);
+                    }
                 }
             }
             catch
@@ -212,15 +226,31 @@ namespace FitISO.Maui.ViewModels
             if (start is null)
                 return;
 
-            var startLocal = WorkoutService.ToLocal(start.Value);
-            if (startLocal.Year != heatmapYear || startLocal.Month != heatmapMonth)
-                return;
+            Interlocked.Increment(ref cacheVersion);
 
-            var updatedDays = new HashSet<int>(HeatmapWorkoutDays) { startLocal.Day };
-            HeatmapWorkoutDays = updatedDays;
-            CacheMonthDays(heatmapYear, heatmapMonth, updatedDays);
+            var startLocal = WorkoutService.ToLocal(start.Value);
+            var year = startLocal.Year;
+            var month = startLocal.Month;
+
+            var isDisplayed = year == heatmapYear && month == heatmapMonth;
+
+            if (isDisplayed)
+            {
+                var updatedDays = new HashSet<int>(HeatmapWorkoutDays) { startLocal.Day };
+                HeatmapWorkoutDays = updatedDays;
+                CacheMonthDays(year, month, updatedDays);
+            }
+            else if (monthDaysCache.TryGetValue((year, month), out var cached))
+            {
+                CacheMonthDays(year, month, new HashSet<int>(cached) { startLocal.Day });
+            }
         }
 
-        public async void Receive(DbImportedMessage message) => await LoadHeatmapAsync();
+        public async void Receive(DbImportedMessage message)
+        {
+            monthDaysCache.Clear();
+            monthDaysCacheOrder.Clear();
+            await LoadHeatmapAsync();
+        }
     }
 }
