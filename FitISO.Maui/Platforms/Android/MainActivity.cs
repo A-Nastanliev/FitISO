@@ -13,7 +13,7 @@ using System.ComponentModel;
 namespace FitISO.Maui
 {
     [Activity(Theme = "@style/Maui.SplashTheme", MainLauncher = true, LaunchMode = LaunchMode.SingleTop,
-        ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation | ConfigChanges.UiMode | ConfigChanges.ScreenLayout | 
+        ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation | ConfigChanges.UiMode | ConfigChanges.ScreenLayout |
         ConfigChanges.SmallestScreenSize | ConfigChanges.Density,
         SupportsPictureInPicture = true)]
     [MetaData("android.app.shortcuts", Resource = "@xml/shortcuts")]
@@ -26,6 +26,7 @@ namespace FitISO.Maui
         internal const string ActionPipResetRest = "com.companyname.fitiso.maui.pip.RESET_REST";
         const int RequestCodeToggle = 9001;
         const int RequestCodeReset = 9002;
+        const int RequestCodeNotifications = 4002;
 
         RestPipActionReceiver? pipReceiver;
         ActiveWorkoutViewModel? activeWorkoutViewModel;
@@ -59,10 +60,16 @@ namespace FitISO.Maui
 
             if (activeWorkoutViewModel is not null)
                 activeWorkoutViewModel.PropertyChanged += ActiveWorkoutViewModel_PropertyChanged;
+
+            ActiveWorkoutState.Instance.PropertyChanged += ActiveWorkoutState_PropertyChanged;
+            if (ActiveWorkoutState.Instance.HasActiveWorkout)
+                RequestNotificationPermissionIfNeeded();
         }
 
         protected override void OnDestroy()
         {
+            ActiveWorkoutState.Instance.PropertyChanged -= ActiveWorkoutState_PropertyChanged;
+
             if (activeWorkoutViewModel is not null)
                 activeWorkoutViewModel.PropertyChanged -= ActiveWorkoutViewModel_PropertyChanged;
 
@@ -97,6 +104,28 @@ namespace FitISO.Maui
                 return;
 
             _ = service.TryStartFavouriteWorkoutAsync();
+        }
+
+        void ActiveWorkoutState_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(ActiveWorkoutState.HasActiveWorkout) && ActiveWorkoutState.Instance.HasActiveWorkout)
+                RequestNotificationPermissionIfNeeded();
+        }
+
+        void RequestNotificationPermissionIfNeeded()
+        {
+            if (!OperatingSystem.IsAndroidVersionAtLeast(33)) return;
+            if (CheckSelfPermission(global::Android.Manifest.Permission.PostNotifications) == Permission.Granted) return;
+
+            RequestPermissions(new[] { global::Android.Manifest.Permission.PostNotifications }, RequestCodeNotifications);
+        }
+
+        public override void OnRequestPermissionsResult(int requestCode, string[] permissions, Permission[] grantResults)
+        {
+            base.OnRequestPermissionsResult(requestCode, permissions, grantResults);
+
+            if (requestCode == RequestCodeNotifications)
+                WorkoutNotificationManager.Instance?.Update();
         }
 
         protected override void OnUserLeaveHint()

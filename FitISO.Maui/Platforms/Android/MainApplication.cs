@@ -15,6 +15,7 @@ namespace FitISO.Maui
         public override void OnCreate()
         {
             base.OnCreate();
+            WorkoutNotificationManager.Register(this);
             WallpaperColorObserver.Register(this);
             ThemeOverlayObserver.Register(this);
         }
