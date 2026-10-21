@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace FitISO.Tests
+namespace FitISO.Tests.Services
 {
     internal class TestDbContextFactory : IDbContextFactory<FitDbContext>
     {

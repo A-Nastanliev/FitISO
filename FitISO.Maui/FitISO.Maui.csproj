@@ -86,6 +86,7 @@
 
 	<ItemGroup>
 	  <ProjectReference Include="..\FitISO.Services\FitISO.Services.csproj" />
+	  <ProjectReference Include="..\FitISO.Sharing\FitISO.Sharing.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>
