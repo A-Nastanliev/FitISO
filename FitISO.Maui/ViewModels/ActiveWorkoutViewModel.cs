@@ -7,6 +7,7 @@ using FitISO.Maui.Models;
 using FitISO.Services;
 using FitISO.Maui.Services;
 using FitISO.Maui.Views;
+using FitISO.Sharing.Snapshots;
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
@@ -23,6 +24,7 @@ namespace FitISO.Maui.ViewModels
         Workout workout = new();
 
         [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(DisplayDuration))]
         TimeSpan duration;
 
         [ObservableProperty]
@@ -44,17 +46,34 @@ namespace FitISO.Maui.ViewModels
         [NotifyPropertyChangedFor(nameof(IsNotInPipMode))]
         [NotifyPropertyChangedFor(nameof(ShowProgressCard))]
         [NotifyPropertyChangedFor(nameof(ShowTopCards))]
+        [NotifyPropertyChangedFor(nameof(ShowOwnList))]
+        [NotifyPropertyChangedFor(nameof(ShowPartnerList))]
         bool isInPipMode;
 
-        public bool ShowTopCards => (RestStopwatchEnabled || ProgressCardEnabled) && !IsInPipMode;
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(ShowTopCards))]
+        bool hasExtraTopCard;
+
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(ShowOwnList))]
+        [NotifyPropertyChangedFor(nameof(ShowPartnerList))]
+        bool isViewingPartner;
+
+        public bool ShowTopCards => (RestStopwatchEnabled || ProgressCardEnabled || HasExtraTopCard) && !IsInPipMode;
         public bool IsNotInPipMode => !IsInPipMode;
         public bool ShowProgressCard => ProgressCardEnabled && !IsInPipMode;
+        public bool ShowOwnList => !IsInPipMode && !IsViewingPartner;
+        public bool ShowPartnerList => !IsInPipMode && IsViewingPartner;
 
         double progress;
         public double Progress
         {
             get => progress;
-            private set => SetProperty(ref progress, value);
+            private set
+            {
+                if (SetProperty(ref progress, value))
+                    OnPropertyChanged(nameof(DisplayProgress));
+            }
         }
 
         [ObservableProperty]
@@ -64,6 +83,7 @@ namespace FitISO.Maui.ViewModels
         DateTime? restStartTime;
 
         [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(DisplayRestElapsed))]
         TimeSpan restElapsed;
 
         [ObservableProperty]
@@ -71,12 +91,100 @@ namespace FitISO.Maui.ViewModels
         [NotifyPropertyChangedFor(nameof(ShowStoppedRest))]
         bool restIsStopped;
 
-        public bool ShowStartRest => RestStartTime is null;
-        public bool ShowRunningRest => RestStartTime is not null && !RestIsStopped;
-        public bool ShowStoppedRest => RestStartTime is not null && RestIsStopped;
+        public bool ShowStartRest => !IsViewingPartner && RestStartTime is null;
+        public bool ShowRunningRest => IsViewingPartner
+            ? PartnerRestActive && !PartnerRestPaused
+            : RestStartTime is not null && !RestIsStopped;
+        public bool ShowStoppedRest => !IsViewingPartner && RestStartTime is not null && RestIsStopped;
+
+        WorkoutSnapshot? partnerSnapshot;
+        Func<DateTime, DateTime> partnerToLocal = t => t;
+
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(DisplayDuration))]
+        TimeSpan partnerDuration;
+
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(DisplayRestElapsed))]
+        TimeSpan partnerRestElapsed;
+
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(DisplayProgress))]
+        double partnerProgress;
+
+        [ObservableProperty]
+        string partnerWorkoutName = string.Empty;
+
+        public bool PartnerRestActive => partnerSnapshot?.Rest.StartTimeUtc is not null;
+        bool PartnerRestPaused => PartnerRestActive && partnerSnapshot!.Rest.IsStopped;
+
+        public TimeSpan DisplayDuration => IsViewingPartner ? PartnerDuration : Duration;
+        public TimeSpan DisplayRestElapsed => IsViewingPartner ? PartnerRestElapsed : RestElapsed;
+        public double DisplayProgress => IsViewingPartner ? PartnerProgress : Progress;
+
+        public bool ShowRestCard => IsViewingPartner ? PartnerRestActive : RestStopwatchEnabled;
+        public bool ShowRestControls => !IsViewingPartner;
+        public bool ShowPartnerPaused => IsViewingPartner && PartnerRestPaused;
+
+        public void SetPartner(WorkoutSnapshot? snapshot, Func<DateTime, DateTime> toLocal)
+        {
+            partnerSnapshot = snapshot;
+            partnerToLocal = toLocal;
+
+            PartnerWorkoutName = snapshot?.Name ?? string.Empty;
+
+            int total = snapshot?.Exercises.Sum(e => e.Sets.Count) ?? 0;
+            int done = snapshot?.Exercises.Sum(e => e.Sets.Count(s => s.IsComplete)) ?? 0;
+            PartnerProgress = total == 0 ? 0 : (double)done / total;
+
+            RefreshPartnerTimes();
+            RaiseDisplayChanged();
+        }
+
+        void RefreshPartnerTimes()
+        {
+            var p = partnerSnapshot;
+            if (p is null)
+            {
+                PartnerDuration = default;
+                PartnerRestElapsed = default;
+                return;
+            }
+
+            var now = DateTime.UtcNow;
+
+            if (p.StartTimeUtc is DateTime start)
+                PartnerDuration = p.EndTimeUtc is DateTime end
+                    ? end - start               
+                    : now - partnerToLocal(start);  
+
+            if (p.Rest.StartTimeUtc is DateTime rest)
+                PartnerRestElapsed = now - partnerToLocal(rest);
+        }
+
+        void RaiseDisplayChanged()
+        {
+            OnPropertyChanged(nameof(DisplayDuration));
+            OnPropertyChanged(nameof(DisplayRestElapsed));
+            OnPropertyChanged(nameof(DisplayProgress));
+            OnPropertyChanged(nameof(PartnerRestActive));
+            OnPropertyChanged(nameof(ShowRestCard));
+            OnPropertyChanged(nameof(ShowRestControls));
+            OnPropertyChanged(nameof(ShowStartRest));
+            OnPropertyChanged(nameof(ShowRunningRest));
+            OnPropertyChanged(nameof(ShowStoppedRest));
+            OnPropertyChanged(nameof(ShowPartnerPaused));
+        }
+
+        partial void OnIsViewingPartnerChanged(bool value) => RaiseDisplayChanged();
+
         WorkoutExercise? _restTriggerExercise;
         Set? _restTriggerSet;
         bool _restoringRest;
+
+        public event EventHandler? StateChanged;
+
+        void RaiseStateChanged() => StateChanged?.Invoke(this, EventArgs.Empty);
 
         IDispatcherTimer? _timer;
 
@@ -115,6 +223,8 @@ namespace FitISO.Maui.ViewModels
 
         partial void OnRestStartTimeChanged(DateTime? value)
         {
+            RaiseStateChanged();
+
             if (_restoringRest) return;
 
             if (value is DateTime dt)
@@ -142,6 +252,8 @@ namespace FitISO.Maui.ViewModels
 
         partial void OnRestIsStoppedChanged(bool value)
         {
+            RaiseStateChanged();
+
             if (_restoringRest || RestStartTime is null) return;
 
             restStopwatchStateService.IsStopped = value;
@@ -269,10 +381,14 @@ namespace FitISO.Maui.ViewModels
             TotalSets = total;
             CompletedSets = completed;
             Progress = total == 0 ? 0 : (double)completed / total;
+            RaiseStateChanged();
         }
 
         void Workout_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
+            if (e.PropertyName == nameof(Models.Workout.Name) || e.PropertyName == nameof(Models.Workout.EndTime))
+                RaiseStateChanged();
+
             if (e.PropertyName != nameof(Models.Workout.Name)) return;
 
             _nameDebounceCts?.Cancel();
@@ -322,6 +438,8 @@ namespace FitISO.Maui.ViewModels
 
             if (RestStartTime is DateTime restStart)
                 RestElapsed = DateTime.UtcNow - restStart;
+
+            RefreshPartnerTimes();
         }
 
         [RelayCommand]
@@ -417,6 +535,9 @@ namespace FitISO.Maui.ViewModels
         void Set_PropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
             if (sender is not Set set) return;
+
+            if (e.PropertyName == nameof(Set.Weight) || e.PropertyName == nameof(Set.Reps))
+                RaiseStateChanged();
 
             if (e.PropertyName == nameof(Set.Reps) && set.Reps is not null && set.Weight is null)
             {
@@ -581,6 +702,7 @@ namespace FitISO.Maui.ViewModels
                     we.Exercise.Name = exercise.Name;
                 }
             }
+            RaiseStateChanged();
         }
     }
 }

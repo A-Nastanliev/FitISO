@@ -4,6 +4,8 @@ using FitISO.Maui.Services;
 using FitISO.Maui.ViewModels;
 using FitISO.Maui.Views;
 using FitISO.Services;
+using FitISO.Sharing.Session;
+using FitISO.Sharing.Transport;
 using LiveChartsCore.SkiaSharpView.Maui;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -78,6 +80,23 @@ namespace FitISO.Maui
             builder.Services.AddSingleton<RestStopwatchStateService>();
             builder.Services.AddSingleton<HeatmapSettingsService>();
 
+#if ANDROID
+            builder.Services.AddSingleton<NearbyWorkoutTransport>();
+            builder.Services.AddSingleton<IPairingTransport>(sp =>
+            {
+#if DEBUG
+                if (DeviceInfo.DeviceType == DeviceType.Virtual)
+                    return new FakePairingTransport();
+#endif
+                return sp.GetRequiredService<NearbyWorkoutTransport>();
+            });
+            builder.Services.AddSingleton<IWorkoutSessionTransport>(sp => sp.GetRequiredService<IPairingTransport>());
+            builder.Services.AddSingleton<SnapshotVersionSource>();
+            builder.Services.AddSingleton<PartnerSessionCoordinator>();
+            builder.Services.AddSingleton<WorkoutSnapshotPublisher>();
+            builder.Services.AddSingleton<TrainTogetherViewModel>();
+#endif
+
 #if DEBUG
             builder.Logging.AddDebug();
 #endif
@@ -110,6 +129,9 @@ namespace FitISO.Maui
             app.Services.GetRequiredService<MonthlyHeatmapService>();
             app.Services.GetRequiredService<AutoBackupService>();
 
+#if ANDROID
+            app.Services.GetRequiredService<WorkoutSnapshotPublisher>();
+#endif
             return app;
         }
     }

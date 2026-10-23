@@ -5,13 +5,20 @@ namespace FitISO.Sharing.Protocol
 {
     public static class WorkoutSnapshotCodec
     {
-        public const int CurrentProtocolVersion = 1;
+        public const int CurrentProtocolVersion = 2;
 
         static readonly JsonSerializerOptions Options = new(JsonSerializerDefaults.Web);
 
         public static byte[] Encode(WorkoutSnapshot snapshot, DateTime sentAtUtc)
         {
             var envelope = new SnapshotEnvelope(CurrentProtocolVersion, sentAtUtc, snapshot);
+            return JsonSerializer.SerializeToUtf8Bytes(envelope, Options);
+        }
+
+        public static byte[] EncodeSessionEnded(long endedVersion, DateTime sentAtUtc)
+        {
+            var envelope = new SnapshotEnvelope(
+                CurrentProtocolVersion, sentAtUtc, null, MessageType.SessionEnded, endedVersion);
             return JsonSerializer.SerializeToUtf8Bytes(envelope, Options);
         }
 
@@ -24,9 +31,17 @@ namespace FitISO.Sharing.Protocol
             try
             {
                 var decoded = JsonSerializer.Deserialize<SnapshotEnvelope>(payload, Options);
-                if (decoded == null
-                    || decoded.ProtocolVersion != CurrentProtocolVersion
-                    || !IsValid(decoded.Snapshot))
+                if (decoded == null || decoded.ProtocolVersion != CurrentProtocolVersion)
+                    return false;
+
+                bool valid = decoded.Type switch
+                {
+                    MessageType.Snapshot => IsValid(decoded.Snapshot),
+                    MessageType.SessionEnded => decoded.EndedVersion > 0,
+                    _ => false
+                };
+
+                if (!valid)
                     return false;
 
                 envelope = decoded;

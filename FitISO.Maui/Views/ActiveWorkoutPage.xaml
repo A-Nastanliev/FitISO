@@ -12,17 +12,23 @@
              xmlns:views="clr-namespace:FitISO.Maui.Views"
              x:DataType="vm:ActiveWorkoutViewModel"
              xmlns:behaviors="clr-namespace:FitISO.Maui.Behaviors"
+             xmlns:snap="clr-namespace:FitISO.Sharing.Snapshots;assembly=FitISO.Sharing"
              x:Name="Root"
              Title="Active"
              Shell.NavBarIsVisible="{Binding IsNotInPipMode}">
 
     <Shell.TitleView>
-        <Grid Grid.Row="0" ColumnDefinitions="auto,*,auto" ColumnSpacing="10" Padding="10,0" >
-            <Label Text="{Binding Duration, StringFormat='{0:hh\\:mm\\:ss}'}" Grid.Column="0" FontSize="Medium" VerticalOptions="Center" VerticalTextAlignment="Center"/>
-            <Entry Grid.Column="1" Text="{Binding Workout.Name, Mode=TwoWay}" FontSize="Medium" MaxLength="40" HorizontalOptions="Fill" MinimumWidthRequest="60"
+        <Grid Grid.Row="0" ColumnDefinitions="auto,*,auto,auto" ColumnSpacing="10" Padding="10,0" >
+            <Label Text="{Binding DisplayDuration, StringFormat='{0:hh\\:mm\\:ss}'}" Grid.Column="0" FontSize="Medium" VerticalOptions="Center" VerticalTextAlignment="Center"/>
+            <Entry Grid.Column="1" IsVisible="{Binding ShowOwnList}" Text="{Binding Workout.Name, Mode=TwoWay}" FontSize="Medium" MaxLength="40" HorizontalOptions="Fill" MinimumWidthRequest="60"
                 FontAttributes="Bold" VerticalTextAlignment="Center" HorizontalTextAlignment="Center" VerticalOptions="Center"/>
+            <Label Grid.Column="1" Text="{Binding PartnerWorkoutName}" IsVisible="{Binding ShowPartnerList}" FontSize="Medium"
+                FontAttributes="Bold" LineBreakMode="TailTruncation" HorizontalOptions="Fill" HorizontalTextAlignment="Center"
+                VerticalOptions="Center" VerticalTextAlignment="Center"/>
+            <ImageButton x:Name="TrainTogetherButton" IsVisible="False" Grid.Column="2" VerticalOptions="Center"
+                Source="{FontImageSource FontFamily=MaterialRound, Glyph='&#xE7F0;'}" Clicked="OnTrainTogetherClicked"/>
             <ImageButton Source="{FontImageSource FontFamily=MaterialRound, Glyph='&#xEAF8;'}" 
-                Command="{Binding FinishWorkoutCommand}" Grid.Column="2" VerticalOptions="Center"/>
+                Command="{Binding FinishWorkoutCommand}" IsVisible="{Binding ShowOwnList}" Grid.Column="3" VerticalOptions="Center"/>
         </Grid>
     </Shell.TitleView>
 
@@ -30,6 +36,7 @@
     <Grid SafeAreaEdges="None">
         <VerticalStackLayout x:Name="TopCards" Margin="8,16,8,0" Spacing="12" VerticalOptions="Start" ZIndex="1" SafeAreaEdges="None"
             IsVisible="{Binding ShowTopCards}">
+            <views:TrainTogetherCard x:Name="TrainTogetherCard" IsVisible="False"/>
             <Border x:Name="ProgressCard" StrokeThickness="0" StrokeShape="RoundRectangle 25"
                 BackgroundColor="{DynamicResource Gray800}" IsVisible="{Binding ShowProgressCard}">
                 <Grid Padding="20,12">
@@ -41,7 +48,7 @@
                                  HeightRequest="14" VerticalOptions="Fill">
                             <ProgressBar.Behaviors>
                                 <behaviors:AnimatedProgressBehavior
-                                    TargetProgress="{Binding Progress}" Duration="600"
+                                    TargetProgress="{Binding DisplayProgress}" Duration="600"
                                     DefaultColorKey="Gray100" CompletedColorKey="ChartAccentColor"
                                     PulseTarget="{x:Reference ProgressCard}"/>
                             </ProgressBar.Behaviors>
@@ -50,7 +57,7 @@
                 </Grid>
             </Border>
             <Border x:Name="StopwatchCard" StrokeThickness="0" StrokeShape="RoundRectangle 25"
-                BackgroundColor="{DynamicResource Gray800}" IsVisible="{Binding RestStopwatchEnabled}">
+                BackgroundColor="{DynamicResource Gray800}" IsVisible="{Binding ShowRestCard}">
                 <Grid Padding="16,12" RowDefinitions="Auto">
                     <Button Text="Start rest" FontSize="Medium" HeightRequest="38"
                      HorizontalOptions="Fill" VerticalOptions="Center" CornerRadius="20"
@@ -69,14 +76,17 @@
                                 </Image.Source>
                             </Image>
                         </Border>
-                        <Label Grid.Column="1" Text="{Binding RestElapsed, StringFormat='{0:mm\\:ss}'}"
+                        <Label Grid.Column="1" Text="{Binding DisplayRestElapsed, StringFormat='{0:mm\\:ss}'}"
                                 FontSize="Medium" FontAttributes="Bold" TextColor="White"
                                 HorizontalOptions="Center" VerticalOptions="Center"/>
                         <ImageButton Grid.Column="2" HeightRequest="50" WidthRequest="50"
                                 Source="{FontImageSource FontFamily=MaterialRound, Glyph='&#xE047;', Color=White, Size=18}"
                                 BackgroundColor="{DynamicResource DeleteColor}" CornerRadius="25" Padding="8"
-                                Command="{Binding StopRestCommand}"/>
+                                IsVisible="{Binding ShowRestControls}" Command="{Binding StopRestCommand}"/>
                     </Grid>
+                    <Label Text="Paused" FontSize="Medium" FontAttributes="Bold" TextColor="White"
+                           HorizontalOptions="Center" VerticalOptions="Center" Padding="0,8"
+                           IsVisible="{Binding ShowPartnerPaused}"/>
                     <Grid RowDefinitions="Auto" ColumnDefinitions="*,*" ColumnSpacing="12"
                             VerticalOptions="Center" IsVisible="{Binding ShowStoppedRest}">
                         <Button Grid.Column="0" Text="Resume" FontSize="Small" HeightRequest="38"
@@ -95,7 +105,7 @@
         </VerticalStackLayout>
         <Grid IsVisible="{Binding IsInPipMode}" BackgroundColor="{DynamicResource Gray900}">
             <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center" Spacing="8" IsVisible="{Binding ShowRunningRest}">
-                <Label Text="{Binding RestElapsed, StringFormat='{0:mm\\:ss}'}"
+                <Label Text="{Binding DisplayRestElapsed, StringFormat='{0:mm\\:ss}'}"
                    FontSize="48" FontAttributes="Bold" TextColor="White"
                    HorizontalTextAlignment="Center"/>
                 <Label Text="Resting" FontSize="Small" TextColor="{DynamicResource Gray400}" HorizontalTextAlignment="Center"/>
@@ -105,7 +115,7 @@
                 <Label Text="Paused" FontSize="28" FontAttributes="Bold" TextColor="White" HorizontalTextAlignment="Center"/>
             </VerticalStackLayout>
         </Grid>
-        <CollectionView VerticalOptions="Fill" IsVisible="{Binding IsNotInPipMode}"
+        <CollectionView VerticalOptions="Fill" IsVisible="{Binding ShowOwnList}"
             ItemsSource="{Binding Workout.WorkoutExercises}" Margin="0,0,0,6" SelectionMode="None" VerticalScrollBarVisibility="Never">
             <CollectionView.Header>
                 <BoxView Color="Transparent" BackgroundColor="Transparent" Background="Transparent">
@@ -240,5 +250,56 @@
                 </DataTemplate>
             </CollectionView.ItemTemplate>
         </CollectionView>
+        <ScrollView IsVisible="{Binding ShowPartnerList}" VerticalScrollBarVisibility="Never">
+            <VerticalStackLayout>
+                <BoxView Color="Transparent" BackgroundColor="Transparent" Background="Transparent">
+                    <BoxView.HeightRequest>
+                        <MultiBinding Converter="{StaticResource VisibilityAwareHeightConverter}" ConverterParameter="32">
+                            <Binding Path="ShowTopCards"/>
+                            <Binding Path="Height" Source="{x:Reference TopCards}"/>
+                        </MultiBinding>
+                    </BoxView.HeightRequest>
+                </BoxView>
+
+                <VerticalStackLayout x:Name="PartnerList" x:DataType="vm:TrainTogetherViewModel"
+                                     BindableLayout.ItemsSource="{Binding PartnerSnapshot.Exercises}">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate x:DataType="snap:ExerciseSnapshot">
+                            <Border Margin="8,16" StrokeThickness="0" StrokeShape="RoundRectangle 25"
+                                    BackgroundColor="{DynamicResource Gray900}">
+                                <VerticalStackLayout>
+                                    <Label Text="{Binding Name}" FontSize="Medium" Padding="0,4"
+                                           HorizontalOptions="Center" HorizontalTextAlignment="Center" LineBreakMode="WordWrap"/>
+                                    <VerticalStackLayout BindableLayout.ItemsSource="{Binding Sets}">
+                                        <BindableLayout.ItemTemplate>
+                                            <DataTemplate x:DataType="snap:SetSnapshot">
+                                                <VerticalStackLayout>
+                                                    <BoxView HeightRequest="1" Color="{DynamicResource Gray600}"/>
+                                                    <Grid ColumnDefinitions="3*,2*,30" ColumnSpacing="12" Padding="0,10">
+                                                        <HorizontalStackLayout Grid.Column="0" Spacing="8" HorizontalOptions="Center">
+                                                            <Label Text="{Binding Weight, StringFormat='{0:0.##}'}"
+                                                                   FontSize="Small" TextColor="White"/>
+                                                            <Label Text="kg" FontSize="Small" TextColor="{DynamicResource Gray400}"/>
+                                                        </HorizontalStackLayout>
+                                                        <Label Grid.Column="1" Text="{Binding Reps, StringFormat='{0:0.##}'}"
+                                                               FontSize="Small" TextColor="White" HorizontalOptions="Center"/>
+                                                        <Label Grid.Column="2" IsVisible="{Binding IsComplete}"
+                                                               FontFamily="MaterialRound" Text="&#xE5CA;" FontSize="Small"
+                                                               TextColor="{DynamicResource ChartAccentColor}"
+                                                               VerticalOptions="Center" HorizontalOptions="Center"/>
+                                                    </Grid>
+                                                </VerticalStackLayout>
+                                            </DataTemplate>
+                                        </BindableLayout.ItemTemplate>
+                                    </VerticalStackLayout>
+                                </VerticalStackLayout>
+                            </Border>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </VerticalStackLayout>
+
+                <BoxView HeightRequest="10" Color="Transparent" BackgroundColor="Transparent" Background="Transparent"/>
+            </VerticalStackLayout>
+        </ScrollView>
     </Grid>
 </ContentPage>

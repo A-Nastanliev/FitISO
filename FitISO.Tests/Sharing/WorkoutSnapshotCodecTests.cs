@@ -76,7 +76,7 @@ namespace FitISO.Tests.Sharing
         public void TryDecode_WithOtherProtocolVersion_ReturnsFalse()
         {
             var json = Encoding.UTF8.GetString(WorkoutSnapshotCodec.Encode(CreateSnapshot(1), SentAt))
-                .Replace("\"protocolVersion\":1", "\"protocolVersion\":99");
+                .Replace($"\"protocolVersion\":{WorkoutSnapshotCodec.CurrentProtocolVersion}", "\"protocolVersion\":99");
 
             Assert.That(WorkoutSnapshotCodec.TryDecode(Encoding.UTF8.GetBytes(json), out _), Is.False);
         }

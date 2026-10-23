@@ -11,7 +11,11 @@ namespace FitISO.Sharing.Session
         readonly object _gate = new();
 
         WorkoutSnapshot _latestLocal;
+        long _localEndedVersion;
+
         WorkoutSnapshot _partner;
+        long _partnerLastVersion;
+        bool _partnerFinished;
         TimeSpan _clockOffset;
 
         public PartnerSessionCoordinator(IWorkoutSessionTransport transport, Func<DateTime> utcNow = null)
@@ -33,6 +37,11 @@ namespace FitISO.Sharing.Session
             get { lock (_gate) return _partner; }
         }
 
+        public bool PartnerFinished
+        {
+            get { lock (_gate) return _partnerFinished; }
+        }
+
         public TimeSpan ClockOffset
         {
             get { lock (_gate) return _clockOffset; }
@@ -40,22 +49,40 @@ namespace FitISO.Sharing.Session
 
         public DateTime PartnerTimeToLocal(DateTime partnerUtc) => partnerUtc + ClockOffset;
 
+        long LatestLocalVersion => Math.Max(_latestLocal?.Version ?? 0, _localEndedVersion);
+
         public Task PublishAsync(WorkoutSnapshot snapshot)
         {
             if (snapshot == null) throw new ArgumentNullException(nameof(snapshot));
 
             lock (_gate)
             {
-                if (_latestLocal != null && snapshot.Version <= _latestLocal.Version)
+                if (snapshot.Version <= LatestLocalVersion)
                     return Task.CompletedTask;
                 _latestLocal = snapshot;
             }
             return SendLatestAsync();
         }
 
+        public Task PublishSessionEndedAsync(long version)
+        {
+            lock (_gate)
+            {
+                if (version <= LatestLocalVersion)
+                    return Task.CompletedTask;
+                _localEndedVersion = version;
+            }
+            return SendLatestAsync();
+        }
+
         public void ResetPartner()
         {
-            lock (_gate) _partner = null;
+            lock (_gate)
+            {
+                _partner = null;
+                _partnerLastVersion = 0;
+                _partnerFinished = false;
+            }
             PartnerUpdated?.Invoke(this, EventArgs.Empty);
         }
 
@@ -82,9 +109,25 @@ namespace FitISO.Sharing.Session
             lock (_gate)
             {
                 _clockOffset = receivedAt - envelope.SentAtUtc;
-                if (_partner == null || envelope.Snapshot.Version > _partner.Version)
+
+                if (envelope.Type == MessageType.SessionEnded)
+                {
+                    if (envelope.EndedVersion > _partnerLastVersion)
+                    {
+                        _partnerLastVersion = envelope.EndedVersion;
+
+                        if (_partner != null)
+                        {
+                            _partnerFinished = true;
+                            changed = true;
+                        }
+                    }
+                }
+                else if (envelope.Snapshot.Version > _partnerLastVersion)
                 {
                     _partner = envelope.Snapshot;
+                    _partnerLastVersion = envelope.Snapshot.Version;
+                    _partnerFinished = false;
                     changed = true;
                 }
             }
@@ -95,15 +138,25 @@ namespace FitISO.Sharing.Session
 
         async Task SendLatestAsync()
         {
-            WorkoutSnapshot snapshot;
-            lock (_gate) snapshot = _latestLocal;
+            byte[] payload;
+            lock (_gate)
+            {
+                if (_transport.State != TransportState.Connected)
+                    return;
 
-            if (snapshot == null || _transport.State != TransportState.Connected)
-                return;
+                long snapshotVersion = _latestLocal?.Version ?? 0;
+
+                if (_localEndedVersion > snapshotVersion)
+                    payload = WorkoutSnapshotCodec.EncodeSessionEnded(_localEndedVersion, _utcNow());
+                else if (_latestLocal != null)
+                    payload = WorkoutSnapshotCodec.Encode(_latestLocal, _utcNow());
+                else
+                    return;
+            }
 
             try
             {
-                await _transport.SendAsync(WorkoutSnapshotCodec.Encode(snapshot, _utcNow()));
+                await _transport.SendAsync(payload);
             }
             catch (Exception)
             {

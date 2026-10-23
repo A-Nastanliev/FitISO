@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:FitISO.Maui.ViewModels"
+             x:Class="FitISO.Maui.Views.TrainTogetherCard"
+             x:DataType="vm:TrainTogetherViewModel">
+
+    <Border StrokeThickness="0" StrokeShape="RoundRectangle 25"
+            BackgroundColor="{DynamicResource Gray800}">
+        <Grid Padding="16,10" ColumnDefinitions="Auto,*,Auto,Auto" RowDefinitions="Auto,Auto"
+              ColumnSpacing="10" RowSpacing="10" MinimumHeightRequest="50">
+
+            <ActivityIndicator Grid.Column="0" WidthRequest="20" HeightRequest="20" VerticalOptions="Center"
+                               Color="White" IsRunning="True">
+                <ActivityIndicator.Triggers>
+                    <DataTrigger TargetType="ActivityIndicator" Binding="{Binding IsConnected}" Value="True">
+                        <Setter Property="IsVisible" Value="False"/>
+                    </DataTrigger>
+                    <DataTrigger TargetType="ActivityIndicator" Binding="{Binding IsConnectionLost}" Value="True">
+                        <Setter Property="IsVisible" Value="False"/>
+                    </DataTrigger>
+                    <DataTrigger TargetType="ActivityIndicator" Binding="{Binding IsPartnerEnded}" Value="True">
+                        <Setter Property="IsVisible" Value="False"/>
+                    </DataTrigger>
+                </ActivityIndicator.Triggers>
+            </ActivityIndicator>
+
+            <Image Grid.Column="0" WidthRequest="20" HeightRequest="20" VerticalOptions="Center">
+                <Image.Source>
+                    <FontImageSource FontFamily="MaterialRound" Glyph="&#xE7EF;" Color="White" Size="20"/>
+                </Image.Source>
+                <Image.Triggers>
+                    <DataTrigger TargetType="Image" Binding="{Binding IsConnected}" Value="False">
+                        <Setter Property="IsVisible" Value="False"/>
+                    </DataTrigger>
+                </Image.Triggers>
+            </Image>
+
+            <VerticalStackLayout Grid.Column="1" VerticalOptions="Center">
+                <Label FontSize="Small" TextColor="White" FontAttributes="Bold" LineBreakMode="TailTruncation">
+                    <Label.Triggers>
+                        <DataTrigger TargetType="Label" Binding="{Binding IsSearching}" Value="True">
+                            <Setter Property="Text" Value="Looking for your partner…"/>
+                        </DataTrigger>
+                        <DataTrigger TargetType="Label" Binding="{Binding IsReconnecting}" Value="True">
+                            <Setter Property="Text" Value="Reconnecting…"/>
+                        </DataTrigger>
+                        <DataTrigger TargetType="Label" Binding="{Binding IsConnected}" Value="True">
+                            <Setter Property="Text" Value="Training together"/>
+                        </DataTrigger>
+                        <DataTrigger TargetType="Label" Binding="{Binding IsConnectionLost}" Value="True">
+                            <Setter Property="Text" Value="Connection lost"/>
+                        </DataTrigger>
+                        <DataTrigger TargetType="Label" Binding="{Binding IsPartnerEnded}" Value="True">
+                            <Setter Property="Text" Value="Partner finished"/>
+                        </DataTrigger>
+                    </Label.Triggers>
+                </Label>
+                <Label Text="{Binding PartnerName}" FontSize="Micro" TextColor="{DynamicResource Gray400}"
+                       LineBreakMode="TailTruncation" IsVisible="{Binding HasPartnerName}"/>
+            </VerticalStackLayout>
+
+            <Button Grid.Column="2" Text="Reconnect" FontSize="Small" HeightRequest="36" CornerRadius="18"
+                    BackgroundColor="{DynamicResource Gray600}" TextColor="White" Padding="14,0"
+                    IsVisible="{Binding IsConnectionLost}" Command="{Binding ReconnectCommand}"/>
+
+            <Button Grid.Column="3" Text="Stop" FontSize="Small" HeightRequest="36" CornerRadius="18"
+                    BackgroundColor="{DynamicResource Gray500}" TextColor="White" Padding="14,0"
+                    Command="{Binding StopCommand}">
+                <Button.Triggers>
+                    <DataTrigger TargetType="Button" Binding="{Binding IsPartnerEnded}" Value="True">
+                        <Setter Property="Text" Value="Close"/>
+                    </DataTrigger>
+                </Button.Triggers>
+            </Button>
+
+            <Border Grid.Row="1" Grid.ColumnSpan="4" IsVisible="{Binding ShowToggle}"
+                    StrokeThickness="0" StrokeShape="RoundRectangle 20"
+                    BackgroundColor="{DynamicResource Gray900}" Padding="3">
+                <Grid ColumnDefinitions="*,*" ColumnSpacing="3">
+                    <Button Grid.Column="0" Text="Me" HeightRequest="34" CornerRadius="17" FontSize="Small"
+                            TextColor="White" BackgroundColor="Transparent" Command="{Binding ShowMeCommand}">
+                        <Button.Triggers>
+                            <DataTrigger TargetType="Button" Binding="{Binding ViewingMe}" Value="True">
+                                <Setter Property="BackgroundColor" Value="{DynamicResource Gray600}"/>
+                            </DataTrigger>
+                        </Button.Triggers>
+                    </Button>
+                    <Button Grid.Column="1" Text="{Binding PartnerName, FallbackValue='Partner'}"
+                            HeightRequest="34" CornerRadius="17" FontSize="Small" LineBreakMode="TailTruncation"
+                            TextColor="White" BackgroundColor="Transparent" Command="{Binding ShowPartnerCommand}">
+                        <Button.Triggers>
+                            <DataTrigger TargetType="Button" Binding="{Binding ViewingPartner}" Value="True">
+                                <Setter Property="BackgroundColor" Value="{DynamicResource Gray600}"/>
+                            </DataTrigger>
+                        </Button.Triggers>
+                    </Button>
+                </Grid>
+            </Border>
+        </Grid>
+    </Border>
+</ContentView>
