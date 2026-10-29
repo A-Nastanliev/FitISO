@@ -58,6 +58,8 @@ namespace FitISO.Sharing.Protocol
             && s.Name != null
             && s.Rest != null
             && s.Exercises != null
-            && s.Exercises.All(e => e != null && e.Name != null && e.Sets != null && e.Sets.All(set => set != null));
+            && s.Exercises.All(e => e != null && e.Name != null && e.Sets != null
+                && e.Sets.All(set => set != null)
+                && (e.LastSets == null || e.LastSets.All(set => set != null)));
     }
 }

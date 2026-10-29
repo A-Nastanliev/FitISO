@@ -143,11 +143,23 @@ namespace FitISO.Maui.Services
                 PlannedWeight = plannedWeight;
                 for (int i = 0; i < sets; i++)
                     Sets.Add(new FakeSet());
+
+                if (name != "Biceps curl")
+                {
+                    BestSet = new SetSnapshot(plannedWeight + 10, 5, true);
+                    LastSets = Enumerable.Range(0, sets)
+                        .Select(i => new SetSnapshot(plannedWeight, 10 - i, true))
+                        .ToList();
+                    LastSetsDateUtc = DateTime.UtcNow.AddDays(-4);
+                }
             }
 
             public string Name { get; }
             public double PlannedWeight { get; }
             public List<FakeSet> Sets { get; } = new();
+            public SetSnapshot? BestSet { get; }
+            public List<SetSnapshot>? LastSets { get; }
+            public DateTime? LastSetsDateUtc { get; }
         }
 
         sealed class FakeWorkout
@@ -216,7 +228,10 @@ namespace FitISO.Maui.Services
                     _exercises
                         .Select(e => new ExerciseSnapshot(
                             e.Name,
-                            e.Sets.Select(s => new SetSnapshot(s.Weight, s.Reps, s.IsComplete)).ToList()))
+                            e.Sets.Select(s => new SetSnapshot(s.Weight, s.Reps, s.IsComplete)).ToList(),
+                            e.BestSet,
+                            e.LastSets,
+                            e.LastSetsDateUtc))
                         .ToList(),
                     new RestStopwatchSnapshot(IsFinished ? null : _restStartUtc, false));
 
