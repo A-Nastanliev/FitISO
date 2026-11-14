@@ -1,8 +1,11 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using CommunityToolkit.Maui.Storage;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using FitISO.Maui.Messages;
+using CommunityToolkit.Maui.Alerts;
 using FitISO.Maui.Models;
+using FitISO.Maui.Rendering;
 using FitISO.Maui.Services;
 using FitISO.Services;
 using LiveChartsCore;
@@ -84,6 +87,7 @@ namespace FitISO.Maui.ViewModels
 
         const double RepsInfluence = 0.01;
         const double MaxRepsOffset = 0.5;
+        const int VisiblePoints = 5;
 
         public ExerciseDetailsPopupViewModel(ExerciseService exerciseService, SetService setService, FavouriteExerciseService favoriteExerciseService)
         {
@@ -149,8 +153,13 @@ namespace FitISO.Maui.ViewModels
             {
                 new Axis
                 {
-                    Labels = history!.Select(h => h.Date.ToString("MMM d")).ToArray(),
+                    Labels = history.Select(h => h.Date.ToString("MMM d")).ToArray(),
                     LabelsRotation = 15,
+                    MinStep = 1,
+                    MinZoomDelta = VisiblePoints,
+                    ForceStepToMin = true,
+                    MinLimit = Math.Max(-0.5, history.Count - VisiblePoints - 0.5),
+                    MaxLimit = history.Count - 0.5
                 }
             };
         }
@@ -263,6 +272,55 @@ namespace FitISO.Maui.ViewModels
             {
                 Exercise.Name = nameBeforeEdit;
                 await Shell.Current.DisplayAlertAsync("Couldn't rename", $"The exercise couldn't be renamed. Try again.", "OK");
+            }
+            finally
+            {
+                Busy = false;
+            }
+        }
+
+        [RelayCommand]
+        private Task ExportChartImageAsync() =>
+            ExportChartAsync(ExerciseProgressImageBuilder.Build, "png", "Image saved");
+
+        [RelayCommand]
+        private Task ExportChartPdfAsync() =>
+            ExportChartAsync(ExerciseProgressPdfBuilder.Build, "pdf", "PDF saved");
+
+        async Task ExportChartAsync(Action<Exercise, Stream> build, string extension, string successMessage)
+        {
+            if (Busy || !HasHistory)
+                return;
+
+            Busy = true;
+
+            try
+            {
+                using var stream = new MemoryStream();
+                build(Exercise, stream);
+                stream.Position = 0;
+
+                var invalidChars = Path.GetInvalidFileNameChars();
+                var safeName = string.Concat(Exercise.Name.Split(invalidChars));
+                var fileName = $"FitISO_{safeName}_progress_{DateTime.Now:yyyy_MM_dd}.{extension}";
+
+                var result = await FileSaver.Default.SaveAsync(fileName, stream, CancellationToken.None);
+
+                if (result.IsSuccessful)
+                {
+                    _ = Toast.Make(successMessage).Show();
+                }
+                else if (result.Exception is not null && result.Exception is not OperationCanceledException)
+                {
+                    await Shell.Current.DisplayAlertAsync("Export failed", result.Exception.Message, "OK");
+                }
+            }
+            catch (OperationCanceledException)
+            {
+            }
+            catch (Exception ex)
+            {
+                await Shell.Current.DisplayAlertAsync("Export failed", ex.Message, "OK");
             }
             finally
             {

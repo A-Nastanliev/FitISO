@@ -19,7 +19,19 @@
         </Style>
     </nlayouts:PopupPageBase.Resources>
 
-    <Grid RowDefinitions="*, auto" >
+    <Grid RowDefinitions="auto,*, auto" >
+        <HorizontalStackLayout Grid.Row="0" HorizontalOptions="End" Spacing="8"
+                           Padding="0,10,20,0"
+                           IsVisible="{Binding HasHistory}">
+            <ImageButton HeightRequest="40" WidthRequest="40" CornerRadius="20" Padding="8"
+                     BackgroundColor="{DynamicResource Gray500}"
+                     Source="{FontImageSource FontFamily=MaterialRound, Glyph='&#xE3F4;'}"
+                     Command="{Binding ExportChartImageCommand}" />
+            <ImageButton HeightRequest="40" WidthRequest="40" CornerRadius="20" Padding="8"
+                     BackgroundColor="{DynamicResource Gray500}"
+                     Source="{FontImageSource FontFamily=MaterialRound, Glyph='&#xE415;'}"
+                     Command="{Binding ExportChartPdfCommand}" />
+        </HorizontalStackLayout>
         <Grid Grid.Row="2" RowDefinitions="Auto, Auto">
             <Grid Padding="20,10" RowSpacing="12" ColumnDefinitions="*, auto, auto, auto" ColumnSpacing="12">
                 <Label Text="{Binding Exercise.Name}" Grid.Row="0" Grid.Column="0"
@@ -128,8 +140,9 @@
                 </Grid>
             </ScrollView>
         </Grid>
-        <lvc:CartesianChart Grid.Row="0"
+        <lvc:CartesianChart Grid.Row="1"
               Series="{Binding ChartSeries}"
+              ZoomMode="PanX"
               XAxes="{Binding ChartXAxes}"
               BackgroundColor="{DynamicResource Gray900}"
               IsVisible="{Binding HasHistory}"
