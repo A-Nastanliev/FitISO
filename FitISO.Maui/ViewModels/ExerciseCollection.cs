@@ -73,7 +73,7 @@ namespace FitISO.Maui.ViewModels
                 {
                     exercise.LastSets = workoutExercise.Sets;
                     exercise.LastSetsDate = message.Value.StartTime;
-                    if (exercise.BestSet is null || exercise.BestSet.Weight is 0 || exercise.BestSet.Weight is null)
+                    if (exercise.BestSet is null || exercise.BestSet.Weight is null)
                         exercise.BestSet = workoutExercise.Sets[0];
 
                     Set historyPoint = workoutExercise.Sets[0];
@@ -85,7 +85,11 @@ namespace FitISO.Maui.ViewModels
                         }
                     }
 
-                    exercise.History.Add(new ExerciseHistoryPoint(exercise.LastSetsDate.Value, historyPoint.Weight.Value, historyPoint.Reps.Value));
+                    if (exercise.HistoryLoaded)
+                    {
+                        exercise.History.Add(new ExerciseHistoryPoint(
+                            exercise.LastSetsDate.Value, historyPoint.Weight.Value, historyPoint.Reps.Value));
+                    }
 
                     foreach (var set in workoutExercise.Sets)
                     {

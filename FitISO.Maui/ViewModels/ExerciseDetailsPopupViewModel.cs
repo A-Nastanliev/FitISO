@@ -97,11 +97,13 @@ namespace FitISO.Maui.ViewModels
 
         public async Task LoadChartData()
         {
-            if (Exercise.History.Count == 0)
+            if (!Exercise.HistoryLoaded)
             {
+                Exercise.History.Clear();
                 var sets = await setService.GetBestSetPerWorkoutAsync(Exercise.Id);
                 foreach (var s in sets)
                     Exercise.History.Add(new ExerciseHistoryPoint(s.WorkoutExercise.Workout.StartTime!.Value, s.Weight!.Value, s.Reps!.Value));
+                Exercise.HistoryLoaded = true;
             }
             BuildChart();
         }
