@@ -26,7 +26,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_below="@id/widget_title"
-        android:scaleType="fitXY"
+        android:scaleType="fitCenter"
         android:contentDescription="@null" />
 
 	<TextView

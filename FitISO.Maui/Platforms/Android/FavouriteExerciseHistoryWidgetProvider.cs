@@ -1,6 +1,7 @@
 ﻿using Android.App;
 using Android.Appwidget;
 using Android.Content;
+using Android.OS;
 using Android.Views;
 using Android.Widget;
 using FitISO.Maui.Models;
@@ -21,6 +22,8 @@ namespace FitISO.Maui.Platforms.Android
 
         const int WidgetWidthDp = 180;
         const int WidgetHeightDp = 110;
+        const int WidgetPaddingDp = 10;
+        const int TitleBlockDp = 28;
 
         public override void OnReceive(Context? context, Intent? intent)
         {
@@ -41,16 +44,43 @@ namespace FitISO.Maui.Platforms.Android
 
             var snapshot = ReadSnapshot(context);
             var density = context.Resources!.DisplayMetrics!.Density;
-            var widthPx = (int)(WidgetWidthDp * density);
-            var heightPx = (int)(WidgetHeightDp * density);
 
             foreach (var widgetId in appWidgetIds)
             {
+                var options = appWidgetManager.GetAppWidgetOptions(widgetId);
+                var (widgetWidthDp, widgetHeightDp) = GetWidgetSizeDp(context, options);
+
+                var chartWidthPx = (int)((widgetWidthDp - 2 * WidgetPaddingDp) * density);
+                var chartHeightPx = (int)((widgetHeightDp - 2 * WidgetPaddingDp - TitleBlockDp) * density);
+
                 var views = new RemoteViews(context.PackageName, Resource.Layout.favourite_exercise_history_widget_layout);
 
-                ApplyToViews(context, views, snapshot, widthPx, heightPx);
+                ApplyToViews(context, views, snapshot, chartWidthPx, chartHeightPx);
                 appWidgetManager.UpdateAppWidget(widgetId, views);
             }
+        }
+
+        public override void OnAppWidgetOptionsChanged(Context? context, AppWidgetManager? appWidgetManager, int appWidgetId, Bundle? newOptions)
+        {
+            base.OnAppWidgetOptionsChanged(context, appWidgetManager, appWidgetId, newOptions);
+            OnUpdate(context, appWidgetManager, new[] { appWidgetId });
+        }
+
+        static (int WidthDp, int HeightDp) GetWidgetSizeDp(Context context, Bundle? options)
+        {
+            var portrait = context.Resources!.Configuration!.Orientation == global::Android.Content.Res.Orientation.Portrait;
+
+            var widthKey = portrait ? AppWidgetManager.OptionAppwidgetMinWidth : AppWidgetManager.OptionAppwidgetMaxWidth;
+            var heightKey = portrait ? AppWidgetManager.OptionAppwidgetMaxHeight : AppWidgetManager.OptionAppwidgetMinHeight;
+
+            return (OptionOrDefault(options, widthKey, WidgetWidthDp),
+                    OptionOrDefault(options, heightKey, WidgetHeightDp));
+        }
+
+        static int OptionOrDefault(Bundle? options, string key, int fallback)
+        {
+            var value = options?.GetInt(key, fallback) ?? fallback;
+            return value > 0 ? value : fallback;
         }
 
         static Exercise? ReadSnapshot(Context context)
@@ -85,7 +115,9 @@ namespace FitISO.Maui.Platforms.Android
             var accent = WidgetTheme.ToSkColor(WidgetTheme.AccentColor(context, themePrefs));
             var gridColor = WidgetTheme.ToSkColor(WidgetTheme.GridColor(context, themePrefs));
 
-            using var skBitmap = ExerciseChartDrawer.Draw(snapshot.History, Math.Max(widthPx, 1), Math.Max(heightPx, 1), accent, gridColor);
+            var density = context.Resources!.DisplayMetrics!.Density;
+
+            using var skBitmap = ExerciseChartDrawer.Draw(snapshot.History, Math.Max(widthPx, 1), Math.Max(heightPx, 1), accent, gridColor, density);
             using var image = SKImage.FromBitmap(skBitmap);
             using var data = image.Encode(SKEncodedImageFormat.Png, 100);
             using var stream = data.AsStream();

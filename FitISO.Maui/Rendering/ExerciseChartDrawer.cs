@@ -11,18 +11,27 @@ namespace FitISO.Maui.Rendering
         const double RepsInfluence = 0.01;
         const double MaxRepsOffset = 0.5;
 
-        public static SKBitmap Draw(IReadOnlyList<ExerciseHistoryPoint> history, int width, int height, SKColor accent, SKColor gridColor)
+        const float AxisTextDp = 11f;
+
+        public static SKBitmap Draw(IReadOnlyList<ExerciseHistoryPoint> history, int width, int height,
+            SKColor accent, SKColor gridColor, float density = 0f)
         {
             return SkiaDrawer.CreateTransparentBitmap(width, height, canvas =>
-                Draw(canvas, history, width, height, accent, gridColor));
+                Draw(canvas, history, width, height, accent, gridColor, density));
         }
 
-        public static void Draw(SKCanvas canvas, IReadOnlyList<ExerciseHistoryPoint> history, int width, int height, SKColor accent, SKColor gridColor)
+        public static void Draw(SKCanvas canvas, IReadOnlyList<ExerciseHistoryPoint> history, int width, int height,
+            SKColor accent, SKColor gridColor, float density = 0f)
         {
             if (history.Count == 0)
                 return;
 
-            var axisTextSize = Math.Clamp(height * 0.10f, 20f, 34f);
+            float Size(float legacyPx, float dp) => density > 0f ? dp * density : legacyPx;
+
+            var axisTextSize = density > 0f
+                ? AxisTextDp * density
+                : Math.Clamp(height * 0.10f, 20f, 34f);
+
             using var axisFont = new SKFont
             {
                 Size = axisTextSize,
@@ -34,11 +43,18 @@ namespace FitISO.Maui.Rendering
                 IsAntialias = true
             };
 
-            var xAxisHeight = axisTextSize + 8f;
-            var topPadding = axisFont.Metrics.CapHeight + 8f;
+            var capHeight = axisFont.Metrics.CapHeight;
+            var descent = axisFont.Metrics.Descent;
+
+            var yLabelLift = Size(4f, 2f);
+            var yLabelGap = Size(6f, 4f);
+            var xLabelTopGap = Size(10f, 6f);
+
+            var topPadding = capHeight + yLabelLift + Size(2f, 1f);
+            var xAxisHeight = xLabelTopGap + capHeight + descent + Size(2f, 1f);
 
             var lastLabelWidth = axisFont.MeasureText(history[^1].Date.ToString("MMM d"));
-            var rightPadding = lastLabelWidth / 2f + 6f;
+            var rightPadding = Math.Max(lastLabelWidth / 2f + Size(2f, 1f), Size(8f, 5f));
 
             var values = history
                 .Select(h => WeightWithRepsTiebreak(h.Weight, h.Reps))
@@ -56,9 +72,11 @@ namespace FitISO.Maui.Rendering
             var yAxisLabelWidth = new[] { max, mid, min }
                 .Select(v => axisFont.MeasureText(v.ToString("0.#")))
                 .Max();
-            var yAxisWidth = yAxisLabelWidth + 6f;
+            var yAxisWidth = yAxisLabelWidth + yLabelGap;
 
-            var plotLeft = yAxisWidth;
+            var firstLabelWidth = axisFont.MeasureText(history[0].Date.ToString("MMM d"));
+            var plotInset = Size(14f, 8f);
+            var plotLeft = Math.Max(yAxisWidth + plotInset, firstLabelWidth / 2f + Size(5f, 3f));
             var plotRight = width - rightPadding;
             var plotTop = topPadding;
             var plotBottom = height - xAxisHeight;
@@ -80,7 +98,7 @@ namespace FitISO.Maui.Rendering
             using var gridPaint = new SKPaint
             {
                 Color = gridColor.WithAlpha(70),
-                StrokeWidth = 1,
+                StrokeWidth = Math.Max(1f, Size(1f, 0.5f)),
                 IsAntialias = false,
                 Style = SKPaintStyle.Stroke
             };
@@ -102,7 +120,7 @@ namespace FitISO.Maui.Rendering
             using var linePaint = new SKPaint
             {
                 Color = accent,
-                StrokeWidth = 3,
+                StrokeWidth = Size(3f, 2f),
                 IsAntialias = true,
                 Style = SKPaintStyle.Stroke,
                 StrokeCap = SKStrokeCap.Round,
@@ -119,7 +137,7 @@ namespace FitISO.Maui.Rendering
             using var dotStrokePaint = new SKPaint
             {
                 Color = accent,
-                StrokeWidth = 3,
+                StrokeWidth = Size(3f, 1.5f),
                 IsAntialias = true,
                 Style = SKPaintStyle.Stroke
             };
@@ -141,60 +159,116 @@ namespace FitISO.Maui.Rendering
                 canvas.DrawPath(linePath, linePaint);
             }
 
+            var dotRadius = Size(5f, 3f);
             foreach (var p in points)
             {
-                canvas.DrawCircle(p, 5, dotFillPaint);
-                canvas.DrawCircle(p, 5, dotStrokePaint);
+                canvas.DrawCircle(p, dotRadius, dotFillPaint);
+                canvas.DrawCircle(p, dotRadius, dotStrokePaint);
             }
 
-            DrawYAxisLabels(canvas, axisFont, axisPaint, min, max, plotTop, plotBottom, yAxisWidth);
-            DrawXAxisLabels(canvas, axisFont, axisPaint, history, points, plotBottom, xAxisHeight, width);
+            DrawYAxisLabels(canvas, axisFont, axisPaint, min, max, plotTop, plotBottom, yAxisWidth, yLabelGap, yLabelLift);
+
+            var xLabelBaseline = plotBottom + xLabelTopGap + capHeight;
+            var minLabelGap = Size(8f, 4f);
+            var comfortLabelGap = Size(36f, 18f);
+            DrawXAxisLabels(canvas, axisFont, axisPaint, history, points, xLabelBaseline, minLabelGap, comfortLabelGap);
         }
 
         static double WeightWithRepsTiebreak(double weight, double reps) =>
             weight + Math.Min(reps * RepsInfluence, MaxRepsOffset);
 
-        static void DrawYAxisLabels(SKCanvas canvas, SKFont font, SKPaint paint, float min, float max, float plotTop, float plotBottom, float yAxisWidth)
+        static void DrawYAxisLabels(SKCanvas canvas, SKFont font, SKPaint paint, float min, float max, float plotTop, float plotBottom, float yAxisWidth, float gap, float lift)
         {
             var mid = (min + max) / 2f;
             var ticks = new[] { max, mid, min };
             var ys = new[] { plotTop, (plotTop + plotBottom) / 2f, plotBottom };
-            var metrics = font.Metrics;
 
             for (var i = 0; i < ticks.Length; i++)
             {
                 var text = ticks[i].ToString("0.#");
                 var textWidth = font.MeasureText(text);
-                var textY = ys[i] - (metrics.Ascent + metrics.Descent) / 2f;
-                canvas.DrawText(text, yAxisWidth - textWidth - 6f, textY, font, paint);
+
+                canvas.DrawText(text, yAxisWidth - textWidth - gap, ys[i] - lift, font, paint);
             }
         }
 
-        static void DrawXAxisLabels(SKCanvas canvas, SKFont font, SKPaint paint, IReadOnlyList<ExerciseHistoryPoint> history, SKPoint[] points, float plotBottom, float xAxisHeight, float canvasWidth)
+        static void DrawXAxisLabels(SKCanvas canvas, SKFont font, SKPaint paint, IReadOnlyList<ExerciseHistoryPoint> history, SKPoint[] points, float baselineY, float minGap, float comfortGap)
         {
-            var labelCount = Math.Clamp(history.Count, 2, 4);
-            var indices = PickIndices(history.Count, labelCount);
-            var textY = plotBottom + xAxisHeight - 4f;
-
-            foreach (var i in indices)
+            foreach (var (text, centerX) in ChooseLabels(font, history, points, minGap, comfortGap))
             {
-                var text = history[i].Date.ToString("MMM d");
                 var textWidth = font.MeasureText(text);
-                var textX = Math.Clamp(points[i].X - textWidth / 2f, 0f, canvasWidth - textWidth);
-                canvas.DrawText(text, textX, textY, font, paint);
+                canvas.DrawText(text, centerX - textWidth / 2f, baselineY, font, paint);
             }
         }
 
-        static int[] PickIndices(int count, int labelCount)
+        static List<(string Text, float CenterX)> ChooseLabels(SKFont font, IReadOnlyList<ExerciseHistoryPoint> history, SKPoint[] points, float minGap, float comfortGap)
         {
-            if (count <= labelCount)
-                return Enumerable.Range(0, count).ToArray();
+            var count = history.Count;
+            if (count == 1)
+                return BuildLabels(history, points, 1);
 
-            var indices = new int[labelCount];
-            for (var i = 0; i < labelCount; i++)
-                indices[i] = (int)Math.Round(i * (count - 1) / (double)(labelCount - 1));
+            var maxLabels = FiveLabelsFitComfortably(font, history, points, comfortGap) ? 5 : 3;
 
-            return indices.Distinct().ToArray();
+            for (var labelCount = Math.Min(maxLabels, count); labelCount >= 2; labelCount--)
+            {
+                var labels = BuildLabels(history, points, labelCount);
+                if (LabelsFit(font, labels, minGap))
+                    return labels;
+            }
+
+            return BuildLabels(history, points, 2);
+        }
+
+        static bool FiveLabelsFitComfortably(SKFont font, IReadOnlyList<ExerciseHistoryPoint> history, SKPoint[] points, float comfortGap)
+        {
+            var widestLabel = history.Max(h => font.MeasureText(h.Date.ToString("MMM d")));
+
+            var spacing = (points[^1].X - points[0].X) / 4f;
+
+            return spacing >= widestLabel + comfortGap;
+        }
+
+        static List<(string Text, float CenterX)> BuildLabels(IReadOnlyList<ExerciseHistoryPoint> history, SKPoint[] points, int labelCount)
+        {
+            var count = history.Count;
+            var labels = new List<(string Text, float CenterX)>(labelCount);
+
+            if (labelCount == 1)
+            {
+                labels.Add((history[0].Date.ToString("MMM d"), points[0].X));
+                return labels;
+            }
+
+            for (var k = 0; k < labelCount; k++)
+            {
+                var position = (count - 1) * (double)k / (labelCount - 1);
+                var lower = (int)Math.Floor(position);
+                var upper = Math.Min(lower + 1, count - 1);
+                var fraction = (float)(position - lower);
+
+                var centerX = points[lower].X + (points[upper].X - points[lower].X) * fraction;
+                var dateIndex = (int)Math.Round(position, MidpointRounding.AwayFromZero);
+
+                labels.Add((history[dateIndex].Date.ToString("MMM d"), centerX));
+            }
+
+            return labels;
+        }
+
+        static bool LabelsFit(SKFont font, List<(string Text, float CenterX)> labels, float minGap)
+        {
+            var previousRight = float.NegativeInfinity;
+
+            foreach (var (text, centerX) in labels)
+            {
+                var left = centerX - font.MeasureText(text) / 2f;
+                if (left < previousRight + minGap)
+                    return false;
+
+                previousRight = left + font.MeasureText(text);
+            }
+
+            return true;
         }
     }
 }
