@@ -22,8 +22,18 @@ namespace FitISO.Maui.Platforms.Android
 
         const int WidgetWidthDp = 180;
         const int WidgetHeightDp = 110;
-        const int WidgetPaddingDp = 10;
-        const int TitleBlockDp = 28;
+
+        const float TitleSpPerHeightDp = 0.16f;   
+        const float MinTitleSp = 9f;
+        const float MaxTitleSp = 18f;
+
+        const float PaddingPerHeightDp = 0.09f; 
+        const float MinPaddingDp = 4f;
+        const float MaxPaddingDp = 10f;
+
+        const float TitleLineHeightFactor = 1.2f; 
+        const float TitleMarginDp = 4f;        
+        const float TitleSlackDp = 2f;
 
         public override void OnReceive(Context? context, Intent? intent)
         {
@@ -44,16 +54,26 @@ namespace FitISO.Maui.Platforms.Android
 
             var snapshot = ReadSnapshot(context);
             var density = context.Resources!.DisplayMetrics!.Density;
+            var fontScale = context.Resources!.Configuration!.FontScale;
 
             foreach (var widgetId in appWidgetIds)
             {
                 var options = appWidgetManager.GetAppWidgetOptions(widgetId);
                 var (widgetWidthDp, widgetHeightDp) = GetWidgetSizeDp(context, options);
 
-                var chartWidthPx = (int)((widgetWidthDp - 2 * WidgetPaddingDp) * density);
-                var chartHeightPx = (int)((widgetHeightDp - 2 * WidgetPaddingDp - TitleBlockDp) * density);
+                var titleSp = Math.Clamp(widgetHeightDp * TitleSpPerHeightDp, MinTitleSp, MaxTitleSp);
+                var paddingDp = Math.Clamp(widgetHeightDp * PaddingPerHeightDp, MinPaddingDp, MaxPaddingDp);
+
+                var titleBlockDp = titleSp * fontScale * TitleLineHeightFactor + TitleMarginDp + TitleSlackDp;
+
+                var chartWidthPx = (int)((widgetWidthDp - 2 * paddingDp) * density);
+                var chartHeightPx = (int)((widgetHeightDp - 2 * paddingDp - titleBlockDp) * density);
 
                 var views = new RemoteViews(context.PackageName, Resource.Layout.favourite_exercise_history_widget_layout);
+
+                var paddingPx = (int)(paddingDp * density);
+                views.SetViewPadding(Resource.Id.widget_root, paddingPx, paddingPx, paddingPx, paddingPx);
+                views.SetTextViewTextSize(Resource.Id.widget_title, (int)global::Android.Util.ComplexUnitType.Sp, titleSp);
 
                 ApplyToViews(context, views, snapshot, chartWidthPx, chartHeightPx);
                 appWidgetManager.UpdateAppWidget(widgetId, views);

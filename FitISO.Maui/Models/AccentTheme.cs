@@ -32,7 +32,7 @@ namespace FitISO.Maui.Models
         void SetFromResources(ResourceDictionary resources)
         {
             Theme = resources;
-            Swatch = (Color)resources["Gray500"];
+            Swatch = resources.TryGetValue("SwatchColor", out var swatchValue) ? (Color)swatchValue : (Color)resources["Gray500"];
             ChartAccentColor = (Color)resources["ChartAccentColor"];
             ChartGridColor = (Color)resources["Gray400"];
             ChartBackgroundColor = (Color)resources["Gray950"];
