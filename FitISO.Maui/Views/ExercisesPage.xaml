@@ -17,7 +17,7 @@
 
     <Grid SafeAreaEdges="None" RowDefinitions="*">
         <CollectionView VerticalOptions="Fill"
-                        ItemsSource="{Binding ExerciseCollection.Items}" Margin="6" SelectionMode="Single" SelectedItem="{Binding SelectedExercise, Mode=TwoWay}"
+                        ItemsSource="{Binding ExerciseCollection.Items}" Margin="6,0,6,6" SelectionMode="Single" SelectedItem="{Binding SelectedExercise, Mode=TwoWay}"
                         RemainingItemsThreshold="3" VerticalScrollBarVisibility="Never"
                         RemainingItemsThresholdReachedCommand="{Binding ExerciseCollection.LoadCommand}">
 

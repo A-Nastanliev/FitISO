@@ -19,7 +19,7 @@
     </Shell.TitleView>
 
     <Grid RowDefinitions="*"  SafeAreaEdges="None">
-        <CollectionView VerticalOptions="Fill"  ItemsSource="{Binding Items}" Margin="6" SelectionMode="None"
+        <CollectionView VerticalOptions="Fill"  ItemsSource="{Binding Items}" Margin="6,0,6,6" SelectionMode="None"
                         RemainingItemsThreshold="3" VerticalScrollBarVisibility="Never"
                         RemainingItemsThresholdReachedCommand="{Binding LoadCommand}">
 

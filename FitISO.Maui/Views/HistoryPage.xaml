@@ -16,12 +16,24 @@
         </Grid>
     </Shell.TitleView>
 
-    <Grid RowDefinitions="Auto,*" SafeAreaEdges="None">
-        <views:HeatmapView x:Name="HeatmapSection" Grid.Row="0"/>
-        <CollectionView VerticalOptions="Fill" Grid.Row="1"
+    <Grid SafeAreaEdges="None">
+        <views:HeatmapView 
+            x:Name="HeatmapSection" Margin="2,14,2,0" VerticalOptions="Start" ZIndex="1"/>
+        <CollectionView VerticalOptions="Fill"
                    ItemsSource="{Binding Items}" Margin="6"
                    RemainingItemsThreshold="3" VerticalScrollBarVisibility="Never"
                    RemainingItemsThresholdReachedCommand="{Binding LoadCommand}">
+
+            <CollectionView.Header>
+                <BoxView Color="Transparent" BackgroundColor="Transparent" Background="Transparent">
+                    <BoxView.HeightRequest>
+                        <MultiBinding Converter="{StaticResource VisibilityAwareHeightConverter}" ConverterParameter="20">
+                            <Binding Path="IsVisible" Source="{x:Reference HeatmapSection}"/>
+                            <Binding Path="Height" Source="{x:Reference HeatmapSection}"/>
+                        </MultiBinding>
+                    </BoxView.HeightRequest>
+                </BoxView>
+            </CollectionView.Header>
 
             <CollectionView.Footer>
                 <BoxView HeightRequest="100" Color="Transparent" BackgroundColor="Transparent" Background="Transparent"/>

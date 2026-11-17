@@ -7,52 +7,60 @@
              xmlns:behaviors="clr-namespace:FitISO.Maui.Behaviors"
              x:DataType="vm:HeatmapViewModel">
 
-    <Grid RowDefinitions="Auto,Auto">
-        <Grid Grid.Row="0" ColumnDefinitions="Auto,Auto,*,Auto,Auto" ColumnSpacing="12" Margin="12,4,12,0" VerticalOptions="Center">
-            <ImageButton Grid.Column="0"
-                Source="{FontImageSource FontFamily=MaterialRound, Glyph='&#xE5DC;', Size=24, Color={DynamicResource Gray300}}"
-                BackgroundColor="Transparent" Aspect="Center"
-                IsEnabled="{Binding CanGoPreviousMonth}"
-                Command="{Binding HeatmapGoToFirstMonthCommand}"/>
-            <ImageButton Grid.Column="1"
-                Source="{FontImageSource FontFamily=MaterialRound, Glyph='&#xE5CB;', Size=24, Color={DynamicResource Gray300}}"
-                BackgroundColor="Transparent" Aspect="Center"
-                IsEnabled="{Binding CanGoPreviousMonth}"
-                Command="{Binding HeatmapPreviousMonthCommand}"/>
-            <Label Grid.Column="2" Text="{Binding HeatmapMonthLabel}"
-                FontSize="Small" HorizontalTextAlignment="Center" VerticalTextAlignment="Center">
-                <Label.Behaviors>
-                    <behaviors:SlideOnChangeBehavior Value="{Binding HeatmapMonthIndex}" Distance="16" Duration="300"/>
-                </Label.Behaviors>
-            </Label>
-            <ImageButton Grid.Column="3"
-                Source="{FontImageSource FontFamily=MaterialRound, Glyph='&#xE5CC;', Size=24, Color={DynamicResource Gray300}}"
-                BackgroundColor="Transparent" Aspect="Center"
-                IsEnabled="{Binding CanGoNextMonth}"
-                Command="{Binding HeatmapNextMonthCommand}"/>
-            <ImageButton Grid.Column="4"
-                Source="{FontImageSource FontFamily=MaterialRound, Glyph='&#xE5DD;', Size=24, Color={DynamicResource Gray300}}"
-                BackgroundColor="Transparent" Aspect="Center"
-                IsEnabled="{Binding CanGoNextMonth}"
-                Command="{Binding HeatmapGoToCurrentMonthCommand}"/>
-        </Grid>
-        <Grid Grid.Row="1" x:Name="HeatmapSwipeContainer" HeightRequest="140" Margin="12,8" IsClippedToBounds="True">
-            <Grid.GestureRecognizers>
-                <PanGestureRecognizer PanUpdated="OnHeatmapPanUpdated"/>
-            </Grid.GestureRecognizers>
+    <Border StrokeThickness="1" StrokeShape="RoundRectangle 25"  Margin="12"
+        Stroke="{DynamicResource ChartAccentColor}">
+        <Grid RowDefinitions="Auto,Auto" >
+            <Grid BackgroundColor="{DynamicResource Gray900}">
+                <Grid Grid.Row="0" ColumnDefinitions="Auto,Auto,*,Auto,Auto" ColumnSpacing="12" Margin="16,4,16,4" VerticalOptions="Center" >
+                    <ImageButton Grid.Column="0"
+                    Source="{FontImageSource FontFamily=MaterialRound, Glyph='&#xE5DC;', Size=24, Color={DynamicResource Gray300}}"
+                    BackgroundColor="Transparent" Aspect="Center"
+                    IsEnabled="{Binding CanGoPreviousMonth}"
+                    Command="{Binding HeatmapGoToFirstMonthCommand}"/>
+                    <ImageButton Grid.Column="1"
+                    Source="{FontImageSource FontFamily=MaterialRound, Glyph='&#xE5CB;', Size=24, Color={DynamicResource Gray300}}"
+                    BackgroundColor="Transparent" Aspect="Center"
+                    IsEnabled="{Binding CanGoPreviousMonth}"
+                    Command="{Binding HeatmapPreviousMonthCommand}"/>
+                    <Label Grid.Column="2" Text="{Binding HeatmapMonthLabel}"
+                    FontSize="Small" HorizontalTextAlignment="Center" VerticalTextAlignment="Center">
+                        <Label.Behaviors>
+                            <behaviors:SlideOnChangeBehavior Value="{Binding HeatmapMonthIndex}" Distance="16" Duration="300"/>
+                        </Label.Behaviors>
+                    </Label>
+                    <ImageButton Grid.Column="3"
+                    Source="{FontImageSource FontFamily=MaterialRound, Glyph='&#xE5CC;', Size=24, Color={DynamicResource Gray300}}"
+                    BackgroundColor="Transparent" Aspect="Center"
+                    IsEnabled="{Binding CanGoNextMonth}"
+                    Command="{Binding HeatmapNextMonthCommand}"/>
+                    <ImageButton Grid.Column="4"
+                    Source="{FontImageSource FontFamily=MaterialRound, Glyph='&#xE5DD;', Size=24, Color={DynamicResource Gray300}}"
+                    BackgroundColor="Transparent" Aspect="Center"
+                    IsEnabled="{Binding CanGoNextMonth}"
+                    Command="{Binding HeatmapGoToCurrentMonthCommand}"/>
+                </Grid>
+            </Grid>
+            <Grid Grid.Row="1" x:Name="HeatmapSwipeContainer" HeightRequest="150"  IsClippedToBounds="True"
+                BackgroundColor="{DynamicResource Gray950}">
+                <Grid Margin="12,8"> 
+                    <Grid.GestureRecognizers>
+                        <PanGestureRecognizer PanUpdated="OnHeatmapPanUpdated"/>
+                    </Grid.GestureRecognizers>
 
-            <skia:SKCanvasView x:Name="HeatmapPreviewCanvas"
-                        InputTransparent="True" IsVisible="False" Opacity="0"
-                        PaintSurface="OnHeatmapPreviewPaintSurface"/>
+                    <skia:SKCanvasView x:Name="HeatmapPreviewCanvas"
+                            InputTransparent="True" IsVisible="False" Opacity="0"
+                            PaintSurface="OnHeatmapPreviewPaintSurface"/>
 
-            <skia:SKCanvasView x:Name="HeatmapCanvas"
-                        InputTransparent="True"
-                        PaintSurface="OnHeatmapPaintSurface">
-                <skia:SKCanvasView.Behaviors>
-                    <behaviors:SlideOnChangeBehavior x:Name="HeatmapCanvasSlideBehavior"
-                        Value="{Binding HeatmapMonthIndex}" Distance="48" Duration="600"/>
-                </skia:SKCanvasView.Behaviors>
-            </skia:SKCanvasView>
+                    <skia:SKCanvasView x:Name="HeatmapCanvas"
+                            InputTransparent="True"
+                            PaintSurface="OnHeatmapPaintSurface">
+                        <skia:SKCanvasView.Behaviors>
+                            <behaviors:SlideOnChangeBehavior x:Name="HeatmapCanvasSlideBehavior"
+                            Value="{Binding HeatmapMonthIndex}" Distance="48" Duration="600"/>
+                        </skia:SKCanvasView.Behaviors>
+                    </skia:SKCanvasView>
+                </Grid>
+            </Grid>
         </Grid>
-    </Grid>
+    </Border>
 </ContentView>
