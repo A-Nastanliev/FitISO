@@ -21,32 +21,51 @@ namespace FitISO.Maui.Views
         public HeatmapView()
         {
             InitializeComponent();
+            Loaded += OnLoaded;
             Unloaded += OnUnloaded;
         }
 
         public void Attach(HeatmapViewModel viewModel)
         {
-            if (heatmapViewModel is not null)
-                heatmapViewModel.PropertyChanged -= OnHeatmapViewModelPropertyChanged;
+            Unsubscribe();
 
             heatmapViewModel = viewModel;
             BindingContext = viewModel;
+
+            Subscribe();
+        }
+
+        void OnLoaded(object? sender, EventArgs e)
+        {
+            Subscribe();
+            HeatmapCanvas.InvalidateSurface();
+        }
+
+        void OnUnloaded(object? sender, EventArgs e) => Unsubscribe();
+
+        void Subscribe()
+        {
+            if (heatmapViewModel is null) return;
+
+            heatmapViewModel.PropertyChanged -= OnHeatmapViewModelPropertyChanged; 
             heatmapViewModel.PropertyChanged += OnHeatmapViewModelPropertyChanged;
+        }
+
+        void Unsubscribe()
+        {
+            if (heatmapViewModel is null) return;
+
+            heatmapViewModel.PropertyChanged -= OnHeatmapViewModelPropertyChanged;
         }
 
         public Task RefreshIfStaleAsync() =>
             heatmapViewModel?.RefreshHeatmapIfStaleAsync() ?? Task.CompletedTask;
 
-        void OnUnloaded(object? sender, EventArgs e)
-        {
-            if (heatmapViewModel is not null)
-                heatmapViewModel.PropertyChanged -= OnHeatmapViewModelPropertyChanged;
-        }
-
         void OnHeatmapViewModelPropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
             switch (e.PropertyName)
             {
+                case nameof(HeatmapViewModel.HeatmapMonthIndex):
                 case nameof(HeatmapViewModel.HeatmapWorkoutDays):
                 case nameof(HeatmapViewModel.HeatmapToday):
                 case nameof(HeatmapViewModel.HeatmapDaysInMonth):
@@ -200,6 +219,7 @@ namespace FitISO.Maui.Views
             finally
             {
                 committing = false;
+                ResetPanVisualState();
             }
         }
 
