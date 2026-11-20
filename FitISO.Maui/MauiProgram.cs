@@ -1,4 +1,5 @@
 ﻿using CommunityToolkit.Maui;
+using CommunityToolkit.Maui.Media;
 using FitISO.Data;
 using FitISO.Maui.Services;
 using FitISO.Maui.ViewModels;
@@ -56,6 +57,7 @@ namespace FitISO.Maui
             builder.Services.AddSingleton<BackupSettingsViewModel>();
             builder.Services.AddSingleton<HeatmapSettingsViewModel>();
             builder.Services.AddSingleton<WorkoutSettingsViewModel>();
+            builder.Services.AddSingleton<VoiceLoggingSettingsViewModel>();
 
             builder.Services.AddTransient<WorkoutFormPage>();
             builder.Services.AddTransient<WorkoutFormViewModel>();
@@ -79,6 +81,8 @@ namespace FitISO.Maui
             builder.Services.AddSingleton<AccentThemeService>();
             builder.Services.AddSingleton<RestStopwatchStateService>();
             builder.Services.AddSingleton<HeatmapSettingsService>();
+            builder.Services.AddSingleton<VoiceLoggingSettingsService>();
+            builder.Services.AddSingleton<VoiceRecognitionService>();
 
 #if ANDROID
             builder.Services.AddSingleton<NearbyWorkoutTransport>();

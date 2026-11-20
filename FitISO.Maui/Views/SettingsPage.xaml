@@ -220,7 +220,28 @@
                         ThumbColor="{StaticResource White}" />
                 </Grid>
             </VerticalStackLayout>
+            
+            <BoxView HeightRequest="1" BackgroundColor="{DynamicResource Gray700}" Margin="0,8"/>
 
+            <VerticalStackLayout x:Name="VoiceLoggingSection" Spacing="16">
+                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="16">
+                    <VerticalStackLayout Grid.Column="0" Spacing="8" VerticalOptions="Center">
+                        <Label
+                            Text="Voice Logging" FontSize="Medium" />
+                        <Label
+                            Text="Show a microphone button on the workout page to log sets by voice. Say the exercise, the weight and the reps."
+                            FontSize="Small" HorizontalTextAlignment="Justify"
+                            TextColor="{DynamicResource Gray500}" />
+                    </VerticalStackLayout>
+                    <Switch
+                        Grid.Column="1"
+                        VerticalOptions="Center" OffColor="{DynamicResource Gray700}"
+                        IsToggled="{Binding VoiceLoggingEnabled, Mode=TwoWay}"
+                        OnColor="{DynamicResource Gray300}"
+                        ThumbColor="{StaticResource White}" />
+                </Grid>
+            </VerticalStackLayout>
+            
             <BoxView HeightRequest="1" BackgroundColor="{DynamicResource Gray700}" Margin="0,8"/>
 
             <VerticalStackLayout x:Name="HeatmapSection" Spacing="16">

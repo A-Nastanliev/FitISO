@@ -38,7 +38,8 @@ public partial class ActiveWorkoutPage : ContentPage
     protected override void OnDisappearing()
     {
         base.OnDisappearing();
-        viewModel.Stop();
+        viewModel.Stop(); 
+        viewModel.CancelVoiceLogging();
         ActiveWorkoutState.Instance.IsActiveWorkoutPageVisible = false;
 
         if (trainTogether is not null)

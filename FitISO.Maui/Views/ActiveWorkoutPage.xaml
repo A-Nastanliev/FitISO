@@ -18,17 +18,26 @@
              Shell.NavBarIsVisible="{Binding IsNotInPipMode}">
 
     <Shell.TitleView>
-        <Grid Grid.Row="0" ColumnDefinitions="auto,*,auto,auto" ColumnSpacing="10" Padding="10,0" >
+        <Grid Grid.Row="0" ColumnDefinitions="auto,*,auto, auto,auto" ColumnSpacing="10" Padding="10,0" >
             <Label Text="{Binding DisplayDuration, StringFormat='{0:hh\\:mm\\:ss}'}" Grid.Column="0" FontSize="Medium" VerticalOptions="Center" VerticalTextAlignment="Center"/>
             <Entry Grid.Column="1" IsVisible="{Binding ShowOwnList}" Text="{Binding Workout.Name, Mode=TwoWay}" FontSize="Medium" MaxLength="40" HorizontalOptions="Fill" MinimumWidthRequest="60"
                 FontAttributes="Bold" VerticalTextAlignment="Center" HorizontalTextAlignment="Center" VerticalOptions="Center"/>
             <Label Grid.Column="1" Text="{Binding PartnerWorkoutName}" IsVisible="{Binding ShowPartnerList}" FontSize="Medium"
                 FontAttributes="Bold" LineBreakMode="TailTruncation" HorizontalOptions="Fill" HorizontalTextAlignment="Center"
                 VerticalOptions="Center" VerticalTextAlignment="Center"/>
-            <ImageButton x:Name="TrainTogetherButton" IsVisible="False" Grid.Column="2" VerticalOptions="Center"
+            <ImageButton x:Name="VoiceLoggingButton" IsVisible="{Binding VoiceLoggingEnabled}" Grid.Column="2" VerticalOptions="Center"
+                Command="{Binding ToggleVoiceLoggingCommand}"
+                Source="{FontImageSource FontFamily=MaterialRound, Glyph='&#xE029;'}">
+                <ImageButton.Triggers>
+                    <DataTrigger TargetType="ImageButton" Binding="{Binding IsListening}" Value="True">
+                        <Setter Property="BackgroundColor" Value="{DynamicResource DeleteColor}"/>
+                    </DataTrigger>
+                </ImageButton.Triggers>
+            </ImageButton>
+            <ImageButton x:Name="TrainTogetherButton" IsVisible="False" Grid.Column="3" VerticalOptions="Center"
                 Source="{FontImageSource FontFamily=MaterialRound, Glyph='&#xE7F0;'}" Clicked="OnTrainTogetherClicked"/>
             <ImageButton Source="{FontImageSource FontFamily=MaterialRound, Glyph='&#xEAF8;'}" 
-                Command="{Binding FinishWorkoutCommand}" IsVisible="{Binding ShowOwnList}" Grid.Column="3" VerticalOptions="Center"/>
+                Command="{Binding FinishWorkoutCommand}" IsVisible="{Binding ShowOwnList}" Grid.Column="4" VerticalOptions="Center"/>
         </Grid>
     </Shell.TitleView>
 
