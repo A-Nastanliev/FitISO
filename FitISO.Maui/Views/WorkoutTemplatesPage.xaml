@@ -28,64 +28,73 @@
             </CollectionView.Footer>
 
             <CollectionView.EmptyView>
-                <Label  Text="No workout templates found"
-                         HorizontalOptions="Center"
-                         VerticalOptions="Center"/>
+                <VerticalStackLayout VerticalOptions="Center" HorizontalOptions="Center" Spacing="8">
+                    <Image HorizontalOptions="Center"
+                        Source="{FontImageSource FontFamily=MaterialRound, Glyph='&#xE3C9;', Size=48, Color={DynamicResource Gray500}}"/>
+                    <Label Text="No workouts yet" FontSize="Medium" FontAttributes="Bold" HorizontalTextAlignment="Center"/>
+                    <Label Text="Tap + to create your first template" TextColor="{DynamicResource Gray400}" HorizontalTextAlignment="Center"/>
+                </VerticalStackLayout>
             </CollectionView.EmptyView>
 
             <CollectionView.ItemTemplate>
-                <DataTemplate>
-                    <Grid>
-                        <Border StrokeThickness="0" StrokeShape="RoundRectangle 25" BackgroundColor="{DynamicResource Gray900}" Margin="8,8">
-                            <Grid x:DataType="models:Workout" RowDefinitions="Auto, Auto, Auto" RowSpacing="10" Margin="0" Padding="10,10">
-                                <Label HorizontalTextAlignment="Center" Text="{Binding Name}" FontSize="Medium"/>
-                                <Border StrokeThickness="0" StrokeShape="RoundRectangle 25" Grid.Row="2" BackgroundColor="{DynamicResource Gray700}" Padding="10,4">
-                                    <CollectionView VerticalOptions="Fill" SelectionMode="None" VerticalScrollBarVisibility="Never" 
-                                             ItemsSource="{Binding WorkoutExercises}">
-                                        <CollectionView.ItemTemplate>
-                                            <DataTemplate >
-                                                <Border x:DataType="models:WorkoutExercise" StrokeThickness="0" >
-                                                    <Grid Padding="12,4" ColumnDefinitions="*, auto" ColumnSpacing="12">
-                                                        <Label HorizontalTextAlignment="Start" Text="{Binding Exercise.Name}" FontSize="Small"
-                                                                LineBreakMode="WordWrap" TextColor="White"/>
-                                                        <Label Text="{Binding SetCount}" TextColor="{DynamicResource Gray300}" FontSize="Small" Grid.Column="1"/>
-                                                    </Grid>
-                                                </Border>
-                                            </DataTemplate>
-                                        </CollectionView.ItemTemplate>
-                                    </CollectionView>
-                                </Border>
-                                <Grid Grid.Row="1" ColumnDefinitions="*,*,*,*" Margin="0,4" Padding="12,0">
-                                    <ImageButton Source="{FontImageSource FontFamily=MaterialRound, Glyph='&#xe83a;', Size=20, Color={DynamicResource Gray400}}"
-                                           BackgroundColor="Transparent" Aspect="Center" HorizontalOptions="Center"
-                                            Command="{Binding BindingContext.ToggleFavoriteCommand, Source={x:Reference Root}}"
-                                            CommandParameter="{Binding .}">
-                                        <ImageButton.Triggers>
-                                            <DataTrigger TargetType="ImageButton" Binding="{Binding IsFavorite}" Value="True">
-                                                <Setter Property="Source" Value="{FontImageSource FontFamily=MaterialRound, Glyph='&#xE838;', Size=20,
-                                                    Color={DynamicResource  ChartAccentColor}}"/>
-                                            </DataTrigger>
-                                            <DataTrigger TargetType="ImageButton" Binding="{Binding IsFavorite}" Value="False">
-                                                <Setter Property="Source" Value="{FontImageSource FontFamily=MaterialRound, Glyph='&#xE83A;', Size=20,
-                                                    Color={DynamicResource Gray400}}"/>
-                                            </DataTrigger>
-                                        </ImageButton.Triggers>
-                                    </ImageButton>
-                                    <ImageButton Source="{FontImageSource FontFamily=MaterialRound, Glyph='&#xe872;', Size=20, Color={DynamicResource Gray400}}"
-                                        Aspect="Center" Grid.Column="1" HorizontalOptions="Center"
-                                        Command="{Binding BindingContext.DeleteWorkoutTemplateCommand, Source={x:Reference Root}}"
-                                        CommandParameter="{Binding .}"/>
-                                    <ImageButton Source="{FontImageSource FontFamily=MaterialRound, Glyph='&#xE3C9;', Size=20, Color={DynamicResource Gray400}}"
-                                        Aspect="Center" Grid.Column="2" HorizontalOptions="Center"
-                                        Command="{Binding BindingContext.EditWorkoutTemplateCommand, Source={x:Reference Root}}"
-                                        CommandParameter="{Binding .}"/>
-                                    <ImageButton Source="{FontImageSource FontFamily=MaterialRound, Glyph='&#xE037;', Size=20, Color={DynamicResource Gray400}}"
-                                       Aspect="Center" Grid.Column="3" HorizontalOptions="Center"
-                                       Command="{Binding BindingContext.StartWorkoutCommand, Source={x:Reference Root}}" CommandParameter="{Binding .}"/>
-                                </Grid>
+                <DataTemplate x:DataType="models:Workout">
+                    <Border Style="{StaticResource SectionCard}" Margin="8,6" Padding="16,14">
+                        <Grid RowDefinitions="Auto,Auto,Auto,Auto" RowSpacing="8">
+
+                            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                                <VerticalStackLayout Spacing="2">
+                                    <Label Text="{Binding Name}" FontSize="Medium" FontAttributes="Bold"
+                                        LineBreakMode="TailTruncation" MaxLines="1"/>
+                                    <Label Text="{Binding WorkoutExercises.Count, StringFormat='{0} exercises'}"
+                                        FontSize="Micro" TextColor="{DynamicResource Gray400}"/>
+                                </VerticalStackLayout>
+
+                                <ImageButton Grid.Column="1" BackgroundColor="Transparent" Aspect="Center"
+                                     VerticalOptions="Start"
+                                     Source="{FontImageSource FontFamily=MaterialRound, Glyph='&#xE83A;', Size=22, Color={DynamicResource Gray400}}"
+                                     Command="{Binding BindingContext.ToggleFavoriteCommand, Source={x:Reference Root}}"
+                                     CommandParameter="{Binding .}">
+                                    <ImageButton.Triggers>
+                                        <DataTrigger TargetType="ImageButton" Binding="{Binding IsFavorite}" Value="True">
+                                            <Setter Property="Source"
+                                                Value="{FontImageSource FontFamily=MaterialRound, Glyph='&#xE838;', Size=22, Color={DynamicResource ChartAccentColor}}"/>
+                                        </DataTrigger>
+                                    </ImageButton.Triggers>
+                                </ImageButton>
                             </Grid>
-                        </Border>
-                    </Grid>
+
+                            <VerticalStackLayout Grid.Row="1" Spacing="0" BindableLayout.ItemsSource="{Binding WorkoutExercises}">
+                                <BindableLayout.ItemTemplate>
+                                    <DataTemplate x:DataType="models:WorkoutExercise">
+                                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12" Padding="0,6">
+                                            <Label Text="{Binding Exercise.Name}" FontSize="Small"
+                                                LineBreakMode="TailTruncation" MaxLines="1"/>
+                                            <Label Grid.Column="1" Text="{Binding SetCount, StringFormat='{0}'}"
+                                                FontSize="Small" TextColor="{DynamicResource Gray400}"/>
+                                        </Grid>
+                                    </DataTemplate>
+                                </BindableLayout.ItemTemplate>
+                            </VerticalStackLayout>
+
+                            <BoxView Grid.Row="2" HeightRequest="1" Margin="0,4,0,0"
+                                Color="{DynamicResource Gray700}"/>
+
+                            <Grid Grid.Row="3" ColumnDefinitions="Auto,Auto,*" ColumnSpacing="16">
+                                <ImageButton BackgroundColor="Transparent" Aspect="Center"
+                                     Source="{FontImageSource FontFamily=MaterialRound, Glyph='&#xE3C9;', Size=22, Color={DynamicResource Gray300}}"
+                                     Command="{Binding BindingContext.EditWorkoutTemplateCommand, Source={x:Reference Root}}"
+                                     CommandParameter="{Binding .}"/>
+                                <ImageButton Grid.Column="1" BackgroundColor="Transparent" Aspect="Center"
+                                     Source="{FontImageSource FontFamily=MaterialRound, Glyph='&#xE872;', Size=22, Color={DynamicResource Gray400}}"
+                                     Command="{Binding BindingContext.DeleteWorkoutTemplateCommand, Source={x:Reference Root}}"
+                                     CommandParameter="{Binding .}"/>
+                                <ImageButton Grid.Column="2" BackgroundColor="{DynamicResource ChartAccentColor}" Aspect="Center" HorizontalOptions="End"
+                                  CornerRadius="16" Padding="6" Source="{FontImageSource FontFamily=MaterialRound, Glyph='&#xE037;', Size=22, Color={DynamicResource Gray950}}"
+                                  Command="{Binding BindingContext.StartWorkoutCommand, Source={x:Reference Root}}"
+                                  CommandParameter="{Binding .}"/>
+                            </Grid>
+                        </Grid>
+                    </Border>
                 </DataTemplate>
             </CollectionView.ItemTemplate>
         </CollectionView>
