@@ -65,6 +65,8 @@ namespace FitISO.Maui
             builder.Services.AddSingleton<WorkoutTemplatesViewModel>();
 
             builder.Services.AddSingleton<ActiveWorkoutViewModel>();
+            builder.Services.AddSingleton<IActiveWorkoutProvider>(sp => sp.GetRequiredService<ActiveWorkoutViewModel>());
+            builder.Services.AddSingleton<VoiceLoggingViewModel>();
 
             builder.Services.AddTransient<SelectExercisePopupPage>();
             builder.Services.AddTransient<SelectExercisePopupViewModel>();

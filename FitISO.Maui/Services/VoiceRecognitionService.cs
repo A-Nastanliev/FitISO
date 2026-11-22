@@ -8,22 +8,24 @@ namespace FitISO.Maui.Services
     {
         static readonly TimeSpan MaxListenTime = TimeSpan.FromSeconds(12);
         static readonly TimeSpan NativeCallTimeout = TimeSpan.FromSeconds(2);
+        static readonly TimeSpan OutcomeTimeout = TimeSpan.FromSeconds(2);
 
         ISpeechToText? current;
 
         public async Task<string?> ListenOnceAsync(CultureInfo culture, CancellationToken cancellationToken = default)
         {
-            if (current is not null) return null; 
+            if (current is not null) return null;
 
             var speechToText = new SpeechToTextImplementation();
             current = speechToText;
 
-            bool recognizerFinished = false;
+            bool started = false;
+            var outcome = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
             var tcs = new TaskCompletionSource<string?>(TaskCreationOptions.RunContinuationsAsynchronously);
 
             void OnCompleted(object? sender, SpeechToTextRecognitionResultCompletedEventArgs e)
             {
-                recognizerFinished = true;
+                outcome.TrySetResult();
                 var result = e.RecognitionResult;
 
                 if (!result.IsSuccessful)
@@ -61,6 +63,8 @@ namespace FitISO.Maui.Services
                     ShouldReportPartialResults = false
                 }, CancellationToken.None);
 
+                started = true;
+
                 return await tcs.Task;
             }
             catch (Exception ex)
@@ -73,10 +77,14 @@ namespace FitISO.Maui.Services
             }
             finally
             {
-                speechToText.RecognitionResultCompleted -= OnCompleted;
-
-                if (!recognizerFinished)
+                if (started && !outcome.Task.IsCompleted)
+                {
                     await StopQuietlyAsync(speechToText);
+
+                    await Task.WhenAny(outcome.Task, Task.Delay(OutcomeTimeout));
+                }
+
+                speechToText.RecognitionResultCompleted -= OnCompleted;
 
                 await DisposeQuietlyAsync(speechToText);
                 current = null;
@@ -89,7 +97,6 @@ namespace FitISO.Maui.Services
         {
             try
             {
-                if (speechToText.CurrentState != SpeechToTextState.Listening) return;
                 await Task.WhenAny(speechToText.StopListenAsync(CancellationToken.None), Task.Delay(NativeCallTimeout));
             }
             catch (Exception ex)

@@ -20,7 +20,7 @@ namespace FitISO.Maui.ViewModels
 {
     public partial class ActiveWorkoutViewModel : ObservableObject, IRecipient<WorkoutStartedMessage>, IRecipient<DbImportedMessage>,
         IRecipient<ExerciseUpdatedMessage>, IRecipient<RestStopwatchEnabledChangedMessage>, IRecipient<ProgressCardEnabledChangedMessage>,
-        IRecipient<VoiceLoggingEnabledChangedMessage>
+        IActiveWorkoutProvider
     {
         [ObservableProperty]
         Workout workout = new();
@@ -43,20 +43,6 @@ namespace FitISO.Maui.ViewModels
         [NotifyPropertyChangedFor(nameof(ShowTopCards))]
         [NotifyPropertyChangedFor(nameof(ShowProgressCard))]
         bool progressCardEnabled;
-
-        [ObservableProperty]
-        bool voiceLoggingEnabled;
-
-        readonly VoiceRecognitionService voiceRecognitionService;
-
-        static readonly CultureInfo VoiceCulture = new("en-US");
-
-        [ObservableProperty]
-        bool isListening;
-
-        CancellationTokenSource? voiceCts;
-
-        WorkoutExercise? lastVoiceExercise;
 
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(IsNotInPipMode))]
@@ -192,7 +178,11 @@ namespace FitISO.Maui.ViewModels
             OnPropertyChanged(nameof(ShowPartnerPaused));
         }
 
-        partial void OnIsViewingPartnerChanged(bool value) => RaiseDisplayChanged();
+        partial void OnIsViewingPartnerChanged(bool value)
+        {
+            ActiveWorkoutState.Instance.IsViewingPartner = value;
+            RaiseDisplayChanged();
+        }
 
         WorkoutExercise? _restTriggerExercise;
         Set? _restTriggerSet;
@@ -216,8 +206,7 @@ namespace FitISO.Maui.ViewModels
         readonly RestStopwatchStateService restStopwatchStateService;
 
         public ActiveWorkoutViewModel(SetService setService, WorkoutService workoutService, WorkoutExerciseService workoutExerciseService,
-            WorkoutSettingsService workoutSettingsService, RestStopwatchStateService restStopwatchStateService,
-            VoiceLoggingSettingsService voiceLoggingSettingsService, VoiceRecognitionService voiceRecognitionService, IServiceProvider serviceProvider)
+            WorkoutSettingsService workoutSettingsService, RestStopwatchStateService restStopwatchStateService, IServiceProvider serviceProvider)
         {
             WeakReferenceMessenger.Default.RegisterAll(this);
             this.setService = setService;
@@ -228,103 +217,14 @@ namespace FitISO.Maui.ViewModels
             this.serviceProvider = serviceProvider;
             RestStopwatchEnabled = workoutSettingsService.RestStopwatchEnabled;
             ProgressCardEnabled = workoutSettingsService.ProgressCardEnabled;
-            VoiceLoggingEnabled = voiceLoggingSettingsService.VoiceLoggingEnabled;
-            this.voiceRecognitionService = voiceRecognitionService;
             ActiveWorkoutState.Instance.PropertyChanged += ActiveWorkoutState_PropertyChanged;
             IsInPipMode = ActiveWorkoutState.Instance.IsInPipMode;
-        }
-
-        [RelayCommand(AllowConcurrentExecutions = true)]
-        async Task ToggleVoiceLogging()
-        {
-            if (IsViewingPartner || IsInPipMode) return;
-
-            if (IsListening)
-            {
-                voiceCts?.Cancel();
-                return;
-            }
-
-            var cts = voiceCts = new CancellationTokenSource();
-            IsListening = true;
-            try
-            {
-                string? text = await voiceRecognitionService.ListenOnceAsync(VoiceCulture, cts.Token);
-
-                if (!cts.IsCancellationRequested && !string.IsNullOrWhiteSpace(text))
-                    ApplyVoiceCommand(text);
-            }
-            finally
-            {
-                IsListening = false;
-                if (ReferenceEquals(voiceCts, cts)) voiceCts = null;
-                cts.Dispose();
-            }
-        }
-
-        public void CancelVoiceLogging() => voiceCts?.Cancel();
-
-        void ApplyVoiceCommand(string text)
-        {
-            if (VoiceCommandParser.Parse(text) is not { } command)
-            {
-                _ = Toast.Make($"Didn't understand \"{text}\"").Show();
-                return;
-            }
-
-            WorkoutExercise? workoutExercise;
-
-            if (command.ExerciseName is null)
-            {
-                workoutExercise = lastVoiceExercise is not null && Workout.WorkoutExercises.Contains(lastVoiceExercise)
-                    ? lastVoiceExercise
-                    : null;
-
-                if (workoutExercise is null)
-                {
-                    _ = Toast.Make("Say the exercise first, e.g. \"bench press 100 kg 5 reps\"").Show();
-                    return;
-                }
-            }
-            else
-            {
-                workoutExercise = ExerciseNameMatcher.FindBest(
-                    command.ExerciseName, Workout.WorkoutExercises, we => we.Exercise.Name);
-
-                if (workoutExercise is null)
-                {
-                    _ = Toast.Make($"No exercise matching \"{command.ExerciseName}\" in this workout").Show();
-                    return;
-                }
-
-                lastVoiceExercise = workoutExercise;
-            }
-
-            var set = workoutExercise.Sets.FirstOrDefault(s => !(s.Weight is >= 0 && s.Reps is > 0));
-
-            if (set is null)
-            {
-                _ = Toast.Make($"All sets of {workoutExercise.Exercise.Name} are already filled").Show();
-                return;
-            }
-
-            if (command.Weight is double weight)
-                set.Weight = weight;
-
-            set.Reps = command.Reps;
-
-            int setNumber = workoutExercise.Sets.IndexOf(set) + 1;
-            string weightText = set.Weight is double w ? $"{w:0.##} kg" : "no weight";
-            _ = Toast.Make($"{workoutExercise.Exercise.Name} · set {setNumber}: {weightText} × {set.Reps}").Show();
         }
 
         void ActiveWorkoutState_PropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
             if (e.PropertyName == nameof(ActiveWorkoutState.IsInPipMode))
-            {
                 IsInPipMode = ActiveWorkoutState.Instance.IsInPipMode;
-                if (IsInPipMode) CancelVoiceLogging();
-            }
         }
 
         partial void OnRestStartTimeChanged(DateTime? value)
@@ -369,8 +269,6 @@ namespace FitISO.Maui.ViewModels
 
         public void Receive(ProgressCardEnabledChangedMessage message) => ProgressCardEnabled = message.Value;
 
-        public void Receive(VoiceLoggingEnabledChangedMessage message) => VoiceLoggingEnabled = message.Value;
-
         partial void OnRestStopwatchEnabledChanged(bool value)
         {
             if (!value)
@@ -385,7 +283,6 @@ namespace FitISO.Maui.ViewModels
 
         partial void OnWorkoutChanged(Workout oldValue, Workout newValue)
         {
-            lastVoiceExercise = null;
             if (oldValue is not null)
             {
                 oldValue.PropertyChanged -= Workout_PropertyChanged;

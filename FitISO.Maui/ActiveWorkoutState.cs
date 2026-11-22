@@ -20,6 +20,9 @@ namespace FitISO.Maui
         [NotifyPropertyChangedFor(nameof(IsNotInPipMode))]
         bool isInPipMode;
 
+        [ObservableProperty]
+        bool isViewingPartner;
+
         public bool IsNotInPipMode => !IsInPipMode;
     }
 }

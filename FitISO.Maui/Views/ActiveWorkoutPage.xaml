@@ -25,8 +25,8 @@
             <Label Grid.Column="1" Text="{Binding PartnerWorkoutName}" IsVisible="{Binding ShowPartnerList}" FontSize="Medium"
                 FontAttributes="Bold" LineBreakMode="TailTruncation" HorizontalOptions="Fill" HorizontalTextAlignment="Center"
                 VerticalOptions="Center" VerticalTextAlignment="Center"/>
-            <ImageButton x:Name="VoiceLoggingButton" IsVisible="{Binding VoiceLoggingEnabled}" Grid.Column="2" VerticalOptions="Center"
-                Command="{Binding ToggleVoiceLoggingCommand}"
+            <ImageButton x:Name="VoiceLoggingButton" x:DataType="vm:VoiceLoggingViewModel" IsVisible="{Binding IsAvailable}" Grid.Column="2" VerticalOptions="Center"
+                Command="{Binding ToggleCommand}"
                 Source="{FontImageSource FontFamily=MaterialRound, Glyph='&#xE029;'}">
                 <ImageButton.Triggers>
                     <DataTrigger TargetType="ImageButton" Binding="{Binding IsListening}" Value="True">

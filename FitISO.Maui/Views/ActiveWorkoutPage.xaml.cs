@@ -6,13 +6,17 @@ namespace FitISO.Maui.Views;
 public partial class ActiveWorkoutPage : ContentPage
 {
     readonly ActiveWorkoutViewModel viewModel;
+    readonly VoiceLoggingViewModel voiceLogging;
     readonly TrainTogetherViewModel? trainTogether;
 
-    public ActiveWorkoutPage(ActiveWorkoutViewModel activeWorkoutViewModel)
+    public ActiveWorkoutPage(ActiveWorkoutViewModel activeWorkoutViewModel, VoiceLoggingViewModel voiceLoggingViewModel)
     {
         InitializeComponent();
         BindingContext = activeWorkoutViewModel;
         viewModel = activeWorkoutViewModel;
+
+        voiceLogging = voiceLoggingViewModel;           
+        VoiceLoggingButton.BindingContext = voiceLogging; 
 
         trainTogether = IPlatformApplication.Current?.Services.GetService<TrainTogetherViewModel>();
         if (trainTogether is not null)
@@ -38,8 +42,8 @@ public partial class ActiveWorkoutPage : ContentPage
     protected override void OnDisappearing()
     {
         base.OnDisappearing();
-        viewModel.Stop(); 
-        viewModel.CancelVoiceLogging();
+        viewModel.Stop();
+        voiceLogging.Cancel();
         ActiveWorkoutState.Instance.IsActiveWorkoutPageVisible = false;
 
         if (trainTogether is not null)
