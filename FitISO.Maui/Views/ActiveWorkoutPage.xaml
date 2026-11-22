@@ -65,15 +65,15 @@
                     </Border>
                 </Grid>
             </Border>
-            <Border x:Name="StopwatchCard" StrokeThickness="0" StrokeShape="RoundRectangle 25"
-                BackgroundColor="{DynamicResource Gray800}" IsVisible="{Binding ShowRestCard}">
+            <Border x:Name="StopwatchCard" x:DataType="vm:RestTimerViewModel" StrokeThickness="0" StrokeShape="RoundRectangle 25"
+                BackgroundColor="{DynamicResource Gray800}" IsVisible="{Binding IsAvailable}">
                 <Grid Padding="16,12" RowDefinitions="Auto">
                     <Button Text="Start rest" FontSize="Medium" HeightRequest="38"
                      HorizontalOptions="Fill" VerticalOptions="Center" CornerRadius="20"
                      BackgroundColor="{DynamicResource Gray600}" TextColor="White"
                      ImageSource="{FontImageSource FontFamily=MaterialRound, Glyph='&#xE425;', Color=White, Size=16}"
-                     ContentLayout="Left,8"  IsVisible="{Binding ShowStartRest}" Command="{Binding StartRestCommand}"/>
-                    <Grid RowDefinitions="Auto" ColumnDefinitions="Auto,*,Auto" VerticalOptions="Center" IsVisible="{Binding ShowRunningRest}">
+                     ContentLayout="Left,8"  IsVisible="{Binding ShowStart}" Command="{Binding StartCommand}"/>
+                    <Grid RowDefinitions="Auto" ColumnDefinitions="Auto,*,Auto" VerticalOptions="Center" IsVisible="{Binding ShowRunning}">
                         <Border Grid.Column="0" HeightRequest="50" WidthRequest="50" BackgroundColor="{DynamicResource Gray600}"
                                 StrokeThickness="0" Padding="8">
                             <Border.StrokeShape>
@@ -85,44 +85,67 @@
                                 </Image.Source>
                             </Image>
                         </Border>
-                        <Label Grid.Column="1" Text="{Binding DisplayRestElapsed, StringFormat='{0:mm\\:ss}'}"
+                        <Label Grid.Column="1" Text="{Binding Elapsed, StringFormat='{0:mm\\:ss}'}"
                                 FontSize="Medium" FontAttributes="Bold" TextColor="White"
                                 HorizontalOptions="Center" VerticalOptions="Center"/>
                         <ImageButton Grid.Column="2" HeightRequest="50" WidthRequest="50"
                                 Source="{FontImageSource FontFamily=MaterialRound, Glyph='&#xE047;', Color=White, Size=18}"
                                 BackgroundColor="{DynamicResource DeleteColor}" CornerRadius="25" Padding="8"
-                                IsVisible="{Binding ShowRestControls}" Command="{Binding StopRestCommand}"/>
+                                Command="{Binding StopCommand}"/>
                     </Grid>
-                    <Label Text="Paused" FontSize="Medium" FontAttributes="Bold" TextColor="White"
-                           HorizontalOptions="Center" VerticalOptions="Center" Padding="0,8"
-                           IsVisible="{Binding ShowPartnerPaused}"/>
                     <Grid RowDefinitions="Auto" ColumnDefinitions="*,*" ColumnSpacing="12"
-                            VerticalOptions="Center" IsVisible="{Binding ShowStoppedRest}">
+                            VerticalOptions="Center" IsVisible="{Binding ShowStopped}">
                         <Button Grid.Column="0" Text="Resume" FontSize="Small" HeightRequest="38"
                                 VerticalOptions="Center" CornerRadius="20" BackgroundColor="{DynamicResource Gray600}" TextColor="White"
                                 ImageSource="{FontImageSource FontFamily=MaterialRound, Glyph='&#xE037;', Color=White, Size=16}"
                                 ContentLayout="Left,6"
-                                Command="{Binding ResumeRestCommand}"/>
+                                Command="{Binding ResumeCommand}"/>
                         <Button Grid.Column="1" Text="Reset" FontSize="Small" HeightRequest="38"
                                 VerticalOptions="Center" CornerRadius="20" BackgroundColor="{DynamicResource Gray500}" TextColor="White"
                                 ImageSource="{FontImageSource FontFamily=MaterialRound, Glyph='&#xE5D5;', Color=White, Size=16}"
                                 ContentLayout="Left,6"
-                                Command="{Binding ManualResetRestCommand}"/>
+                                Command="{Binding RestartCommand}"/>
                     </Grid>
+                </Grid>
+            </Border>
+            <Border x:Name="PartnerStopwatchCard" StrokeThickness="0" StrokeShape="RoundRectangle 25"
+                BackgroundColor="{DynamicResource Gray800}" IsVisible="{Binding ShowPartnerRestCard}">
+                <Grid Padding="16,12" RowDefinitions="Auto">
+                    <Grid RowDefinitions="Auto" ColumnDefinitions="Auto,*,Auto" VerticalOptions="Center" IsVisible="{Binding ShowPartnerRunningRest}">
+                        <Border Grid.Column="0" HeightRequest="50" WidthRequest="50" BackgroundColor="{DynamicResource Gray600}"
+                                StrokeThickness="0" Padding="8">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="25"/>
+                            </Border.StrokeShape>
+                            <Image>
+                                <Image.Source>
+                                    <FontImageSource FontFamily="MaterialRound" Glyph="&#xE425;" Color="White" Size="18"/>
+                                </Image.Source>
+                            </Image>
+                        </Border>
+                        <Label Grid.Column="1" Text="{Binding PartnerRestElapsed, StringFormat='{0:mm\\:ss}'}"
+                                FontSize="Medium" FontAttributes="Bold" TextColor="White"
+                                HorizontalOptions="Center" VerticalOptions="Center"/>
+                    </Grid>
+                    <Label Text="Paused" FontSize="Medium" FontAttributes="Bold" TextColor="White"
+                           HorizontalOptions="Center" VerticalOptions="Center" Padding="0,8"
+                           IsVisible="{Binding ShowPartnerPaused}"/>
                 </Grid>
             </Border>
         </VerticalStackLayout>
         <Grid IsVisible="{Binding IsInPipMode}" BackgroundColor="{DynamicResource Gray900}">
-            <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center" Spacing="8" IsVisible="{Binding ShowRunningRest}">
-                <Label Text="{Binding DisplayRestElapsed, StringFormat='{0:mm\\:ss}'}"
-                   FontSize="48" FontAttributes="Bold" TextColor="White"
-                   HorizontalTextAlignment="Center"/>
-                <Label Text="Resting" FontSize="Small" TextColor="{DynamicResource Gray400}" HorizontalTextAlignment="Center"/>
-            </VerticalStackLayout>
-            <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center" Spacing="8"
-                IsVisible="{Binding ShowStoppedRest}">
-                <Label Text="Paused" FontSize="28" FontAttributes="Bold" TextColor="White" HorizontalTextAlignment="Center"/>
-            </VerticalStackLayout>
+            <Grid x:Name="PipRest" x:DataType="vm:RestTimerViewModel">
+                <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center" Spacing="8" IsVisible="{Binding ShowRunning}">
+                    <Label Text="{Binding Elapsed, StringFormat='{0:mm\\:ss}'}"
+                       FontSize="48" FontAttributes="Bold" TextColor="White"
+                       HorizontalTextAlignment="Center"/>
+                    <Label Text="Resting" FontSize="Small" TextColor="{DynamicResource Gray400}" HorizontalTextAlignment="Center"/>
+                </VerticalStackLayout>
+                <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center" Spacing="8"
+                    IsVisible="{Binding ShowStopped}">
+                    <Label Text="Paused" FontSize="28" FontAttributes="Bold" TextColor="White" HorizontalTextAlignment="Center"/>
+                </VerticalStackLayout>
+            </Grid>
         </Grid>
         <CollectionView VerticalOptions="Fill" IsVisible="{Binding ShowOwnList}"
             ItemsSource="{Binding Workout.WorkoutExercises}" Margin="0,0,0,6" SelectionMode="None" VerticalScrollBarVisibility="Never">
@@ -344,18 +367,18 @@
                                             <DataTemplate x:DataType="snap:SetSnapshot">
                                                 <VerticalStackLayout>
                                                     <BoxView HeightRequest="1" Color="{DynamicResource Gray600}"/>
-                                                    <Grid ColumnDefinitions="3*,2*,30" ColumnSpacing="12" Padding="0,10">
-                                                        <HorizontalStackLayout Grid.Column="0" Spacing="8" HorizontalOptions="Center">
+                                                    <Grid Margin="0,0,30,0" Padding="0,10" ColumnDefinitions="3*,2*" ColumnSpacing="12" VerticalOptions="Center">
+                                                        <Grid Grid.Column="0" ColumnSpacing="8" HorizontalOptions="Center"
+                                                            IsClippedToBounds="True" ColumnDefinitions="5*,auto,4*">
                                                             <Label Text="{Binding Weight, StringFormat='{0:0.##}'}"
-                                                                   FontSize="Small" TextColor="White"/>
-                                                            <Label Text="kg" FontSize="Small" TextColor="{DynamicResource Gray400}"/>
-                                                        </HorizontalStackLayout>
-                                                        <Label Grid.Column="1" Text="{Binding Reps, StringFormat='{0:0.##}'}"
-                                                               FontSize="Small" TextColor="White" HorizontalOptions="Center"/>
-                                                        <Label Grid.Column="2" IsVisible="{Binding IsComplete}"
-                                                               FontFamily="MaterialRound" Text="&#xE5CA;" FontSize="Small"
-                                                               TextColor="{DynamicResource ChartAccentColor}"
-                                                               VerticalOptions="Center" HorizontalOptions="Center"/>
+                                                                TextColor="White" HorizontalOptions="Fill"
+                                                                HorizontalTextAlignment="End" FontSize="Small" MinimumWidthRequest="90"/>
+                                                            <Label Text="kg" VerticalTextAlignment="Center" Grid.Column="1"
+                                                                FontSize="Small" TextColor="{DynamicResource Gray400}"/>
+                                                        </Grid>
+                                                        <Label Text="{Binding Reps, StringFormat='{0:0.##}'}"
+                                                            Grid.Column="1" TextColor="White" MinimumWidthRequest="90"
+                                                            HorizontalOptions="Center" HorizontalTextAlignment="End" FontSize="Small"/>
                                                     </Grid>
                                                 </VerticalStackLayout>
                                             </DataTemplate>

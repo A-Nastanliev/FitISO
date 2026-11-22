@@ -67,6 +67,7 @@ namespace FitISO.Maui
             builder.Services.AddSingleton<ActiveWorkoutViewModel>();
             builder.Services.AddSingleton<IActiveWorkoutProvider>(sp => sp.GetRequiredService<ActiveWorkoutViewModel>());
             builder.Services.AddSingleton<VoiceLoggingViewModel>();
+            builder.Services.AddSingleton<RestTimerViewModel>();
 
             builder.Services.AddTransient<SelectExercisePopupPage>();
             builder.Services.AddTransient<SelectExercisePopupViewModel>();
@@ -131,6 +132,7 @@ namespace FitISO.Maui
             });
 #endif
             app.Services.GetRequiredService<ActiveWorkoutViewModel>();
+            app.Services.GetRequiredService<RestTimerViewModel>();
             app.Services.GetRequiredService<LastWorkoutService>();
             app.Services.GetRequiredService<MonthlyHeatmapService>();
             app.Services.GetRequiredService<AutoBackupService>();

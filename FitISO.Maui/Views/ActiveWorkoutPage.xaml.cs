@@ -9,14 +9,18 @@ public partial class ActiveWorkoutPage : ContentPage
     readonly VoiceLoggingViewModel voiceLogging;
     readonly TrainTogetherViewModel? trainTogether;
 
-    public ActiveWorkoutPage(ActiveWorkoutViewModel activeWorkoutViewModel, VoiceLoggingViewModel voiceLoggingViewModel)
+    public ActiveWorkoutPage(ActiveWorkoutViewModel activeWorkoutViewModel, VoiceLoggingViewModel voiceLoggingViewModel,
+        RestTimerViewModel restTimerViewModel)
     {
         InitializeComponent();
         BindingContext = activeWorkoutViewModel;
         viewModel = activeWorkoutViewModel;
 
-        voiceLogging = voiceLoggingViewModel;           
-        VoiceLoggingButton.BindingContext = voiceLogging; 
+        voiceLogging = voiceLoggingViewModel;
+        VoiceLoggingButton.BindingContext = voiceLogging;
+
+        StopwatchCard.BindingContext = restTimerViewModel;
+        PipRest.BindingContext = restTimerViewModel;
 
         trainTogether = IPlatformApplication.Current?.Services.GetService<TrainTogetherViewModel>();
         if (trainTogether is not null)

@@ -78,27 +78,6 @@ namespace FitISO.Maui.ViewModels
             }
         }
 
-        [ObservableProperty]
-        [NotifyPropertyChangedFor(nameof(ShowStartRest))]
-        [NotifyPropertyChangedFor(nameof(ShowRunningRest))]
-        [NotifyPropertyChangedFor(nameof(ShowStoppedRest))]
-        DateTime? restStartTime;
-
-        [ObservableProperty]
-        [NotifyPropertyChangedFor(nameof(DisplayRestElapsed))]
-        TimeSpan restElapsed;
-
-        [ObservableProperty]
-        [NotifyPropertyChangedFor(nameof(ShowRunningRest))]
-        [NotifyPropertyChangedFor(nameof(ShowStoppedRest))]
-        bool restIsStopped;
-
-        public bool ShowStartRest => !IsViewingPartner && RestStartTime is null;
-        public bool ShowRunningRest => IsViewingPartner
-            ? PartnerRestActive && !PartnerRestPaused
-            : RestStartTime is not null && !RestIsStopped;
-        public bool ShowStoppedRest => !IsViewingPartner && RestStartTime is not null && RestIsStopped;
-
         WorkoutSnapshot? partnerSnapshot;
         Func<DateTime, DateTime> partnerToLocal = t => t;
 
@@ -107,7 +86,6 @@ namespace FitISO.Maui.ViewModels
         TimeSpan partnerDuration;
 
         [ObservableProperty]
-        [NotifyPropertyChangedFor(nameof(DisplayRestElapsed))]
         TimeSpan partnerRestElapsed;
 
         [ObservableProperty]
@@ -121,11 +99,10 @@ namespace FitISO.Maui.ViewModels
         bool PartnerRestPaused => PartnerRestActive && partnerSnapshot!.Rest.IsStopped;
 
         public TimeSpan DisplayDuration => IsViewingPartner ? PartnerDuration : Duration;
-        public TimeSpan DisplayRestElapsed => IsViewingPartner ? PartnerRestElapsed : RestElapsed;
         public double DisplayProgress => IsViewingPartner ? PartnerProgress : Progress;
 
-        public bool ShowRestCard => IsViewingPartner ? PartnerRestActive : RestStopwatchEnabled;
-        public bool ShowRestControls => !IsViewingPartner;
+        public bool ShowPartnerRestCard => IsViewingPartner && PartnerRestActive;
+        public bool ShowPartnerRunningRest => IsViewingPartner && PartnerRestActive && !PartnerRestPaused;
         public bool ShowPartnerPaused => IsViewingPartner && PartnerRestPaused;
 
         public void SetPartner(WorkoutSnapshot? snapshot, Func<DateTime, DateTime> toLocal)
@@ -157,8 +134,8 @@ namespace FitISO.Maui.ViewModels
 
             if (p.StartTimeUtc is DateTime start)
                 PartnerDuration = p.EndTimeUtc is DateTime end
-                    ? end - start               
-                    : now - partnerToLocal(start);  
+                    ? end - start
+                    : now - partnerToLocal(start);
 
             if (p.Rest.StartTimeUtc is DateTime rest)
                 PartnerRestElapsed = now - partnerToLocal(rest);
@@ -167,14 +144,10 @@ namespace FitISO.Maui.ViewModels
         void RaiseDisplayChanged()
         {
             OnPropertyChanged(nameof(DisplayDuration));
-            OnPropertyChanged(nameof(DisplayRestElapsed));
             OnPropertyChanged(nameof(DisplayProgress));
             OnPropertyChanged(nameof(PartnerRestActive));
-            OnPropertyChanged(nameof(ShowRestCard));
-            OnPropertyChanged(nameof(ShowRestControls));
-            OnPropertyChanged(nameof(ShowStartRest));
-            OnPropertyChanged(nameof(ShowRunningRest));
-            OnPropertyChanged(nameof(ShowStoppedRest));
+            OnPropertyChanged(nameof(ShowPartnerRestCard));
+            OnPropertyChanged(nameof(ShowPartnerRunningRest));
             OnPropertyChanged(nameof(ShowPartnerPaused));
         }
 
@@ -183,10 +156,6 @@ namespace FitISO.Maui.ViewModels
             ActiveWorkoutState.Instance.IsViewingPartner = value;
             RaiseDisplayChanged();
         }
-
-        WorkoutExercise? _restTriggerExercise;
-        Set? _restTriggerSet;
-        bool _restoringRest;
 
         public event EventHandler? StateChanged;
 
@@ -202,18 +171,14 @@ namespace FitISO.Maui.ViewModels
         readonly SetService setService;
         readonly WorkoutExerciseService workoutExerciseService;
         readonly WorkoutService workoutService;
-        readonly WorkoutSettingsService workoutSettingsService;
-        readonly RestStopwatchStateService restStopwatchStateService;
 
         public ActiveWorkoutViewModel(SetService setService, WorkoutService workoutService, WorkoutExerciseService workoutExerciseService,
-            WorkoutSettingsService workoutSettingsService, RestStopwatchStateService restStopwatchStateService, IServiceProvider serviceProvider)
+            WorkoutSettingsService workoutSettingsService, IServiceProvider serviceProvider)
         {
             WeakReferenceMessenger.Default.RegisterAll(this);
             this.setService = setService;
             this.workoutExerciseService = workoutExerciseService;
             this.workoutService = workoutService;
-            this.workoutSettingsService = workoutSettingsService;
-            this.restStopwatchStateService = restStopwatchStateService;
             this.serviceProvider = serviceProvider;
             RestStopwatchEnabled = workoutSettingsService.RestStopwatchEnabled;
             ProgressCardEnabled = workoutSettingsService.ProgressCardEnabled;
@@ -227,53 +192,9 @@ namespace FitISO.Maui.ViewModels
                 IsInPipMode = ActiveWorkoutState.Instance.IsInPipMode;
         }
 
-        partial void OnRestStartTimeChanged(DateTime? value)
-        {
-            RaiseStateChanged();
-
-            if (_restoringRest) return;
-
-            if (value is DateTime dt)
-            {
-                restStopwatchStateService.WorkoutId = Workout.Id;
-                restStopwatchStateService.StartTimeUtc = dt;
-                restStopwatchStateService.IsStopped = RestIsStopped;
-            }
-            else
-            {
-                restStopwatchStateService.Clear();
-            }
-        }
-
-        void SetRestTrigger(WorkoutExercise? exercise, Set? set)
-        {
-            _restTriggerExercise = exercise;
-            _restTriggerSet = set;
-
-            if (RestStartTime is null) return;
-
-            restStopwatchStateService.TriggerExerciseId = exercise?.Id ?? 0;
-            restStopwatchStateService.TriggerSetId = set?.Id ?? 0;
-        }
-
-        partial void OnRestIsStoppedChanged(bool value)
-        {
-            RaiseStateChanged();
-
-            if (_restoringRest || RestStartTime is null) return;
-
-            restStopwatchStateService.IsStopped = value;
-        }
-
         public void Receive(RestStopwatchEnabledChangedMessage message) => RestStopwatchEnabled = message.Value;
 
         public void Receive(ProgressCardEnabledChangedMessage message) => ProgressCardEnabled = message.Value;
-
-        partial void OnRestStopwatchEnabledChanged(bool value)
-        {
-            if (!value)
-                ResetRest();
-        }
 
         public void Receive(WorkoutStartedMessage message)
         {
@@ -296,36 +217,7 @@ namespace FitISO.Maui.ViewModels
             foreach (var we in newValue.WorkoutExercises)
                 WireWorkoutExercise(we);
 
-            RestoreRestState(newValue);
-
             RecalculateProgress();
-        }
-
-        void RestoreRestState(Workout newValue)
-        {
-            int savedWorkoutId = restStopwatchStateService.WorkoutId;
-            DateTime? savedStartTime = restStopwatchStateService.StartTimeUtc;
-
-            if (savedWorkoutId != 0 && savedWorkoutId == newValue.Id && savedStartTime is DateTime savedDt)
-            {
-                _restoringRest = true;
-                RestStartTime = savedDt;
-                RestIsStopped = restStopwatchStateService.IsStopped;
-                _restoringRest = false;
-
-                int triggerExerciseId = restStopwatchStateService.TriggerExerciseId;
-                int triggerSetId = restStopwatchStateService.TriggerSetId;
-
-                _restTriggerExercise = triggerExerciseId != 0
-                    ? newValue.WorkoutExercises.FirstOrDefault(we => we.Id == triggerExerciseId)
-                    : null;
-                _restTriggerSet = _restTriggerExercise is not null && triggerSetId != 0
-                    ? _restTriggerExercise.Sets.FirstOrDefault(s => s.Id == triggerSetId)
-                    : null;
-                return;
-            }
-
-            ResetRest();
         }
 
         void WorkoutExercises_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
@@ -442,49 +334,7 @@ namespace FitISO.Maui.ViewModels
                 Duration = DateTime.UtcNow - start;
             }
 
-            if (RestStartTime is DateTime restStart)
-                RestElapsed = DateTime.UtcNow - restStart;
-
             RefreshPartnerTimes();
-        }
-
-        [RelayCommand]
-        void StartRest()
-        {
-            RestElapsed = TimeSpan.Zero;
-            RestIsStopped = false;
-            RestStartTime = DateTime.UtcNow;
-            SetRestTrigger(null, null);
-        }
-
-        [RelayCommand]
-        void StopRest()
-        {
-            RestIsStopped = true;
-        }
-
-        [RelayCommand]
-        void ResumeRest()
-        {
-            RestIsStopped = false;
-        }
-
-        [RelayCommand]
-        void ManualResetRest()
-        {
-            RestElapsed = TimeSpan.Zero;
-            RestIsStopped = false;
-            RestStartTime = DateTime.UtcNow;
-            SetRestTrigger(null, null);
-        }
-
-        void ResetRest()
-        {
-            RestElapsed = TimeSpan.Zero;
-            RestIsStopped = false;
-            RestStartTime = null;
-            _restTriggerExercise = null;
-            _restTriggerSet = null;
         }
 
         public void EnsureTimerRunning()
@@ -513,26 +363,9 @@ namespace FitISO.Maui.ViewModels
 
         void Set_JustCompleted(object? sender, EventArgs e)
         {
-            if (!RestStopwatchEnabled) return;
-
             if (sender is not Set set) return;
 
-            var owner = FindOwner(set);
-            if (owner is null) return;
-
-            int index = owner.Sets.IndexOf(set);
-            bool isLastSetOfExercise = index == owner.Sets.Count - 1;
-
-            if (isLastSetOfExercise && !workoutSettingsService.AutoStartRestOnExerciseFinish)
-            {
-                ResetRest();
-                return;
-            }
-
-            RestStartTime = DateTime.UtcNow;
-            RestIsStopped = false;
-
-            SetRestTrigger(isLastSetOfExercise ? null : owner, isLastSetOfExercise ? null : set);
+            WeakReferenceMessenger.Default.Send(new SetCompletedMessage(set));
         }
 
         WorkoutExercise? FindOwner(Set set) =>
@@ -599,29 +432,19 @@ namespace FitISO.Maui.ViewModels
             workoutExercise.Sets.Remove(lastSet);
             workoutExercise.SetCount = workoutExercise.Sets.Count;
 
-            if (ReferenceEquals(_restTriggerExercise, workoutExercise))
-            {
-                bool triggerWasRemoved = ReferenceEquals(_restTriggerSet, lastSet);
-                bool triggerIsNowLast = !triggerWasRemoved && workoutExercise.Sets.Count > 0
-                    && ReferenceEquals(workoutExercise.Sets[^1], _restTriggerSet);
-
-                if (triggerWasRemoved || triggerIsNowLast)
-                    ResetRest();
-            }
+            WeakReferenceMessenger.Default.Send(new SetRemovedMessage(workoutExercise));
 
             if (workoutExercise.SetCount == 0)
             {
                 await workoutExerciseService.DeleteAsync(workoutExercise.Id);
                 Workout.WorkoutExercises.Remove(workoutExercise);
 
-                if (ReferenceEquals(_restTriggerExercise, workoutExercise))
-                    ResetRest();
+                WeakReferenceMessenger.Default.Send(new WorkoutExerciseRemovedMessage(workoutExercise));
             }
 
             if (Workout.WorkoutExercises.Count == 0)
             {
                 Stop();
-                ResetRest();
                 await workoutService.DeleteAsync(Workout.Id);
                 ActiveWorkoutState.Instance.HasActiveWorkout = false;
                 _ = Toast.Make($"{Workout.Name} terminated").Show();
@@ -643,7 +466,6 @@ namespace FitISO.Maui.ViewModels
             await workoutService.EndWorkoutAsync(Workout.Id);
             Workout.EndTime = DateTime.UtcNow;
             _ = Toast.Make($"{Workout.Name} finished").Show();
-            ResetRest();
             Stop();
             await Shell.Current.GoToAsync("//main/history");
             WeakReferenceMessenger.Default.Send(new WorkoutFinishedMessage(Workout));
@@ -683,8 +505,6 @@ namespace FitISO.Maui.ViewModels
 
         public async void Receive(DbImportedMessage message)
         {
-            restStopwatchStateService.Clear();
-
             var activeWorkout = await workoutService.GetActiveWorkoutAsync();
 
             if (activeWorkout != null && activeWorkout?.Id != 0)

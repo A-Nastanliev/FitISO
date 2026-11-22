@@ -29,7 +29,7 @@ namespace FitISO.Maui
         const int RequestCodeNotifications = 4002;
 
         RestPipActionReceiver? pipReceiver;
-        ActiveWorkoutViewModel? activeWorkoutViewModel;
+        RestTimerViewModel? restTimer;
 
         protected override void AttachBaseContext(Context @base)
         {
@@ -47,7 +47,7 @@ namespace FitISO.Maui
             base.OnCreate(savedInstanceState);
             HandleWidgetIntent(Intent);
 
-            activeWorkoutViewModel = IPlatformApplication.Current?.Services.GetService<ActiveWorkoutViewModel>();
+            restTimer = IPlatformApplication.Current?.Services.GetService<RestTimerViewModel>();
 
             if (OperatingSystem.IsAndroidVersionAtLeast(26))
             {
@@ -58,8 +58,8 @@ namespace FitISO.Maui
                 ContextCompat.RegisterReceiver(this, pipReceiver, filter, ContextCompat.ReceiverNotExported);
             }
 
-            if (activeWorkoutViewModel is not null)
-                activeWorkoutViewModel.PropertyChanged += ActiveWorkoutViewModel_PropertyChanged;
+            if (restTimer is not null)
+                restTimer.PropertyChanged += RestTimer_PropertyChanged;
 
             ActiveWorkoutState.Instance.PropertyChanged += ActiveWorkoutState_PropertyChanged;
             if (ActiveWorkoutState.Instance.HasActiveWorkout)
@@ -70,8 +70,8 @@ namespace FitISO.Maui
         {
             ActiveWorkoutState.Instance.PropertyChanged -= ActiveWorkoutState_PropertyChanged;
 
-            if (activeWorkoutViewModel is not null)
-                activeWorkoutViewModel.PropertyChanged -= ActiveWorkoutViewModel_PropertyChanged;
+            if (restTimer is not null)
+                restTimer.PropertyChanged -= RestTimer_PropertyChanged;
 
             if (pipReceiver is not null)
                 UnregisterReceiver(pipReceiver);
@@ -134,7 +134,8 @@ namespace FitISO.Maui
 
             if (!OperatingSystem.IsAndroidVersionAtLeast(26)) return;
             if (!ActiveWorkoutState.Instance.IsActiveWorkoutPageVisible) return;
-            if (activeWorkoutViewModel?.RestStartTime is null) return;
+            if (ActiveWorkoutState.Instance.IsViewingPartner) return;
+            if (restTimer?.StartTime is null) return;
 
             EnterPictureInPictureMode(BuildPipParams());
         }
@@ -145,11 +146,11 @@ namespace FitISO.Maui
             ActiveWorkoutState.Instance.IsInPipMode = isInPictureInPictureMode;
         }
 
-        void ActiveWorkoutViewModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+        void RestTimer_PropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
             if (!OperatingSystem.IsAndroidVersionAtLeast(26) || !IsInPictureInPictureMode) return;
 
-            if (e.PropertyName is nameof(ActiveWorkoutViewModel.RestIsStopped) or nameof(ActiveWorkoutViewModel.RestStartTime))
+            if (e.PropertyName is nameof(RestTimerViewModel.IsStopped) or nameof(RestTimerViewModel.StartTime))
                 SetPictureInPictureParams(BuildPipParams());
         }
 
@@ -160,7 +161,7 @@ namespace FitISO.Maui
 
             var actions = new List<RemoteAction>();
 
-            if (activeWorkoutViewModel?.RestIsStopped == true)
+            if (restTimer?.IsStopped == true)
             {
                 actions.Add(BuildAction(Resource.Drawable.ic_pip_resume, "Resume", ActionPipToggleRest, RequestCodeToggle));
                 actions.Add(BuildAction(Resource.Drawable.ic_pip_reset, "Reset", ActionPipResetRest, RequestCodeReset));
@@ -185,14 +186,14 @@ namespace FitISO.Maui
 
         void OnPipToggleRequested()
         {
-            if (activeWorkoutViewModel is null) return;
+            if (restTimer is null) return;
 
-            if (activeWorkoutViewModel.RestIsStopped)
-                activeWorkoutViewModel.ResumeRestCommand.Execute(null);
+            if (restTimer.IsStopped)
+                restTimer.ResumeCommand.Execute(null);
             else
-                activeWorkoutViewModel.StopRestCommand.Execute(null);
+                restTimer.StopCommand.Execute(null);
         }
 
-        void OnPipResetRequested() => activeWorkoutViewModel?.ManualResetRestCommand.Execute(null);
+        void OnPipResetRequested() => restTimer?.RestartCommand.Execute(null);
     }
 }

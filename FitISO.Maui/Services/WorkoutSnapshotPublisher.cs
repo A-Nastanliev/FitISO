@@ -2,6 +2,7 @@ using FitISO.Maui.Models;
 using FitISO.Maui.ViewModels;
 using FitISO.Sharing.Session;
 using FitISO.Sharing.Transport;
+using System.ComponentModel;
 
 namespace FitISO.Maui.Services
 {
@@ -11,6 +12,7 @@ namespace FitISO.Maui.Services
         static readonly TimeSpan SettleDelay = TimeSpan.FromMilliseconds(400);
 
         readonly ActiveWorkoutViewModel _activeWorkout;
+        readonly RestTimerViewModel _rest;
         readonly PartnerSessionCoordinator _coordinator;
         readonly SnapshotVersionSource _versions;
         CancellationTokenSource? _debounceCts;
@@ -19,14 +21,22 @@ namespace FitISO.Maui.Services
 
         public event EventHandler? SessionEnded;
 
-        public WorkoutSnapshotPublisher(ActiveWorkoutViewModel activeWorkout, PartnerSessionCoordinator coordinator, SnapshotVersionSource versions)
+        public WorkoutSnapshotPublisher(ActiveWorkoutViewModel activeWorkout, RestTimerViewModel rest, PartnerSessionCoordinator coordinator, SnapshotVersionSource versions)
         {
             _activeWorkout = activeWorkout;
+            _rest = rest;
             _coordinator = coordinator;
             _versions = versions;
 
             _activeWorkout.StateChanged += OnWorkoutStateChanged;
+            _rest.PropertyChanged += OnRestPropertyChanged;
             _coordinator.ConnectionStateChanged += OnConnectionStateChanged;
+        }
+
+        void OnRestPropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName is nameof(RestTimerViewModel.StartTime) or nameof(RestTimerViewModel.IsStopped))
+                OnWorkoutStateChanged(sender, EventArgs.Empty);
         }
 
         static bool IsActive(Workout? workout) =>
@@ -117,8 +127,8 @@ namespace FitISO.Maui.Services
         {
             var snapshot = WorkoutSnapshotMapper.Map(
                 workout,
-                _activeWorkout.RestStartTime,
-                _activeWorkout.RestIsStopped,
+                _rest.StartTime,
+                _rest.IsStopped,
                 _versions.Next());
 
             return _coordinator.PublishAsync(snapshot);
@@ -128,6 +138,7 @@ namespace FitISO.Maui.Services
         {
             _debounceCts?.Cancel();
             _activeWorkout.StateChanged -= OnWorkoutStateChanged;
+            _rest.PropertyChanged -= OnRestPropertyChanged;
             _coordinator.ConnectionStateChanged -= OnConnectionStateChanged;
         }
     }
