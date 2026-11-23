@@ -10,7 +10,7 @@ using System.Linq;
 
 namespace FitISO.Maui.ViewModels
 {
-    public partial class RestTimerViewModel : ObservableObject,
+    public partial class RestStopwatchViewModel : ObservableObject,
         IRecipient<RestStopwatchEnabledChangedMessage>, IRecipient<SetCompletedMessage>, IRecipient<SetRemovedMessage>,
         IRecipient<WorkoutExerciseRemovedMessage>, IRecipient<WorkoutFinishedMessage>, IRecipient<DbImportedMessage>
     {
@@ -46,7 +46,7 @@ namespace FitISO.Maui.ViewModels
         public bool ShowRunning => StartTime is not null && !IsStopped;
         public bool ShowStopped => StartTime is not null && IsStopped;
 
-        public RestTimerViewModel(RestStopwatchStateService stateService, WorkoutSettingsService settings, IActiveWorkoutProvider activeWorkout)
+        public RestStopwatchViewModel(RestStopwatchStateService stateService, WorkoutSettingsService settings, IActiveWorkoutProvider activeWorkout)
         {
             this.stateService = stateService;
             this.settings = settings;

@@ -25,12 +25,19 @@
             <Label Grid.Column="1" Text="{Binding PartnerWorkoutName}" IsVisible="{Binding ShowPartnerList}" FontSize="Medium"
                 FontAttributes="Bold" LineBreakMode="TailTruncation" HorizontalOptions="Fill" HorizontalTextAlignment="Center"
                 VerticalOptions="Center" VerticalTextAlignment="Center"/>
-            <ImageButton x:Name="VoiceLoggingButton" x:DataType="vm:VoiceLoggingViewModel" IsVisible="{Binding IsAvailable}" Grid.Column="2" VerticalOptions="Center"
+            <ImageButton x:Name="VoiceLoggingButton" x:DataType="vm:VoiceLoggingViewModel" Padding="2"
+                IsVisible="{Binding IsAvailable}" Grid.Column="2" VerticalOptions="Center"  CornerRadius="17"
+                BackgroundColor="Transparent"
                 Command="{Binding ToggleCommand}"
-                Source="{FontImageSource FontFamily=MaterialRound, Glyph='&#xE029;'}">
+                Source="{FontImageSource FontFamily=MaterialRound,Size=30, Glyph='&#xE029;'}">
                 <ImageButton.Triggers>
                     <DataTrigger TargetType="ImageButton" Binding="{Binding IsListening}" Value="True">
-                        <Setter Property="BackgroundColor" Value="{DynamicResource DeleteColor}"/>
+                        <Setter Property="BackgroundColor" Value="{DynamicResource ChartAccentColor}"/>
+                        <Setter Property="Source">
+                            <Setter.Value>
+                                <FontImageSource FontFamily="MaterialRound" Glyph="&#xE029;" Color="White"/>
+                            </Setter.Value>
+                        </Setter>
                     </DataTrigger>
                 </ImageButton.Triggers>
             </ImageButton>
@@ -65,7 +72,7 @@
                     </Border>
                 </Grid>
             </Border>
-            <Border x:Name="StopwatchCard" x:DataType="vm:RestTimerViewModel" StrokeThickness="0" StrokeShape="RoundRectangle 25"
+            <Border x:Name="StopwatchCard" x:DataType="vm:RestStopwatchViewModel" StrokeThickness="0" StrokeShape="RoundRectangle 25"
                 BackgroundColor="{DynamicResource Gray800}" IsVisible="{Binding IsAvailable}">
                 <Grid Padding="16,12" RowDefinitions="Auto">
                     <Button Text="Start rest" FontSize="Medium" HeightRequest="38"
@@ -134,7 +141,7 @@
             </Border>
         </VerticalStackLayout>
         <Grid IsVisible="{Binding IsInPipMode}" BackgroundColor="{DynamicResource Gray900}">
-            <Grid x:Name="PipRest" x:DataType="vm:RestTimerViewModel">
+            <Grid x:Name="PipRest" x:DataType="vm:RestStopwatchViewModel">
                 <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center" Spacing="8" IsVisible="{Binding ShowRunning}">
                     <Label Text="{Binding Elapsed, StringFormat='{0:mm\\:ss}'}"
                        FontSize="48" FontAttributes="Bold" TextColor="White"

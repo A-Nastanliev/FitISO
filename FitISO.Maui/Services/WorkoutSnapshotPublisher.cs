@@ -12,7 +12,7 @@ namespace FitISO.Maui.Services
         static readonly TimeSpan SettleDelay = TimeSpan.FromMilliseconds(400);
 
         readonly ActiveWorkoutViewModel _activeWorkout;
-        readonly RestTimerViewModel _rest;
+        readonly RestStopwatchViewModel _rest;
         readonly PartnerSessionCoordinator _coordinator;
         readonly SnapshotVersionSource _versions;
         CancellationTokenSource? _debounceCts;
@@ -21,7 +21,7 @@ namespace FitISO.Maui.Services
 
         public event EventHandler? SessionEnded;
 
-        public WorkoutSnapshotPublisher(ActiveWorkoutViewModel activeWorkout, RestTimerViewModel rest, PartnerSessionCoordinator coordinator, SnapshotVersionSource versions)
+        public WorkoutSnapshotPublisher(ActiveWorkoutViewModel activeWorkout, RestStopwatchViewModel rest, PartnerSessionCoordinator coordinator, SnapshotVersionSource versions)
         {
             _activeWorkout = activeWorkout;
             _rest = rest;
@@ -35,7 +35,7 @@ namespace FitISO.Maui.Services
 
         void OnRestPropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
-            if (e.PropertyName is nameof(RestTimerViewModel.StartTime) or nameof(RestTimerViewModel.IsStopped))
+            if (e.PropertyName is nameof(RestStopwatchViewModel.StartTime) or nameof(RestStopwatchViewModel.IsStopped))
                 OnWorkoutStateChanged(sender, EventArgs.Empty);
         }
 

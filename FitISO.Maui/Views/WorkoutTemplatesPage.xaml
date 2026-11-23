@@ -89,7 +89,7 @@
                                      Command="{Binding BindingContext.DeleteWorkoutTemplateCommand, Source={x:Reference Root}}"
                                      CommandParameter="{Binding .}"/>
                                 <ImageButton Grid.Column="2" BackgroundColor="{DynamicResource ChartAccentColor}" Aspect="Center" HorizontalOptions="End"
-                                  CornerRadius="16" Padding="6" Source="{FontImageSource FontFamily=MaterialRound, Glyph='&#xE037;', Size=22, Color={DynamicResource Gray950}}"
+                                  CornerRadius="17" Padding="6" Source="{FontImageSource FontFamily=MaterialRound, Glyph='&#xE037;', Size=22, Color={DynamicResource Gray950}}"
                                   Command="{Binding BindingContext.StartWorkoutCommand, Source={x:Reference Root}}"
                                   CommandParameter="{Binding .}"/>
                             </Grid>

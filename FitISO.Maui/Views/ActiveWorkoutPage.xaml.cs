@@ -10,7 +10,7 @@ public partial class ActiveWorkoutPage : ContentPage
     readonly TrainTogetherViewModel? trainTogether;
 
     public ActiveWorkoutPage(ActiveWorkoutViewModel activeWorkoutViewModel, VoiceLoggingViewModel voiceLoggingViewModel,
-        RestTimerViewModel restTimerViewModel)
+        RestStopwatchViewModel restStopwatchViewModel)
     {
         InitializeComponent();
         BindingContext = activeWorkoutViewModel;
@@ -19,8 +19,8 @@ public partial class ActiveWorkoutPage : ContentPage
         voiceLogging = voiceLoggingViewModel;
         VoiceLoggingButton.BindingContext = voiceLogging;
 
-        StopwatchCard.BindingContext = restTimerViewModel;
-        PipRest.BindingContext = restTimerViewModel;
+        StopwatchCard.BindingContext = restStopwatchViewModel;
+        PipRest.BindingContext = restStopwatchViewModel;
 
         trainTogether = IPlatformApplication.Current?.Services.GetService<TrainTogetherViewModel>();
         if (trainTogether is not null)

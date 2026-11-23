@@ -29,7 +29,7 @@ namespace FitISO.Maui
         const int RequestCodeNotifications = 4002;
 
         RestPipActionReceiver? pipReceiver;
-        RestTimerViewModel? restTimer;
+        RestStopwatchViewModel? restTimer;
 
         protected override void AttachBaseContext(Context @base)
         {
@@ -47,7 +47,7 @@ namespace FitISO.Maui
             base.OnCreate(savedInstanceState);
             HandleWidgetIntent(Intent);
 
-            restTimer = IPlatformApplication.Current?.Services.GetService<RestTimerViewModel>();
+            restTimer = IPlatformApplication.Current?.Services.GetService<RestStopwatchViewModel>();
 
             if (OperatingSystem.IsAndroidVersionAtLeast(26))
             {
@@ -150,7 +150,7 @@ namespace FitISO.Maui
         {
             if (!OperatingSystem.IsAndroidVersionAtLeast(26) || !IsInPictureInPictureMode) return;
 
-            if (e.PropertyName is nameof(RestTimerViewModel.IsStopped) or nameof(RestTimerViewModel.StartTime))
+            if (e.PropertyName is nameof(RestStopwatchViewModel.IsStopped) or nameof(RestStopwatchViewModel.StartTime))
                 SetPictureInPictureParams(BuildPipParams());
         }
 
