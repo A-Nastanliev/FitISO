@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.Messaging;
 using FitISO.Maui.Messages;
+using FitISO.Maui.Models;
 
 namespace FitISO.Maui.Services
 {
@@ -36,6 +37,23 @@ namespace FitISO.Maui.Services
                 if (ProgressCardEnabled == value) return;
                 Preferences.Default.Set(ProgressCardEnabledKey, value);
                 WeakReferenceMessenger.Default.Send(new ProgressCardEnabledChangedMessage(value));
+            }
+        }
+
+        const string WorkoutLayoutKey = "WorkoutLayout";
+
+        public WorkoutLayout WorkoutLayout
+        {
+            get
+            {
+                int stored = Preferences.Default.Get(WorkoutLayoutKey, (int)WorkoutLayout.Classic);
+                return Enum.IsDefined((WorkoutLayout)stored) ? (WorkoutLayout)stored : WorkoutLayout.Classic;
+            }
+            set
+            {
+                if (WorkoutLayout == value) return;
+                Preferences.Default.Set(WorkoutLayoutKey, (int)value);
+                WeakReferenceMessenger.Default.Send(new WorkoutLayoutChangedMessage(value));
             }
         }
     }

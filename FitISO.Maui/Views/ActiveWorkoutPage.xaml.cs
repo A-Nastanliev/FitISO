@@ -21,6 +21,7 @@ public partial class ActiveWorkoutPage : ContentPage
 
         StopwatchCard.BindingContext = restStopwatchViewModel;
         PipRest.BindingContext = restStopwatchViewModel;
+        WorkoutRing.SetRestStopwatch(restStopwatchViewModel);
 
         trainTogether = IPlatformApplication.Current?.Services.GetService<TrainTogetherViewModel>();
         if (trainTogether is not null)

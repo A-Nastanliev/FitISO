@@ -164,6 +164,46 @@
             <BoxView HeightRequest="1" BackgroundColor="{DynamicResource Gray700}" Margin="0,8"/>
 
             <VerticalStackLayout x:Name="WorkoutSettingsSection" Spacing="16">
+                <VerticalStackLayout Spacing="8">
+                    <Label Text="Workout Layout" FontSize="Medium" />
+                    <Label
+                        Text="Choose how the stopwatch, progress and rest timer are shown during your workout."
+                        FontSize="Small" HorizontalTextAlignment="Justify"
+                        TextColor="{DynamicResource Gray500}" />
+                </VerticalStackLayout>
+
+                <CollectionView ItemsSource="{Binding LayoutOptions}" SelectedItem="{Binding SelectedLayoutOption, Mode=TwoWay}"
+                    SelectionMode="Single" VerticalScrollBarVisibility="Never" HorizontalScrollBarVisibility="Never">
+                    <CollectionView.ItemsLayout>
+                        <GridItemsLayout Orientation="Vertical" Span="2" HorizontalItemSpacing="12" VerticalItemSpacing="12"/>
+                    </CollectionView.ItemsLayout>
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate x:DataType="models:WorkoutLayoutOption">
+                            <Border HeightRequest="80" StrokeShape="RoundRectangle 16" StrokeThickness="2"
+                                Stroke="{DynamicResource Gray600}" BackgroundColor="{DynamicResource Gray900}">
+                                <Label Text="{Binding Title}" FontSize="Small"
+                                    HorizontalOptions="Center" VerticalOptions="Center" />
+
+                                <VisualStateManager.VisualStateGroups>
+                                    <VisualStateGroupList>
+                                        <VisualStateGroup x:Name="CommonStates">
+                                            <VisualState x:Name="Normal" />
+                                            <VisualState x:Name="Selected">
+                                                <VisualState.Setters>
+                                                    <Setter Property="Background" Value="{DynamicResource Gray900}"/>
+                                                    <Setter Property="Stroke" Value="{StaticResource White}" />
+                                                </VisualState.Setters>
+                                            </VisualState>
+                                        </VisualStateGroup>
+                                    </VisualStateGroupList>
+                                </VisualStateManager.VisualStateGroups>
+                            </Border>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+
+                <BoxView HeightRequest="1" BackgroundColor="{DynamicResource Gray700}" Margin="0,8"/>
+
                 <Grid ColumnDefinitions="*,Auto" ColumnSpacing="16">
                     <VerticalStackLayout Grid.Column="0" Spacing="8" VerticalOptions="Center">
                         <Label

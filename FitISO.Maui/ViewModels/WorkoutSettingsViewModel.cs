@@ -1,13 +1,24 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Messaging;
 using FitISO.Maui.Messages;
+using FitISO.Maui.Models;
 using FitISO.Maui.Services;
+using System.Collections.ObjectModel;
 
 namespace FitISO.Maui.ViewModels
 {
     public partial class WorkoutSettingsViewModel : ObservableObject, IRecipient<RestStopwatchEnabledChangedMessage>,
-        IRecipient<ProgressCardEnabledChangedMessage>
+        IRecipient<ProgressCardEnabledChangedMessage>, IRecipient<WorkoutLayoutChangedMessage>
     {
+        public ObservableCollection<WorkoutLayoutOption> LayoutOptions { get; } = new()
+        {
+            new WorkoutLayoutOption(WorkoutLayout.Classic, "Classic"),
+            new WorkoutLayoutOption(WorkoutLayout.Ring, "Ring")
+        };
+
+        [ObservableProperty]
+        WorkoutLayoutOption selectedLayoutOption;
+
         [ObservableProperty]
         bool autoStartRestOnExerciseFinish;
 
@@ -28,6 +39,8 @@ namespace FitISO.Maui.ViewModels
             AutoStartRestOnExerciseFinish = workoutSettingsService.AutoStartRestOnExerciseFinish;
             RestStopwatchEnabled = workoutSettingsService.RestStopwatchEnabled;
             ProgressCardEnabled = workoutSettingsService.ProgressCardEnabled;
+
+            selectedLayoutOption = LayoutOptions.FirstOrDefault(o => o.Layout == workoutSettingsService.WorkoutLayout) ?? LayoutOptions[0];
         }
 
         partial void OnAutoStartRestOnExerciseFinishChanged(bool value) => workoutSettingsService.AutoStartRestOnExerciseFinish = value;
@@ -36,8 +49,22 @@ namespace FitISO.Maui.ViewModels
 
         partial void OnProgressCardEnabledChanged(bool value) => workoutSettingsService.ProgressCardEnabled = value;
 
+        partial void OnSelectedLayoutOptionChanged(WorkoutLayoutOption value)
+        {
+            if (value is null) return;
+
+            workoutSettingsService.WorkoutLayout = value.Layout;
+        }
+
         public void Receive(RestStopwatchEnabledChangedMessage message) => RestStopwatchEnabled = message.Value;
 
         public void Receive(ProgressCardEnabledChangedMessage message) => ProgressCardEnabled = message.Value;
+
+        public void Receive(WorkoutLayoutChangedMessage message)
+        {
+            var option = LayoutOptions.FirstOrDefault(o => o.Layout == message.Value);
+            if (option is not null)
+                SelectedLayoutOption = option;
+        }
     }
 }

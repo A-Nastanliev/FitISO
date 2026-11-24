@@ -82,6 +82,7 @@
 		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="10.0.9" />
 		<PackageReference Include="Nalu.Maui.Layouts" Version="10.7.9" />
 		<PackageReference Include="Nalu.Maui.Navigation" Version="10.7.9" />
+		<PackageReference Include="ProgressRing.Maui" Version="1.1.2" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -172,6 +173,9 @@
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
 	  <MauiXaml Update="Views\WorkoutFormPage.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
+	  <MauiXaml Update="Views\WorkoutRingView.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
 	  <MauiXaml Update="Views\WorkoutTemplatesPage.xaml">

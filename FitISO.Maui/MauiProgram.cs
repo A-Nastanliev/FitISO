@@ -25,6 +25,7 @@ namespace FitISO.Maui
                 .UseMauiApp<App>()
                 .UseMauiCommunityToolkit()
                 .UseNaluTabBar()
+                .UseProgressRing()
                 .UseNaluLayouts()
                 .UseLiveCharts()
                 .ConfigureFonts(fonts =>

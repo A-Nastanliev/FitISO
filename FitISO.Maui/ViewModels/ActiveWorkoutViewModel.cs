@@ -20,7 +20,7 @@ namespace FitISO.Maui.ViewModels
 {
     public partial class ActiveWorkoutViewModel : ObservableObject, IRecipient<WorkoutStartedMessage>, IRecipient<DbImportedMessage>,
         IRecipient<ExerciseUpdatedMessage>, IRecipient<RestStopwatchEnabledChangedMessage>, IRecipient<ProgressCardEnabledChangedMessage>,
-        IActiveWorkoutProvider
+        IRecipient<WorkoutLayoutChangedMessage>, IActiveWorkoutProvider
     {
         [ObservableProperty]
         Workout workout = new();
@@ -61,7 +61,15 @@ namespace FitISO.Maui.ViewModels
         [NotifyPropertyChangedFor(nameof(ShowPartnerList))]
         bool isViewingPartner;
 
-        public bool ShowTopCards => (RestStopwatchEnabled || ProgressCardEnabled || HasExtraTopCard) && !IsInPipMode;
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(IsClassicLayout))]
+        [NotifyPropertyChangedFor(nameof(IsRingLayout))]
+        WorkoutLayout workoutLayout;
+
+        public bool IsClassicLayout => WorkoutLayout == WorkoutLayout.Classic;
+        public bool IsRingLayout => WorkoutLayout == WorkoutLayout.Ring;
+
+        public bool ShowTopCards => (!IsClassicLayout || RestStopwatchEnabled || ProgressCardEnabled || HasExtraTopCard) && !IsInPipMode;
         public bool IsNotInPipMode => !IsInPipMode;
         public bool ShowProgressCard => ProgressCardEnabled && !IsInPipMode;
         public bool ShowOwnList => !IsInPipMode && !IsViewingPartner;
@@ -181,6 +189,7 @@ namespace FitISO.Maui.ViewModels
             this.workoutService = workoutService;
             this.serviceProvider = serviceProvider;
             RestStopwatchEnabled = workoutSettingsService.RestStopwatchEnabled;
+            WorkoutLayout = workoutSettingsService.WorkoutLayout;
             ProgressCardEnabled = workoutSettingsService.ProgressCardEnabled;
             ActiveWorkoutState.Instance.PropertyChanged += ActiveWorkoutState_PropertyChanged;
             IsInPipMode = ActiveWorkoutState.Instance.IsInPipMode;
@@ -196,6 +205,7 @@ namespace FitISO.Maui.ViewModels
 
         public void Receive(ProgressCardEnabledChangedMessage message) => ProgressCardEnabled = message.Value;
 
+        public void Receive(WorkoutLayoutChangedMessage message) => WorkoutLayout = message.Value;
         public void Receive(WorkoutStartedMessage message)
         {
             Workout = message.Value;
