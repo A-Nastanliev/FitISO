@@ -37,6 +37,7 @@ namespace FitISO.Maui.ViewModels
 
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(ShowTopCards))]
+        [NotifyPropertyChangedFor(nameof(IsRestStopwatchVisible))]
         bool restStopwatchEnabled;
 
         [ObservableProperty]
@@ -59,15 +60,20 @@ namespace FitISO.Maui.ViewModels
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(ShowOwnList))]
         [NotifyPropertyChangedFor(nameof(ShowPartnerList))]
+        [NotifyPropertyChangedFor(nameof(IsRestStopwatchVisible))]
         bool isViewingPartner;
 
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(IsClassicLayout))]
         [NotifyPropertyChangedFor(nameof(IsRingLayout))]
+        [NotifyPropertyChangedFor(nameof(IsCompactBarLayout))]
         WorkoutLayout workoutLayout;
 
         public bool IsClassicLayout => WorkoutLayout == WorkoutLayout.Classic;
         public bool IsRingLayout => WorkoutLayout == WorkoutLayout.Ring;
+        public bool IsCompactBarLayout => WorkoutLayout == WorkoutLayout.CompactBar;
+
+        public bool IsRestStopwatchVisible => RestStopwatchEnabled && !IsViewingPartner;
 
         public bool ShowTopCards => (!IsClassicLayout || RestStopwatchEnabled || ProgressCardEnabled || HasExtraTopCard) && !IsInPipMode;
         public bool IsNotInPipMode => !IsInPipMode;

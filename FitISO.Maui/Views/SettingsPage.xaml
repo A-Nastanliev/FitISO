@@ -176,7 +176,7 @@
                 <CollectionView ItemsSource="{Binding LayoutOptions}" SelectedItem="{Binding SelectedLayoutOption, Mode=TwoWay}"
                     SelectionMode="Single" VerticalScrollBarVisibility="Never" HorizontalScrollBarVisibility="Never">
                     <CollectionView.ItemsLayout>
-                        <GridItemsLayout Orientation="Vertical" Span="2" HorizontalItemSpacing="12" VerticalItemSpacing="12"/>
+                        <GridItemsLayout Orientation="Vertical" Span="3" HorizontalItemSpacing="12" VerticalItemSpacing="12"/>
                     </CollectionView.ItemsLayout>
                     <CollectionView.ItemTemplate>
                         <DataTemplate x:DataType="models:WorkoutLayoutOption">
@@ -190,8 +190,11 @@
                                                     Value="{x:Static models:WorkoutLayout.Ring}">
                                                     <Setter Property="IsVisible" Value="False" />
                                                 </DataTrigger>
+                                                <DataTrigger TargetType="VerticalStackLayout" Binding="{Binding Layout}"
+                                                    Value="{x:Static models:WorkoutLayout.CompactBar}">
+                                                    <Setter Property="IsVisible" Value="False" />
+                                                </DataTrigger>
                                             </VerticalStackLayout.Triggers>
-
                                             <Border WidthRequest="24" HeightRequest="7" HorizontalOptions="Start"
                                                 StrokeThickness="0" StrokeShape="RoundRectangle 2"
                                                 BackgroundColor="{DynamicResource Gray300}" />
@@ -207,7 +210,6 @@
                                                     <Setter Property="IsVisible" Value="True" />
                                                 </DataTrigger>
                                             </Grid.Triggers>
-
                                             <mhr:ProgressRing WidthRequest="56" HeightRequest="56"
                                                 HorizontalOptions="Center" VerticalOptions="Center"
                                                 StrokeThickness="5" Progress="0.4"
@@ -221,6 +223,26 @@
                                                     StrokeShape="RoundRectangle 2" BackgroundColor="{DynamicResource Gray500}" />
                                             </VerticalStackLayout>
                                         </Grid>
+                                        <Border WidthRequest="72" HeightRequest="36" HorizontalOptions="Center" VerticalOptions="Center"
+                                            StrokeThickness="0" StrokeShape="RoundRectangle 12" Padding="0"
+                                            BackgroundColor="{DynamicResource Gray700}" IsVisible="False" InputTransparent="True">
+                                            <Border.Triggers>
+                                                <DataTrigger TargetType="Border" Binding="{Binding Layout}"
+                                                    Value="{x:Static models:WorkoutLayout.CompactBar}">
+                                                    <Setter Property="IsVisible" Value="True" />
+                                                </DataTrigger>
+                                            </Border.Triggers>
+                                            <Grid RowDefinitions="*,6">
+                                                <Grid Grid.Row="0" ColumnDefinitions="*,Auto,*" Padding="8,0">
+                                                    <Border Grid.Column="0" WidthRequest="20" HeightRequest="8" HorizontalOptions="Start"
+                                                        StrokeThickness="0" StrokeShape="RoundRectangle 2" BackgroundColor="{DynamicResource Gray500}" />
+                                                    <Border Grid.Column="1" WidthRequest="12" HeightRequest="6"
+                                                        StrokeThickness="0" StrokeShape="RoundRectangle 2" BackgroundColor="{DynamicResource Gray500}" />
+                                                </Grid>
+                                                <Border Grid.Row="1" WidthRequest="44" HeightRequest="6" HorizontalOptions="Start"
+                                                    StrokeThickness="0" BackgroundColor="{DynamicResource Gray300}" />
+                                            </Grid>
+                                        </Border>
                                     </Grid>
 
                                     <Label Text="{Binding Title}" FontSize="Small" HorizontalOptions="Center" />
@@ -302,7 +324,7 @@
                         ThumbColor="{StaticResource White}" />
                 </Grid>
             </VerticalStackLayout>
-            
+
             <BoxView HeightRequest="1" BackgroundColor="{DynamicResource Gray700}" Margin="0,8"/>
 
             <VerticalStackLayout x:Name="VoiceLoggingSection" Spacing="16">
@@ -323,7 +345,7 @@
                         ThumbColor="{StaticResource White}" />
                 </Grid>
             </VerticalStackLayout>
-            
+
             <BoxView HeightRequest="1" BackgroundColor="{DynamicResource Gray700}" Margin="0,8"/>
 
             <VerticalStackLayout x:Name="HeatmapSection" Spacing="16">

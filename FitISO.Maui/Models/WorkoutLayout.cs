@@ -3,6 +3,7 @@
     public enum WorkoutLayout
     {
         Classic = 0,
-        Ring = 1
+        Ring = 1,
+        CompactBar = 2
     }
 }

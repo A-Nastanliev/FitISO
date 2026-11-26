@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:FitISO.Maui.ViewModels"
+             xmlns:behaviors="clr-namespace:FitISO.Maui.Behaviors"
+             x:Class="FitISO.Maui.Views.WorkoutCompactBarView"
+             x:DataType="vm:ActiveWorkoutViewModel"
+             IsVisible="{Binding IsCompactBarLayout}">
+
+    <Border x:Name="Bar" StrokeThickness="0" StrokeShape="RoundRectangle 30"
+            BackgroundColor="{DynamicResource Gray800}">
+        <Grid RowDefinitions="Auto,Auto" RowSpacing="0">
+            <Grid Grid.Row="0" ColumnDefinitions="*,Auto,*" Padding="22,12,16,10" >
+                <Label Grid.Column="0" VerticalOptions="Center" HorizontalOptions="Start"
+                       Text="{Binding DisplayDuration, StringFormat='{0:hh\\:mm\\:ss}'}"
+                       FontSize="28" FontAttributes="Bold" TextColor="White"
+                       VerticalTextAlignment="Center">
+                    <Label.Triggers>
+                        <DataTrigger TargetType="Label" Binding="{Binding IsRestStopwatchVisible}" Value="False">
+                            <Setter Property="Grid.ColumnSpan" Value="3" />
+                            <Setter Property="HorizontalOptions" Value="Center" />
+                        </DataTrigger>
+                    </Label.Triggers>
+                </Label>
+                <VerticalStackLayout Grid.Column="1" x:Name="RestTimer" x:DataType="vm:RestStopwatchViewModel"
+                    VerticalOptions="Center" HorizontalOptions="Center"
+                    IsVisible="{Binding IsAvailable}">
+                    <Label Text="{Binding Elapsed, StringFormat='{0:mm\\:ss}'}"
+                           FontSize="22" TextColor="{DynamicResource Gray400}"
+                           HorizontalTextAlignment="Center">
+                        <Label.Triggers>
+                            <DataTrigger TargetType="Label" Binding="{Binding IsStopped}" Value="True">
+                                <Setter Property="IsVisible" Value="False" />
+                            </DataTrigger>
+                            <DataTrigger TargetType="Label" Binding="{Binding IsStopped}" Value="False">
+                                <Setter Property="IsVisible" Value="True" />
+                            </DataTrigger>
+                            <DataTrigger TargetType="Label" Binding="{Binding ShowStart}" Value="True">
+                                <Setter Property="IsVisible" Value="False" />
+                            </DataTrigger>
+                        </Label.Triggers>
+                    </Label>
+                </VerticalStackLayout>
+
+                <HorizontalStackLayout Grid.Column="2" x:Name="RestControls" x:DataType="vm:RestStopwatchViewModel"
+                    Spacing="12" HorizontalOptions="End" VerticalOptions="Center"
+                    IsVisible="{Binding IsAvailable}">
+                    <ImageButton HeightRequest="50" WidthRequest="50" CornerRadius="25" Padding="8"
+                        BackgroundColor="{DynamicResource Gray600}"
+                        Source="{FontImageSource FontFamily=MaterialRound, Glyph='&#xE037;', Color=White, Size=18}"
+                        IsVisible="{Binding ShowStart}" Command="{Binding StartCommand}" />
+                    <ImageButton HeightRequest="50" WidthRequest="50" CornerRadius="25" Padding="8"
+                        BackgroundColor="{DynamicResource DeleteColor}"
+                        Source="{FontImageSource FontFamily=MaterialRound, Glyph='&#xE047;', Color=White, Size=18}"
+                        IsVisible="{Binding ShowRunning}" Command="{Binding StopCommand}" />
+                    <HorizontalStackLayout Spacing="12" IsVisible="{Binding ShowStopped}">
+                        <ImageButton HeightRequest="50" WidthRequest="50" CornerRadius="25" Padding="8"
+                            BackgroundColor="{DynamicResource Gray600}"
+                            Source="{FontImageSource FontFamily=MaterialRound, Glyph='&#xE037;', Color=White, Size=18}"
+                            Command="{Binding ResumeCommand}" />
+                        <ImageButton HeightRequest="50" WidthRequest="50" CornerRadius="25" Padding="8"
+                            BackgroundColor="{DynamicResource Gray500}"
+                            Source="{FontImageSource FontFamily=MaterialRound, Glyph='&#xE5D5;', Color=White, Size=18}"
+                            Command="{Binding RestartCommand}" />
+                    </HorizontalStackLayout>
+                </HorizontalStackLayout>
+            </Grid>
+            <Border Grid.Row="1" StrokeThickness="0" HeightRequest="12" Padding="0"
+                    BackgroundColor="{DynamicResource Gray600}"
+                    IsVisible="{Binding ShowProgressCard}">
+                <ProgressBar ProgressColor="{DynamicResource Gray100}"
+                    BackgroundColor="Transparent" ScaleY="6"
+                    HeightRequest="12" VerticalOptions="Fill">
+                    <ProgressBar.Behaviors>
+                        <behaviors:AnimatedProgressBehavior
+                            TargetProgress="{Binding DisplayProgress}" Duration="600"
+                            DefaultColorKey="Gray100" CompletedColorKey="ChartAccentColor"
+                            PulseTarget="{x:Reference Bar}" />
+                    </ProgressBar.Behaviors>
+                </ProgressBar>
+            </Border>
+        </Grid>
+    </Border>
+</ContentView>

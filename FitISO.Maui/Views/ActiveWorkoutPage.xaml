@@ -64,7 +64,8 @@
             IsVisible="{Binding ShowTopCards}">
             <views:TrainTogetherCard x:Name="TrainTogetherCard" IsVisible="False"/>
             <views:WorkoutRingView x:Name="WorkoutRing"/>
-            <VerticalStackLayout x:Name="ClassicTimers" Spacing="12" IsVisible="{Binding IsClassicLayout}"> 
+            <views:WorkoutCompactBarView x:Name="CompactBar"/>
+            <VerticalStackLayout x:Name="ClassicTimers" Spacing="12" IsVisible="{Binding IsClassicLayout}">
                 <Border x:Name="ProgressCard" StrokeThickness="0" StrokeShape="RoundRectangle 25"
                     BackgroundColor="{DynamicResource Gray800}" IsVisible="{Binding ShowProgressCard}">
                     <Grid Padding="20,12">

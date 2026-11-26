@@ -13,7 +13,8 @@ namespace FitISO.Maui.ViewModels
         public ObservableCollection<WorkoutLayoutOption> LayoutOptions { get; } = new()
         {
             new WorkoutLayoutOption(WorkoutLayout.Classic, "Classic"),
-            new WorkoutLayoutOption(WorkoutLayout.Ring, "Ring")
+            new WorkoutLayoutOption(WorkoutLayout.Ring, "Ring"),
+            new WorkoutLayoutOption(WorkoutLayout.CompactBar, "Compact bar")
         };
 
         [ObservableProperty]
