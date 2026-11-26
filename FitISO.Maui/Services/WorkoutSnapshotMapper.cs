@@ -5,7 +5,8 @@ namespace FitISO.Maui.Services
 {
     public static class WorkoutSnapshotMapper
     {
-        public static WorkoutSnapshot Map(Workout workout, DateTime? restStartTime, bool restIsStopped, long version)
+        public static WorkoutSnapshot Map(Workout workout, DateTime? restStartTime, bool restIsStopped, long version,
+            DisplaySnapshot? display = null)
         {
             var exercises = workout.WorkoutExercises
             .Select(we => new ExerciseSnapshot(
@@ -20,7 +21,7 @@ namespace FitISO.Maui.Services
 
             return new WorkoutSnapshot(
                 version, workout.Name ?? string.Empty, ToUtc(workout.StartTime), ToUtc(workout.EndTime),
-                exercises, new RestStopwatchSnapshot(ToUtc(restStartTime), restIsStopped));
+                exercises, new RestStopwatchSnapshot(ToUtc(restStartTime), restIsStopped), display);
         }
 
         static DateTime? ToUtc(DateTime? value) =>

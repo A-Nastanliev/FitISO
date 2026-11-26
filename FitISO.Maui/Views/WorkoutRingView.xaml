@@ -51,6 +51,14 @@
                         </Label.Triggers>
                     </Label>
                 </VerticalStackLayout>
+                <VerticalStackLayout Grid.Row="1" x:Name="PartnerRestTimer" VerticalOptions="Start"
+                                     IsVisible="{Binding PartnerRestInline}">
+                    <Label Text="{Binding PartnerRestElapsed, StringFormat='{0:mm\\:ss}'}"
+                           FontSize="Large" TextColor="{DynamicResource Gray400}"
+                           HorizontalTextAlignment="Center" IsVisible="{Binding ShowPartnerRunningRest}" />
+                    <Label Text="Paused" FontSize="Medium" TextColor="{DynamicResource Gray400}"
+                           HorizontalTextAlignment="Center" IsVisible="{Binding ShowPartnerPaused}" />
+                </VerticalStackLayout>
             </Grid>
         </Grid>
 

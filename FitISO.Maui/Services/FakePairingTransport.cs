@@ -233,7 +233,16 @@ namespace FitISO.Maui.Services
                             e.LastSets,
                             e.LastSetsDateUtc))
                         .ToList(),
-                    new RestStopwatchSnapshot(IsFinished ? null : _restStartUtc, false));
+                    new RestStopwatchSnapshot(IsFinished ? null : _restStartUtc, false),
+                    NextDisplay());
+
+            int _snapshots;
+
+            DisplaySnapshot NextDisplay()
+            {
+                int n = _snapshots++;
+                return new DisplaySnapshot((n / 4) % 3, (n / 12) % 2 == 0, true);
+            }
 
             bool CompleteNextSet()
             {

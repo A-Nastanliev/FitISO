@@ -16,7 +16,7 @@
                        FontSize="28" FontAttributes="Bold" TextColor="White"
                        VerticalTextAlignment="Center">
                     <Label.Triggers>
-                        <DataTrigger TargetType="Label" Binding="{Binding IsRestStopwatchVisible}" Value="False">
+                        <DataTrigger TargetType="Label" Binding="{Binding IsRestAreaVisible}" Value="False">
                             <Setter Property="Grid.ColumnSpan" Value="3" />
                             <Setter Property="HorizontalOptions" Value="Center" />
                         </DataTrigger>
@@ -40,6 +40,16 @@
                             </DataTrigger>
                         </Label.Triggers>
                     </Label>
+                </VerticalStackLayout>
+
+                <VerticalStackLayout Grid.Column="1" x:Name="PartnerRestTimer"
+                    VerticalOptions="Center" HorizontalOptions="Center"
+                    IsVisible="{Binding PartnerRestInline}">
+                    <Label Text="{Binding PartnerRestElapsed, StringFormat='{0:mm\\:ss}'}"
+                           FontSize="22" TextColor="{DynamicResource Gray400}"
+                           HorizontalTextAlignment="Center" IsVisible="{Binding ShowPartnerRunningRest}" />
+                    <Label Text="Paused" FontSize="18" TextColor="{DynamicResource Gray400}"
+                           HorizontalTextAlignment="Center" IsVisible="{Binding ShowPartnerPaused}" />
                 </VerticalStackLayout>
 
                 <HorizontalStackLayout Grid.Column="2" x:Name="RestControls" x:DataType="vm:RestStopwatchViewModel"

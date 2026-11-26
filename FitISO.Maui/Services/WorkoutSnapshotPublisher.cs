@@ -1,12 +1,17 @@
+using CommunityToolkit.Mvvm.Messaging;
+using FitISO.Maui.Messages;
 using FitISO.Maui.Models;
 using FitISO.Maui.ViewModels;
 using FitISO.Sharing.Session;
+using FitISO.Sharing.Snapshots;
 using FitISO.Sharing.Transport;
 using System.ComponentModel;
 
 namespace FitISO.Maui.Services
 {
-    public sealed class WorkoutSnapshotPublisher : IDisposable
+    public sealed class WorkoutSnapshotPublisher : IDisposable,
+        IRecipient<WorkoutLayoutChangedMessage>, IRecipient<ProgressCardEnabledChangedMessage>,
+        IRecipient<RestStopwatchEnabledChangedMessage>
     {
         static readonly TimeSpan DebounceDelay = TimeSpan.FromMilliseconds(300);
         static readonly TimeSpan SettleDelay = TimeSpan.FromMilliseconds(400);
@@ -15,23 +20,33 @@ namespace FitISO.Maui.Services
         readonly RestStopwatchViewModel _rest;
         readonly PartnerSessionCoordinator _coordinator;
         readonly SnapshotVersionSource _versions;
+        readonly WorkoutSettingsService _settings;
         CancellationTokenSource? _debounceCts;
 
         bool _sessionActive;
 
         public event EventHandler? SessionEnded;
 
-        public WorkoutSnapshotPublisher(ActiveWorkoutViewModel activeWorkout, RestStopwatchViewModel rest, PartnerSessionCoordinator coordinator, SnapshotVersionSource versions)
+        public WorkoutSnapshotPublisher(ActiveWorkoutViewModel activeWorkout, RestStopwatchViewModel rest, PartnerSessionCoordinator coordinator, SnapshotVersionSource versions,
+            WorkoutSettingsService settings)
         {
             _activeWorkout = activeWorkout;
             _rest = rest;
             _coordinator = coordinator;
             _versions = versions;
+            _settings = settings;
 
+            WeakReferenceMessenger.Default.RegisterAll(this);
             _activeWorkout.StateChanged += OnWorkoutStateChanged;
             _rest.PropertyChanged += OnRestPropertyChanged;
             _coordinator.ConnectionStateChanged += OnConnectionStateChanged;
         }
+
+        public void Receive(WorkoutLayoutChangedMessage message) => SchedulePublish();
+
+        public void Receive(ProgressCardEnabledChangedMessage message) => SchedulePublish();
+
+        public void Receive(RestStopwatchEnabledChangedMessage message) => SchedulePublish();
 
         void OnRestPropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
@@ -129,7 +144,8 @@ namespace FitISO.Maui.Services
                 workout,
                 _rest.StartTime,
                 _rest.IsStopped,
-                _versions.Next());
+                _versions.Next(),
+                new DisplaySnapshot((int)_settings.WorkoutLayout, _settings.ProgressCardEnabled, _settings.RestStopwatchEnabled));
 
             return _coordinator.PublishAsync(snapshot);
         }
@@ -137,6 +153,7 @@ namespace FitISO.Maui.Services
         public void Dispose()
         {
             _debounceCts?.Cancel();
+            WeakReferenceMessenger.Default.UnregisterAll(this);
             _activeWorkout.StateChanged -= OnWorkoutStateChanged;
             _rest.PropertyChanged -= OnRestPropertyChanged;
             _coordinator.ConnectionStateChanged -= OnConnectionStateChanged;

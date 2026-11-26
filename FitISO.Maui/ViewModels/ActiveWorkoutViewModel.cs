@@ -38,6 +38,9 @@ namespace FitISO.Maui.ViewModels
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(ShowTopCards))]
         [NotifyPropertyChangedFor(nameof(IsRestStopwatchVisible))]
+        [NotifyPropertyChangedFor(nameof(IsRestAreaVisible))]
+        [NotifyPropertyChangedFor(nameof(PartnerRestInline))]
+        [NotifyPropertyChangedFor(nameof(ShowPartnerRestCard))]
         bool restStopwatchEnabled;
 
         [ObservableProperty]
@@ -68,16 +71,28 @@ namespace FitISO.Maui.ViewModels
         [NotifyPropertyChangedFor(nameof(IsRingLayout))]
         [NotifyPropertyChangedFor(nameof(IsCompactBarLayout))]
         WorkoutLayout workoutLayout;
+        WorkoutLayout EffectiveLayout =>
+            IsViewingPartner && partnerSnapshot?.Display is { } d && Enum.IsDefined(typeof(WorkoutLayout), d.Layout)
+                ? (WorkoutLayout)d.Layout
+                : WorkoutLayout;
 
-        public bool IsClassicLayout => WorkoutLayout == WorkoutLayout.Classic;
-        public bool IsRingLayout => WorkoutLayout == WorkoutLayout.Ring;
-        public bool IsCompactBarLayout => WorkoutLayout == WorkoutLayout.CompactBar;
+        bool EffectiveProgressCardEnabled =>
+            IsViewingPartner && partnerSnapshot?.Display is { } d ? d.ProgressCardEnabled : ProgressCardEnabled;
+
+        bool EffectiveRestStopwatchEnabled =>
+            IsViewingPartner && partnerSnapshot?.Display is { } d ? d.RestStopwatchEnabled : RestStopwatchEnabled;
+
+        public bool IsClassicLayout => EffectiveLayout == WorkoutLayout.Classic;
+        public bool IsRingLayout => EffectiveLayout == WorkoutLayout.Ring;
+        public bool IsCompactBarLayout => EffectiveLayout == WorkoutLayout.CompactBar;
 
         public bool IsRestStopwatchVisible => RestStopwatchEnabled && !IsViewingPartner;
 
-        public bool ShowTopCards => (!IsClassicLayout || RestStopwatchEnabled || ProgressCardEnabled || HasExtraTopCard) && !IsInPipMode;
+        public bool IsRestAreaVisible => EffectiveRestStopwatchEnabled;
+
+        public bool ShowTopCards => (!IsClassicLayout || EffectiveRestStopwatchEnabled || EffectiveProgressCardEnabled || HasExtraTopCard) && !IsInPipMode;
         public bool IsNotInPipMode => !IsInPipMode;
-        public bool ShowProgressCard => ProgressCardEnabled && !IsInPipMode;
+        public bool ShowProgressCard => EffectiveProgressCardEnabled && !IsInPipMode;
         public bool ShowOwnList => !IsInPipMode && !IsViewingPartner;
         public bool ShowPartnerList => !IsInPipMode && IsViewingPartner;
 
@@ -115,7 +130,8 @@ namespace FitISO.Maui.ViewModels
         public TimeSpan DisplayDuration => IsViewingPartner ? PartnerDuration : Duration;
         public double DisplayProgress => IsViewingPartner ? PartnerProgress : Progress;
 
-        public bool ShowPartnerRestCard => IsViewingPartner && PartnerRestActive;
+        public bool ShowPartnerRestCard => IsViewingPartner && PartnerRestActive && IsClassicLayout && EffectiveRestStopwatchEnabled;
+        public bool PartnerRestInline => IsViewingPartner && !IsClassicLayout && EffectiveRestStopwatchEnabled;
         public bool ShowPartnerRunningRest => IsViewingPartner && PartnerRestActive && !PartnerRestPaused;
         public bool ShowPartnerPaused => IsViewingPartner && PartnerRestPaused;
 
@@ -159,6 +175,13 @@ namespace FitISO.Maui.ViewModels
         {
             OnPropertyChanged(nameof(DisplayDuration));
             OnPropertyChanged(nameof(DisplayProgress));
+            OnPropertyChanged(nameof(IsClassicLayout));
+            OnPropertyChanged(nameof(IsRingLayout));
+            OnPropertyChanged(nameof(IsCompactBarLayout));
+            OnPropertyChanged(nameof(ShowProgressCard));
+            OnPropertyChanged(nameof(ShowTopCards));
+            OnPropertyChanged(nameof(IsRestAreaVisible));
+            OnPropertyChanged(nameof(PartnerRestInline));
             OnPropertyChanged(nameof(PartnerRestActive));
             OnPropertyChanged(nameof(ShowPartnerRestCard));
             OnPropertyChanged(nameof(ShowPartnerRunningRest));
