@@ -2,6 +2,7 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:models="clr-namespace:FitISO.Maui.Models"
+             xmlns:mhr="http://mhrastegari.com/progressring"
              x:Class="FitISO.Maui.Views.SettingsPage">
 
     <Shell.TitleView>
@@ -167,7 +168,7 @@
                 <VerticalStackLayout Spacing="8">
                     <Label Text="Workout Layout" FontSize="Medium" />
                     <Label
-                        Text="Choose how the stopwatch, progress and rest timer are shown during your workout."
+                        Text="Choose how the stopwatch, progress and rest stopwatch are shown during your workout."
                         FontSize="Small" HorizontalTextAlignment="Justify"
                         TextColor="{DynamicResource Gray500}" />
                 </VerticalStackLayout>
@@ -179,10 +180,51 @@
                     </CollectionView.ItemsLayout>
                     <CollectionView.ItemTemplate>
                         <DataTemplate x:DataType="models:WorkoutLayoutOption">
-                            <Border HeightRequest="80" StrokeShape="RoundRectangle 16" StrokeThickness="2"
+                            <Border HeightRequest="120" StrokeShape="RoundRectangle 16" StrokeThickness="2"
                                 Stroke="{DynamicResource Gray600}" BackgroundColor="{DynamicResource Gray900}">
-                                <Label Text="{Binding Title}" FontSize="Small"
-                                    HorizontalOptions="Center" VerticalOptions="Center" />
+                                <VerticalStackLayout Spacing="6" VerticalOptions="Center" HorizontalOptions="Center">
+                                    <Grid HeightRequest="56" WidthRequest="72">
+                                        <VerticalStackLayout Spacing="5" VerticalOptions="Center" HorizontalOptions="Center">
+                                            <VerticalStackLayout.Triggers>
+                                                <DataTrigger TargetType="VerticalStackLayout" Binding="{Binding Layout}"
+                                                    Value="{x:Static models:WorkoutLayout.Ring}">
+                                                    <Setter Property="IsVisible" Value="False" />
+                                                </DataTrigger>
+                                            </VerticalStackLayout.Triggers>
+
+                                            <Border WidthRequest="24" HeightRequest="7" HorizontalOptions="Start"
+                                                StrokeThickness="0" StrokeShape="RoundRectangle 2"
+                                                BackgroundColor="{DynamicResource Gray300}" />
+                                            <Border WidthRequest="72" HeightRequest="12" StrokeThickness="0"
+                                                StrokeShape="RoundRectangle 6" BackgroundColor="{DynamicResource Gray500}" />
+                                            <Border WidthRequest="72" HeightRequest="12" StrokeThickness="0"
+                                        StrokeShape="RoundRectangle 6" BackgroundColor="{DynamicResource Gray500}" />
+                                        </VerticalStackLayout>
+                                        <Grid WidthRequest="56" HeightRequest="56" HorizontalOptions="Center" IsVisible="False">
+                                            <Grid.Triggers>
+                                                <DataTrigger TargetType="Grid" Binding="{Binding Layout}"
+                                                    Value="{x:Static models:WorkoutLayout.Ring}">
+                                                    <Setter Property="IsVisible" Value="True" />
+                                                </DataTrigger>
+                                            </Grid.Triggers>
+
+                                            <mhr:ProgressRing WidthRequest="56" HeightRequest="56"
+                                                HorizontalOptions="Center" VerticalOptions="Center"
+                                                StrokeThickness="5" Progress="0.4"
+                                                ProgressColor="{DynamicResource Gray300}"
+                                                TrackColor="{DynamicResource Gray600}"
+                                                InputTransparent="True" />
+                                            <VerticalStackLayout Spacing="4" VerticalOptions="Center" HorizontalOptions="Center" InputTransparent="True">
+                                                <Border WidthRequest="28" HeightRequest="9" StrokeThickness="0"
+                                                    StrokeShape="RoundRectangle 3" BackgroundColor="{DynamicResource Gray500}" />
+                                                <Border WidthRequest="16" HeightRequest="5" StrokeThickness="0"
+                                                    StrokeShape="RoundRectangle 2" BackgroundColor="{DynamicResource Gray500}" />
+                                            </VerticalStackLayout>
+                                        </Grid>
+                                    </Grid>
+
+                                    <Label Text="{Binding Title}" FontSize="Small" HorizontalOptions="Center" />
+                                </VerticalStackLayout>
 
                                 <VisualStateManager.VisualStateGroups>
                                     <VisualStateGroupList>
