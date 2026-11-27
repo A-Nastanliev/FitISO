@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:FitISO.Maui.ViewModels"
+             xmlns:progressBar="clr-namespace:Syncfusion.Maui.Toolkit.ProgressBar;assembly=Syncfusion.Maui.Toolkit"
+             x:Class="FitISO.Maui.Views.WorkoutSegmentedView"
+             x:DataType="vm:ActiveWorkoutViewModel"
+             xmlns:behaviors="clr-namespace:FitISO.Maui.Behaviors"
+             IsVisible="{Binding IsSegmentedLayout}">
+
+    <VerticalStackLayout Spacing="12">
+
+        <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+
+            <Border Grid.Column="0" StrokeThickness="0" StrokeShape="RoundRectangle 25"
+                    BackgroundColor="{DynamicResource Gray800}" Padding="16,22">
+                <Border.Triggers>
+                    <DataTrigger TargetType="Border" Binding="{Binding IsRestAreaVisible}" Value="False">
+                        <Setter Property="Grid.ColumnSpan" Value="2" />
+                    </DataTrigger>
+                </Border.Triggers>
+                <Label Text="{Binding DisplayDuration, StringFormat='{0:hh\\:mm\\:ss}'}"
+                       FontSize="Title" FontAttributes="Bold" TextColor="White"
+                       HorizontalOptions="Center" VerticalOptions="Center"
+                       HorizontalTextAlignment="Center" />
+            </Border>
+
+            <Border Grid.Column="1" x:Name="OwnRestTile" x:DataType="vm:RestStopwatchViewModel"
+                    StrokeThickness="2" Stroke="Transparent" StrokeShape="RoundRectangle 25"
+                    BackgroundColor="{DynamicResource Gray800}" Padding="16,0"
+                    IsVisible="{Binding IsAvailable}">
+                <Border.Triggers>
+                    <DataTrigger TargetType="Border" Binding="{Binding ShowRunning}" Value="True">
+                        <Setter Property="Stroke" Value="{DynamicResource DeleteColor}" />
+                    </DataTrigger>
+                    <DataTrigger TargetType="Border" Binding="{Binding ShowStopped}" Value="True">
+                        <Setter Property="Stroke" Value="{DynamicResource Gray400}" />
+                    </DataTrigger>
+                </Border.Triggers>
+                <Grid>
+                    <Image HorizontalOptions="Center" VerticalOptions="Center" IsVisible="{Binding ShowStart}"
+                           Source="{FontImageSource FontFamily=MaterialRound, Glyph='&#xE037;', Color=White, Size=32}" />
+
+                    <Label Text="{Binding Elapsed, StringFormat='{0:mm\\:ss}'}"
+                           FontSize="Title" FontAttributes="Bold" TextColor="White"
+                           HorizontalOptions="Center" VerticalOptions="Center"
+                           IsVisible="{Binding ShowRunning}" />
+
+                    <Image HorizontalOptions="Center" VerticalOptions="Center" IsVisible="{Binding ShowStopped}"
+                           Source="{FontImageSource FontFamily=MaterialRound, Glyph='&#xE034;', Color=White, Size=32}" />
+                </Grid>
+            </Border>
+
+            <Border Grid.Column="1" StrokeThickness="2" Stroke="Transparent" StrokeShape="RoundRectangle 25"
+                    BackgroundColor="{DynamicResource Gray800}" Padding="16,0"
+                    IsVisible="{Binding PartnerRestInline}">
+                <Border.Triggers>
+                    <DataTrigger TargetType="Border" Binding="{Binding ShowPartnerRunningRest}" Value="True">
+                        <Setter Property="Stroke" Value="{DynamicResource DeleteColor}" />
+                    </DataTrigger>
+                    <DataTrigger TargetType="Border" Binding="{Binding ShowPartnerPaused}" Value="True">
+                        <Setter Property="Stroke" Value="{DynamicResource Gray400}" />
+                    </DataTrigger>
+                </Border.Triggers>
+                <Grid>
+                    <Label Text="{Binding PartnerRestElapsed, StringFormat='{0:mm\\:ss}'}"
+                          FontSize="Title" FontAttributes="Bold" TextColor="White"
+                           HorizontalOptions="Center" VerticalOptions="Center"
+                           IsVisible="{Binding ShowPartnerRunningRest}" />
+                    <Image HorizontalOptions="Center"  VerticalOptions="Center" IsVisible="{Binding ShowPartnerPaused}"
+                               Source="{FontImageSource FontFamily=MaterialRound, Glyph='&#xE034;', Color=White, Size=32}" />
+                </Grid>
+            </Border>
+        </Grid>
+
+        <Border x:Name="ProgressCard" StrokeThickness="0" StrokeShape="RoundRectangle 25"
+                BackgroundColor="{DynamicResource Gray800}" Padding="20,14"
+                IsVisible="{Binding ShowProgressCard}">
+            <Border StrokeThickness="0" StrokeShape="RoundRectangle 7"
+                    BackgroundColor="Transparent" Padding="0" HeightRequest="14">
+                <progressBar:SfLinearProgressBar Minimum="0"
+                    Maximum="{Binding DisplaySegmentCount}"
+                    Progress="{Binding DisplayCompletedSets}"
+                    SegmentCount="{Binding DisplaySegmentCount}"
+                    SegmentGapWidth="4" TrackHeight="14" ProgressHeight="14"
+                    TrackCornerRadius="0" ProgressCornerRadius="0" AnimationDuration="300"
+                    BackgroundColor="Transparent" TrackFill="{DynamicResource Gray600}">
+                    <progressBar:SfLinearProgressBar.Behaviors>
+                        <behaviors:AnimatedSegmentedProgressBehavior
+                            CompletedSets="{Binding DisplayCompletedSets}"
+                            TotalSets="{Binding DisplayTotalSets}"
+                            DefaultColorKey="Gray100" CompletedColorKey="ChartAccentColor"
+                            PulseTarget="{x:Reference ProgressCard}" />
+                    </progressBar:SfLinearProgressBar.Behaviors>
+                </progressBar:SfLinearProgressBar>
+            </Border>
+        </Border>
+    </VerticalStackLayout>
+</ContentView>

@@ -65,6 +65,7 @@
             <views:TrainTogetherCard x:Name="TrainTogetherCard" IsVisible="False"/>
             <views:WorkoutRingView x:Name="WorkoutRing"/>
             <views:WorkoutCompactBarView x:Name="CompactBar"/>
+            <views:WorkoutSegmentedView x:Name="Segmented"/>
             <VerticalStackLayout x:Name="ClassicTimers" Spacing="12" IsVisible="{Binding IsClassicLayout}">
                 <Border x:Name="ProgressCard" StrokeThickness="0" StrokeShape="RoundRectangle 25"
                     BackgroundColor="{DynamicResource Gray800}" IsVisible="{Binding ShowProgressCard}">

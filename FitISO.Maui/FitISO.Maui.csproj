@@ -83,6 +83,7 @@
 		<PackageReference Include="Nalu.Maui.Layouts" Version="10.7.9" />
 		<PackageReference Include="Nalu.Maui.Navigation" Version="10.7.9" />
 		<PackageReference Include="ProgressRing.Maui" Version="1.1.2" />
+		<PackageReference Include="Syncfusion.Maui.Toolkit" Version="1.0.12" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -179,6 +180,9 @@
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
 	  <MauiXaml Update="Views\WorkoutRingView.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
+	  <MauiXaml Update="Views\WorkoutSegmentedView.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
 	  <MauiXaml Update="Views\WorkoutTemplatesPage.xaml">

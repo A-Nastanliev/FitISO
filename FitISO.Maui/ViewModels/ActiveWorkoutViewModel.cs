@@ -30,9 +30,12 @@ namespace FitISO.Maui.ViewModels
         TimeSpan duration;
 
         [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(DisplayCompletedSets))]
         int completedSets;
 
         [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(DisplayTotalSets))]
+        [NotifyPropertyChangedFor(nameof(DisplaySegmentCount))]
         int totalSets;
 
         [ObservableProperty]
@@ -70,6 +73,7 @@ namespace FitISO.Maui.ViewModels
         [NotifyPropertyChangedFor(nameof(IsClassicLayout))]
         [NotifyPropertyChangedFor(nameof(IsRingLayout))]
         [NotifyPropertyChangedFor(nameof(IsCompactBarLayout))]
+        [NotifyPropertyChangedFor(nameof(IsSegmentedLayout))]
         WorkoutLayout workoutLayout;
         WorkoutLayout EffectiveLayout =>
             IsViewingPartner && partnerSnapshot?.Display is { } d && Enum.IsDefined(typeof(WorkoutLayout), d.Layout)
@@ -85,6 +89,7 @@ namespace FitISO.Maui.ViewModels
         public bool IsClassicLayout => EffectiveLayout == WorkoutLayout.Classic;
         public bool IsRingLayout => EffectiveLayout == WorkoutLayout.Ring;
         public bool IsCompactBarLayout => EffectiveLayout == WorkoutLayout.CompactBar;
+        public bool IsSegmentedLayout => EffectiveLayout == WorkoutLayout.Segmented;
 
         public bool IsRestStopwatchVisible => RestStopwatchEnabled && !IsViewingPartner;
 
@@ -124,6 +129,19 @@ namespace FitISO.Maui.ViewModels
         [ObservableProperty]
         string partnerWorkoutName = string.Empty;
 
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(DisplayCompletedSets))]
+        int partnerCompletedSets;
+
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(DisplayTotalSets))]
+        [NotifyPropertyChangedFor(nameof(DisplaySegmentCount))]
+        int partnerTotalSets;
+
+        public int DisplayCompletedSets => IsViewingPartner ? PartnerCompletedSets : CompletedSets;
+        public int DisplayTotalSets => IsViewingPartner ? PartnerTotalSets : TotalSets;
+        public int DisplaySegmentCount => Math.Max(1, DisplayTotalSets);
+
         public bool PartnerRestActive => partnerSnapshot?.Rest.StartTimeUtc is not null;
         bool PartnerRestPaused => PartnerRestActive && partnerSnapshot!.Rest.IsStopped;
 
@@ -144,6 +162,8 @@ namespace FitISO.Maui.ViewModels
 
             int total = snapshot?.Exercises.Sum(e => e.Sets.Count) ?? 0;
             int done = snapshot?.Exercises.Sum(e => e.Sets.Count(s => s.IsComplete)) ?? 0;
+            PartnerTotalSets = total;
+            PartnerCompletedSets = done;
             PartnerProgress = total == 0 ? 0 : (double)done / total;
 
             RefreshPartnerTimes();
@@ -186,6 +206,10 @@ namespace FitISO.Maui.ViewModels
             OnPropertyChanged(nameof(ShowPartnerRestCard));
             OnPropertyChanged(nameof(ShowPartnerRunningRest));
             OnPropertyChanged(nameof(ShowPartnerPaused));
+            OnPropertyChanged(nameof(IsSegmentedLayout));
+            OnPropertyChanged(nameof(DisplayCompletedSets));
+            OnPropertyChanged(nameof(DisplayTotalSets));
+            OnPropertyChanged(nameof(DisplaySegmentCount));
         }
 
         partial void OnIsViewingPartnerChanged(bool value)

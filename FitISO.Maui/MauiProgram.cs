@@ -11,6 +11,7 @@ using LiveChartsCore.SkiaSharpView.Maui;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using SkiaSharp.Views.Maui.Controls.Hosting;
+using Syncfusion.Maui.Toolkit.Hosting;
 
 namespace FitISO.Maui
 {
@@ -28,6 +29,7 @@ namespace FitISO.Maui
                 .UseProgressRing()
                 .UseNaluLayouts()
                 .UseLiveCharts()
+                .ConfigureSyncfusionToolkit()
                 .ConfigureFonts(fonts =>
                 {
                     fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");

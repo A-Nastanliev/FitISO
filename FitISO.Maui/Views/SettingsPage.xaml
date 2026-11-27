@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:models="clr-namespace:FitISO.Maui.Models"
              xmlns:mhr="http://mhrastegari.com/progressring"
+             xmlns:progressBar="clr-namespace:Syncfusion.Maui.Toolkit.ProgressBar;assembly=Syncfusion.Maui.Toolkit"
              x:Class="FitISO.Maui.Views.SettingsPage">
 
     <Shell.TitleView>
@@ -168,7 +169,7 @@
                 <VerticalStackLayout Spacing="8">
                     <Label Text="Workout Layout" FontSize="Medium" />
                     <Label
-                        Text="Choose how the stopwatch, progress and rest stopwatch are shown during your workout."
+                        Text="Choose how the workout stopwatch, progress bar and rest stopwatch are shown during your workout."
                         FontSize="Small" HorizontalTextAlignment="Justify"
                         TextColor="{DynamicResource Gray500}" />
                 </VerticalStackLayout>
@@ -176,7 +177,7 @@
                 <CollectionView ItemsSource="{Binding LayoutOptions}" SelectedItem="{Binding SelectedLayoutOption, Mode=TwoWay}"
                     SelectionMode="Single" VerticalScrollBarVisibility="Never" HorizontalScrollBarVisibility="Never">
                     <CollectionView.ItemsLayout>
-                        <GridItemsLayout Orientation="Vertical" Span="3" HorizontalItemSpacing="12" VerticalItemSpacing="12"/>
+                        <GridItemsLayout Orientation="Vertical" Span="2" HorizontalItemSpacing="12" VerticalItemSpacing="12"/>
                     </CollectionView.ItemsLayout>
                     <CollectionView.ItemTemplate>
                         <DataTemplate x:DataType="models:WorkoutLayoutOption">
@@ -192,6 +193,10 @@
                                                 </DataTrigger>
                                                 <DataTrigger TargetType="VerticalStackLayout" Binding="{Binding Layout}"
                                                     Value="{x:Static models:WorkoutLayout.CompactBar}">
+                                                    <Setter Property="IsVisible" Value="False" />
+                                                </DataTrigger>
+                                                <DataTrigger TargetType="VerticalStackLayout" Binding="{Binding Layout}"
+                                                    Value="{x:Static models:WorkoutLayout.Segmented}">
                                                     <Setter Property="IsVisible" Value="False" />
                                                 </DataTrigger>
                                             </VerticalStackLayout.Triggers>
@@ -243,6 +248,32 @@
                                                     StrokeThickness="0" BackgroundColor="{DynamicResource Gray300}" />
                                             </Grid>
                                         </Border>
+                                        <VerticalStackLayout Spacing="5" WidthRequest="72" VerticalOptions="Center" HorizontalOptions="Center"
+                                            IsVisible="False" InputTransparent="True">
+                                            <VerticalStackLayout.Triggers>
+                                                <DataTrigger TargetType="VerticalStackLayout" Binding="{Binding Layout}"
+                                                    Value="{x:Static models:WorkoutLayout.Segmented}">
+                                                    <Setter Property="IsVisible" Value="True" />
+                                                </DataTrigger>
+                                            </VerticalStackLayout.Triggers>
+                                            <Grid ColumnDefinitions="*,*" ColumnSpacing="5" HeightRequest="26">
+                                                <Border Grid.Column="0" StrokeThickness="0" StrokeShape="RoundRectangle 8"
+                                                    BackgroundColor="{DynamicResource Gray500}" />
+                                                <Border Grid.Column="1" StrokeThickness="0" StrokeShape="RoundRectangle 8"
+                                                    BackgroundColor="{DynamicResource Gray500}" />
+                                            </Grid>
+                                            <Border StrokeThickness="0" StrokeShape="RoundRectangle 5"
+                                                BackgroundColor="Transparent" Padding="0" HeightRequest="10">
+                                                <progressBar:SfLinearProgressBar Minimum="0" Maximum="4" Progress="3"
+                                                    SegmentCount="4" SegmentGapWidth="3"
+                                                    TrackHeight="10" ProgressHeight="10"
+                                                    TrackCornerRadius="0" ProgressCornerRadius="0"
+                                                    AnimationDuration="0" InputTransparent="True"
+                                                    BackgroundColor="Transparent"
+                                                    TrackFill="{DynamicResource Gray600}"
+                                                    ProgressFill="{DynamicResource Gray300}" />
+                                            </Border>
+                                        </VerticalStackLayout>
                                     </Grid>
 
                                     <Label Text="{Binding Title}" FontSize="Small" HorizontalOptions="Center" />

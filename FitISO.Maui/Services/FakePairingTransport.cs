@@ -241,7 +241,7 @@ namespace FitISO.Maui.Services
             DisplaySnapshot NextDisplay()
             {
                 int n = _snapshots++;
-                return new DisplaySnapshot((n / 4) % 3, (n / 12) % 2 == 0, true);
+                return new DisplaySnapshot((n / 4) % 4, (n / 12) % 2 == 0, true);
             }
 
             bool CompleteNextSet()

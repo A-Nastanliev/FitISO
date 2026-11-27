@@ -14,7 +14,8 @@ namespace FitISO.Maui.ViewModels
         {
             new WorkoutLayoutOption(WorkoutLayout.Classic, "Classic"),
             new WorkoutLayoutOption(WorkoutLayout.Ring, "Ring"),
-            new WorkoutLayoutOption(WorkoutLayout.CompactBar, "Compact bar")
+            new WorkoutLayoutOption(WorkoutLayout.CompactBar, "Compact bar"),
+            new WorkoutLayoutOption(WorkoutLayout.Segmented, "Segmented")
         };
 
         [ObservableProperty]

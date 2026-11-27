@@ -4,6 +4,7 @@
     {
         Classic = 0,
         Ring = 1,
-        CompactBar = 2
+        CompactBar = 2,
+        Segmented = 3
     }
 }

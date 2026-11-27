@@ -13,7 +13,7 @@
             <Grid Grid.Row="0" ColumnDefinitions="*,Auto,*" Padding="22,12,16,10" >
                 <Label Grid.Column="0" VerticalOptions="Center" HorizontalOptions="Start"
                        Text="{Binding DisplayDuration, StringFormat='{0:hh\\:mm\\:ss}'}"
-                       FontSize="28" FontAttributes="Bold" TextColor="White"
+                       FontSize="Title" FontAttributes="Bold" TextColor="White"
                        VerticalTextAlignment="Center">
                     <Label.Triggers>
                         <DataTrigger TargetType="Label" Binding="{Binding IsRestAreaVisible}" Value="False">
@@ -26,7 +26,7 @@
                     VerticalOptions="Center" HorizontalOptions="Center"
                     IsVisible="{Binding IsAvailable}">
                     <Label Text="{Binding Elapsed, StringFormat='{0:mm\\:ss}'}"
-                           FontSize="22" TextColor="{DynamicResource Gray400}"
+                           FontSize="Large" TextColor="{DynamicResource Gray400}"
                            HorizontalTextAlignment="Center">
                         <Label.Triggers>
                             <DataTrigger TargetType="Label" Binding="{Binding IsStopped}" Value="True">
@@ -46,9 +46,9 @@
                     VerticalOptions="Center" HorizontalOptions="Center"
                     IsVisible="{Binding PartnerRestInline}">
                     <Label Text="{Binding PartnerRestElapsed, StringFormat='{0:mm\\:ss}'}"
-                           FontSize="22" TextColor="{DynamicResource Gray400}"
+                           FontSize="Large" TextColor="{DynamicResource Gray400}"
                            HorizontalTextAlignment="Center" IsVisible="{Binding ShowPartnerRunningRest}" />
-                    <Label Text="Paused" FontSize="18" TextColor="{DynamicResource Gray400}"
+                    <Label Text="Paused" FontSize="Medium" TextColor="{DynamicResource Gray400}"
                            HorizontalTextAlignment="Center" IsVisible="{Binding ShowPartnerPaused}" />
                 </VerticalStackLayout>
 

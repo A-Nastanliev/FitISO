@@ -61,6 +61,22 @@ namespace FitISO.Maui.ViewModels
             RestoreFor(activeWorkout.Workout);
         }
 
+        [RelayCommand]
+        void Toggle()
+        {
+            if (StartTime is null)
+                Begin();
+            else
+                IsStopped = !IsStopped;
+        }
+
+        [RelayCommand]
+        void Reset()
+        {
+            if (StartTime is not null)
+                Begin();
+        }
+
         void ActiveWorkoutState_PropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
             if (e.PropertyName == nameof(ActiveWorkoutState.IsViewingPartner))
